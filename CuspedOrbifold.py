@@ -59,11 +59,30 @@ class CuspedOrbifold:
 		return cusp
 
 
+	"""
+	Following changed by Mark, 7/12/2021. In the orbifold case, the cusp area computation is a little different.
+	If a horotriangle is at a vertex which is fixed by a nontrivial symmetry, then the area of the triangle is
+	divided by 3. And if a vertex is mapped to another vertex of the same tetrahedron by a symmetry, then only
+	one of the corresponding horotriangles contributes area to the cusp.
+	"""
 	def cusp_area(self, cusp):
 		cusp = self._get_cusp(cusp)
 		area = SquareRootCombination.Zero()
+		already_counted = []
 		for T, V in tets_and_vertices_of_cusp(cusp):
-			area += T.horotriangles[V].area
+			if (T,V) not in already_counted:
+				already_counted.append((T,V))
+				V_index = ZeroSubsimplices.index(V)
+				fix_V = []
+				for perm in T.Symmetries:
+					if perm[V_index] == V_index:
+						fix_V.append(perm)
+					if (T,ZeroSubsimplices[perm[V_index]]) not in already_counted:
+						already_counted.append((T,ZeroSubsimplices[perm[V_index]]))
+				if len(fix_V) > 1:
+					area += T.horotriangles[V].area/SquareRootCombination([(1,3)])
+				else:
+					area += T.horotriangles[V].area
 		return area
 
 	def rescale_cusp(self, cusp, scale):
