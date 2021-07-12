@@ -116,7 +116,10 @@ class SquareRootCombination:
             [(r1*r2, c1*c2) for r1, c1 in self._entries
                             for r2, c2 in other._entries])
 
-    def __div__(self, other):
+    """
+    Chanded __div__ to __truediv__ because that's what python wants - Mark, 7/12/2021
+    """
+    def __truediv__(self, other):
 
         assert len(other._entries) > 0, "Division by zero not allowed"
 

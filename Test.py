@@ -96,8 +96,6 @@ if (e[0],e[1],e[2],e[3]) == (s2[0],s2[1],s2[2],s2[3]):
 	print('they are equal')
 """
 
-L = [0,1]
-
-while L:
-	print(L)
-	print(L.pop())
+a = SquareRootCombination([(2,3)])
+b = SquareRootCombination([(3,5)])
+print(a/b)

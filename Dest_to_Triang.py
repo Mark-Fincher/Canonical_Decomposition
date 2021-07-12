@@ -7,6 +7,7 @@ from perm4 import *
 from tetrahedron import *
 from simplex import *
 from Exact_Arithmetic import *
+from CuspedOrbifold import*
 
 def fill_face(f,i):
 	# If the face f has a block filled in at f[i], then this function will try fill in the other entries with blocks
@@ -223,9 +224,9 @@ def full_snappy_triang(triang):
 
 
 #Dest = [0,0,0,0]
-Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
+#Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 #Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
-#Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
+Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
 
 triang = dest_to_naive_triang(Dest)
 
@@ -250,14 +251,15 @@ def show_triangulation(tets):
 		print('edge 23',tets[i].edge_params[E23])
 
 
-show_triangulation(new_tets)
+#show_triangulation(new_tets)
 
+Triang = CuspedOrbifold(new_tets)
+print(Triang.Vertices)
+print(Triang.Tetrahedra)
+for i in range(2):
+	for v in ZeroSubsimplices:
+		print(Triang.Tetrahedra[i].horotriangles[v].area)
 
-"""
-for i in range(len(triang)):
-	for j in range(len(triang[i])):
-		print('face',j,'of tet',i,'is',triang[i][j])
-"""
 
 
 

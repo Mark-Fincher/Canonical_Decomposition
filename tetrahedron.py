@@ -8,6 +8,7 @@
 
 from simplex import *
 import sys
+from Exact_Arithmetic import*
 
 class Tetrahedron:
     def __init__(self, name = ''):
@@ -21,6 +22,21 @@ class Tetrahedron:
         self.Symmetries = []
         # Added as in Goerner et al
         self.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
+        self.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+
+    def tilt(self, v):
+        "The tilt of the face of the tetrahedron opposite the vertex v."
+        ans = SquareRootCombination.Zero()
+        for w in ZeroSubsimplices:
+            if v == w:
+                c_w = SquareRootCombination.One()
+            else:
+                z = self.edge_params[v | w]
+                c_w = -z.real/abs(z)
+            R_w = self.horotriangles[w].circumradius
+
+            ans += c_w*R_w
+        return ans
 
     def __repr__(self):
         if self.Index != -1: 
