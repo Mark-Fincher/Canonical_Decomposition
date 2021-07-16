@@ -188,12 +188,21 @@ def snappy_tets(triang):
 					tets[i].attach(TwoSubsimplices[j],tets[spouse_pos[0]],(permy[0],permy[1],permy[2],permy[3]))
 	return tets
 
+def index_tets(tets_list):
+	# add indices to tets
+	index_count = 0
+	for tet in tets_list:
+		tet.Index = index_count
+		index_count += 1
+
+
 """
 Now we want to get the symmetries of each tet. At that point we'll be done encoding the triangulation. 
 """
 
 
-def full_snappy_triang(triang):
+def full_snappy_triang(Dest):
+	triang = dest_to_naive_triang(Dest)
 	tets = snappy_tets(triang)
 	sigma = Perm4((2,3,0,1))
 	e = Perm4((0,1,2,3))
@@ -219,18 +228,12 @@ def full_snappy_triang(triang):
 	# Now add the shape parameters. Since the tetrahedra are regular, all edges get the same param, 1/2 + sqrt(3)*i/2
 	for tet in tets:
 		for i in range(6):
-			tet.edge_params[OneSubsimplices[i]] = ComplexSquareRootCombination(SquareRootCombination([(1,Fraction(1/2))]),SquareRootCombination([(3,Fraction(1/2))])) 
+			tet.edge_params[OneSubsimplices[i]] = ComplexSquareRootCombination(SquareRootCombination([(1,Fraction(1/2))]),SquareRootCombination([(Fraction(3,1),Fraction(1/2))])) 
+	# add indices
+	index_tets(tets)
 	return tets
 
 
-Dest = [0,0,0,0]
-#Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
-#Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
-#Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
-
-triang = dest_to_naive_triang(Dest)
-
-new_tets = full_snappy_triang(triang)
 
 def show_triangulation(tets):
 	print('number of tetrahedra is',len(tets))
@@ -251,18 +254,6 @@ def show_triangulation(tets):
 		print('edge 23',tets[i].edge_params[E23])
 
 
-show_triangulation(new_tets)
-
-Triang = CuspedOrbifold(new_tets)
-print(Triang.Vertices)
-print(Triang.Tetrahedra)
-
-"""
-for i in range(2):
-	for v in ZeroSubsimplices:
-		print(Triang.Tetrahedra[i].horotriangles[v].area)
-"""
-print(Triang.LHS_of_convexity_equations())
 
 
 

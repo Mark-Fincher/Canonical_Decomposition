@@ -125,3 +125,10 @@ class Tetrahedron:
 
     def get_orientation_of_edge(self, a, b):
         return self.Class[a | b].orientation_with_respect_to(self, a, b)
+
+    def fill_edge_params(self,z):
+        One = ComplexSquareRootCombination.One()
+        zp  = One / (One - z)
+        zpp = (z - One) / z
+        self.edge_params = {E01:z, E23:z, E02:zp, E13:zp, E03:zpp, E12:zpp}
+

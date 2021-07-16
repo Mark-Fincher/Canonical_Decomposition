@@ -117,7 +117,7 @@ class SquareRootCombination:
                             for r2, c2 in other._entries])
 
     """
-    Chanded __div__ to __truediv__ because that's what python wants - Mark, 7/12/2021
+    Changed __div__ to __truediv__ because that's what python wants - Mark, 7/12/2021
     """
     def __truediv__(self, other):
 
@@ -223,7 +223,7 @@ class ComplexSquareRootCombination:
         return ComplexSquareRootCombination(
             self.real, -self.imag)
 
-    def __div__(self, other):
+    def __truediv__(self, other):
         otherConj = other.conjugate()
         denom = (other * otherConj).real
         num = self * otherConj
