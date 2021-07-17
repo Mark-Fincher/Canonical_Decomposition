@@ -10,18 +10,22 @@ from HoroTriangle import*
 from tetrahedron import*
 from vertex import*
 from Dest_to_Triang import*
+from sagestuff import*
 
 """
 Need interval arithmetic for this.
+"""
 
-def check_2_to_3_possible(self,tet,face):
+def check_2_to_3_possible(tets,tet,face):
 	for edge in OneSubsimplices:
 		if is_subset(edge,face):
 			z = tet.edge_params[edge]
 			w = tet.Neighbor[face].edge_params[tet.Gluing[face].image(edge)]
-			if (z*w).imag ...
+			if (z*w).imag.evaluate() > 0:
+				return True
+			else:
+				return False
 
-"""
 
 
 def two_to_three(triang,tet,face):

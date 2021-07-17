@@ -30,12 +30,13 @@ Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
 
 tets_list = full_snappy_triang(Dest)
 
-show_triangulation(tets_list)
+#show_triangulation(tets_list)
 
 new_tets_list = two_to_three(tets_list,tets_list[0],bitmap((0,2,3)))
 
-show_triangulation(new_tets_list)
+#show_triangulation(new_tets_list)
 
+print(check_2_to_3_possible(tets_list,tets_list[0],F1))
 
 """
 z0 = ComplexSquareRootCombination(SquareRootCombination([(1, Fraction(1, 2))]), SquareRootCombination([(Fraction(3,1), Fraction(1, 2))]))
