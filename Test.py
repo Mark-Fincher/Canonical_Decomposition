@@ -9,20 +9,24 @@ from Dest_to_Triang import*
 from The_Algorithm import*
 
 """
-eye = ComplexSquareRootCombination(SquareRootCombination.Zero(),SquareRootCombination.One())
-T1 = Tetrahedron()
-T1.fill_edge_params(eye)
-T2 = Tetrahedron()
-T2.fill_edge_params(eye)
-T1.attach(F0,T2,[0,1,3,2])
-show_triangulation([T1,T2])
-#New_triang = two_to_three(CuspedOrbifold([T1,T2]),T1,F0)
-#show_triangulation(New_triang.Tetrahedra)
-show_triangulation(two_to_three([T1,T2],T1,F0))
+z = ComplexSquareRootCombination(SquareRootCombination([(1,Fraction(1/2))]),SquareRootCombination([(Fraction(3,1),Fraction(1/2))]))
+tet0 = Tetrahedron()
+tet0.fill_edge_params(z)
+tet0.Index = 0
+#tet0.Symmetries = [Perm4((0,1,2,3)),Perm4((0,2,3,1)),Perm4((0,3,1,2))]
+tet1 = Tetrahedron()
+tet1.fill_edge_params(z)
+tet1.Index = 1
+tet1.Symmetries = tet0.Symmetries
+tet0.attach(F0,tet0,[0,1,3,2])
+show_triangulation([tet0])
+New_triang = two_to_three([tet0],tet0,F0)
+show_triangulation(New_triang)
 """
 
 
 
+"""
 #Dest = [0,0,0,0]
 #Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 #Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
@@ -37,6 +41,7 @@ new_tets_list = two_to_three(tets_list,tets_list[0],bitmap((0,2,3)))
 #show_triangulation(new_tets_list)
 
 print(check_2_to_3_possible(tets_list,tets_list[0],F1))
+"""
 
 """
 z0 = ComplexSquareRootCombination(SquareRootCombination([(1, Fraction(1, 2))]), SquareRootCombination([(Fraction(3,1), Fraction(1, 2))]))
