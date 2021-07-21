@@ -26,7 +26,6 @@ show_triangulation(New_triang)
 
 
 
-"""
 #Dest = [0,0,0,0]
 #Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 #Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
@@ -36,12 +35,31 @@ tets_list = full_snappy_triang(Dest)
 
 #show_triangulation(tets_list)
 
-new_tets_list = two_to_three(tets_list,tets_list[0],bitmap((0,2,3)))
+next_list = two_to_three(tets_list,tets_list[0],F1)
 
-#show_triangulation(new_tets_list)
+#show_triangulation(next_list)
 
-print(check_2_to_3_possible(tets_list,tets_list[0],F1))
+tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
+
+#print(check_2_to_3_possible([tet0],tet0,F1))
+
+next_list = two_to_three([tet0],tet0,F1)
+
+show_triangulation(next_list)
+
+
 """
+print(tet0.tilt(V0).evaluate() < 0)
+print(tet0.tilt(V1).evaluate() < 0)
+print(tet0.tilt(V2).evaluate() < 0)
+print(tet0.tilt(V3).evaluate() < 0)
+"""
+
+
+
+#print(check_2_to_3_possible(tets_list,tets_list[0],F1))
+
+
 
 """
 z0 = ComplexSquareRootCombination(SquareRootCombination([(1, Fraction(1, 2))]), SquareRootCombination([(Fraction(3,1), Fraction(1, 2))]))

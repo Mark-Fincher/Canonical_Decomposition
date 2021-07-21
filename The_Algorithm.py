@@ -21,7 +21,7 @@ def check_2_to_3_possible(tets,tet,face):
 		if is_subset(edge,face):
 			z = tet.edge_params[edge]
 			w = tet.Neighbor[face].edge_params[tet.Gluing[face].image(edge)]
-			if (z*w).imag.evaluate() < 0 or (z*w).imag = SquareRootCombination.Zero():
+			if (z*w).imag.evaluate() < 0 or (z*w).imag == SquareRootCombination.Zero():
 				return False
 	# Now we check that tet doesn't have symmetries taking "face" to a a different face. If so, then a 2-3 move won't make
 	# sense in the universal cover.
@@ -44,8 +44,8 @@ def two_to_three(triang,tet,face):
 	if tet.Neighbor[face] == tet:
 		face_glued_to_self = True
 		for i in range(4):
-			if tet.Gluing[face][i] == i:
-				v0 = i
+			if tet.Gluing[face][i] == i and i != FaceIndex[face]:
+				vert0 = i
 	else:
 		face_glued_to_self = False
 	fix_face_perms = []
@@ -80,41 +80,71 @@ def two_to_three(triang,tet,face):
 	if tet.Neighbor[TwoSubsimplices[b1]] != None:
 		perm = tet.Gluing[TwoSubsimplices[b1]]
 		voisin = tet.Neighbor[TwoSubsimplices[b1]]
+		if voisin == tet:
+			label_fix = Perm4((a1,b1,d1,c1))
+			voisin = new_tet0
+		else:
+			label_fix = Perm4((0,1,2,3))
 		tet.detach(TwoSubsimplices[b1])
-		new_tet0.attach(F1,voisin,[perm[a1],perm[b1],perm[d1],perm[c1]])
+		new_tet0.attach(F1,voisin,[(inv(label_fix)*perm)[a1],(inv(label_fix)*perm)[b1],(inv(label_fix)*perm)[d1],(inv(label_fix)*perm)[c1]])
 	if other_tet.Neighbor[TwoSubsimplices[b2]] != None:
 		perm = other_tet.Gluing[TwoSubsimplices[b2]]
 		voisin = other_tet.Neighbor[TwoSubsimplices[b2]]
+		if voisin == other_tet:
+			label_fix = Perm4((a2,d2,b2,c2))
+			voisin = new_tet0
+		else:
+			label_fix = Perm4((0,1,2,3))
 		other_tet.detach(TwoSubsimplices[b2])
-		new_tet0.attach(F2,voisin,[perm[a2],perm[d2],perm[b2],perm[c2]])
+		new_tet0.attach(F2,voisin,[(inv(label_fix)*perm)[a2],(inv(label_fix)*perm)[d2],(inv(label_fix)*perm)[b2],(inv(label_fix)*perm)[c2]])
 	new_tet0.attach(F3,new_tet2,[2,0,3,1])
 	if tet.Neighbor[TwoSubsimplices[a1]] != None:
 		perm = tet.Gluing[TwoSubsimplices[a1]]
 		voisin = tet.Neighbor[TwoSubsimplices[a1]]
+		if voisin == tet:
+			label_fix = Perm4((a1,b1,d1,c1))
+			voisin = new_tet1
+		else:
+			label_fix = Perm4((0,1,2,3))
 		tet.detach(TwoSubsimplices[a1])
-		new_tet1.attach(F0,voisin,[perm[a1],perm[b1],perm[d1],perm[c1]])
+		new_tet1.attach(F0,voisin,[(inv(label_fix)*perm)[a1],(inv(label_fix)*perm)[b1],(inv(label_fix)*perm)[d1],(inv(label_fix)*perm)[c1]])
 	if other_tet.Neighbor[TwoSubsimplices[a2]] != None:
 		perm = other_tet.Gluing[TwoSubsimplices[a2]]
 		voisin = other_tet.Neighbor[TwoSubsimplices[a2]]
+		if voisin == other_tet:
+			label_fix = Perm4((d2,b2,a2,c2))
+			voisin = new_tet1
+		else:
+			label_fix = Perm4((0,1,2,3))
 		other_tet.detach(TwoSubsimplices[a2])
-		new_tet1.attach(F2,voisin,[perm[d2],perm[b2],perm[a2],perm[c2]])
+		new_tet1.attach(F2,voisin,[(inv(label_fix)*perm)[d2],(inv(label_fix)*perm)[b2],(inv(label_fix)*perm)[a2],(inv(label_fix)*perm)[c2]])
 	new_tet1.attach(F3,new_tet2,[0,1,3,2])
 	if tet.Neighbor[TwoSubsimplices[c1]] != None:
 		perm = tet.Gluing[TwoSubsimplices[c1]]
 		voisin = tet.Neighbor[TwoSubsimplices[c1]]
+		if voisin == tet:
+			label_fix = Perm4((c1,b1,a1,d1))
+			voisin = new_tet2
+		else:
+			label_fix = Perm4((0,1,2,3))
 		tet.detach(TwoSubsimplices[c1])
-		new_tet2.attach(F0,voisin,[perm[c1],perm[b1],perm[a1],perm[d1]])
+		new_tet2.attach(F0,voisin,[(inv(label_fix)*perm)[c1],(inv(label_fix)*perm)[b1],(inv(label_fix)*perm)[a1],(inv(label_fix)*perm)[d1]])
 	if other_tet.Neighbor[TwoSubsimplices[c2]] != None:
 		perm = other_tet.Gluing[TwoSubsimplices[c2]]
 		voisin = other_tet.Neighbor[TwoSubsimplices[c2]]
+		if voisin == other_tet:
+			label_fix = Perm4((d2,b2,a2,c2))
+			voisin = new_tet2
+		else:
+			label_fix = Perm4((0,1,2,3))
 		other_tet.detach(TwoSubsimplices[c2])
-		new_tet2.attach(F3,voisin,[perm[d2],perm[b2],perm[a2],perm[c2]])
+		new_tet2.attach(F3,voisin,[(inv(label_fix)*perm)[d2],(inv(label_fix)*perm)[b2],(inv(label_fix)*perm)[a2],(inv(label_fix)*perm)[c2]])
 	new_tet0.fill_edge_params(z0*w0/(z0 - ComplexSquareRootCombination.One() + w0))
 	new_tet1.fill_edge_params((z0 - ComplexSquareRootCombination.One() + w0)/w0)
 	new_tet2.fill_edge_params((w0 - ComplexSquareRootCombination.One())/(z0 - ComplexSquareRootCombination.One() + w0))
 	if face_glued_to_self and not face_rotation:
-		# v0 is the vertex fixed by the face gluing map
-		if v0 == b1:	
+		# vert0 is the vertex fixed by the face gluing map
+		if vert0 == b1:	
 			new_tet0.Symmetries = [Perm4((0,1,2,3)),Perm4((3,2,1,0))]
 			new_tet0.detach(F3)
 			new_tet1.detach(F3)
@@ -125,7 +155,7 @@ def two_to_three(triang,tet,face):
 					new_tets.append(T)
 			index_tets(new_tets)
 			return new_tets
-		elif v0 == a1:
+		elif vert0 == a1:
 			new_tet1.Symmetries = [Perm4((0,1,2,3)),Perm4((2,3,0,1))]
 			new_tet1.detach(F3)
 			new_tet0.detach(F3)
@@ -136,7 +166,7 @@ def two_to_three(triang,tet,face):
 					new_tets.append(T)
 			index_tets(new_tets)
 			return new_tets
-		elif v0 == c1:
+		elif vert0 == c1:
 			new_tet2.Symmetries = [Perm4((0,1,2,3)),Perm4((3,2,1,0))]
 			new_tet2.detach(F2)
 			new_tet0.detach(F0)
