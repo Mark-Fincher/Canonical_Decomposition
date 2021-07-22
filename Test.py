@@ -37,7 +37,7 @@ tets_list = full_snappy_triang(Dest)
 
 next_list = two_to_three(tets_list,tets_list[0],F1)
 
-#show_triangulation(next_list)
+show_triangulation(next_list)
 
 tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
 
@@ -46,6 +46,8 @@ tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
 next_list = two_to_three([tet0],tet0,F1)
 
 show_triangulation(next_list)
+
+print(next_list[0],next_list[1])
 
 
 """
