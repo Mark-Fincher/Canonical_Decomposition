@@ -25,29 +25,104 @@ show_triangulation(New_triang)
 """
 
 
+"""
+Dest = [0,0,0,0]
 
-#Dest = [0,0,0,0]
-#Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
+tets_list = full_snappy_triang(Dest)
+
+show_triangulation(tets_list)
+
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+
+print(tet0.tilt(V0))
+print(tet0.tild(V1))
+print(tet0.tilt(V2))
+print(tet0.tilt(V3))
+
+"""
+
+
+"""
+Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
+
+tets_list = full_snappy_triang(Dest)
+
+show_triangulation(tets_list)
+
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+
+print(tet0.tilt(V0))
+print(tet0.tilt(V1))
+print(tet0.tilt(V2))
+print(tet0.tilt(V3))
+
+# tet0.tilt(V2) is positive, and F2 is glued to itself, so that face is bad. Do 2-3 move through it.
+
+print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
+
+next_list = two_to_three(orb.Tetrahedra,orb.Tetrahedra[0],F2)
+
+show_triangulation(next_list)
+
+"""
+
+# issue doing the next line, which was expected. One face is glued to none, and the function making the cusp
+# neighborhoods doesn't know what to do with that at the moment.
+"""
+orb = CuspedOrbifold(next_list)
+
+tet0 = orb.Tetrahedra[0]
+
+print(tet0.tilt(V0))
+print(tet0.tilt(V1))
+print(tet0.tilt(V2))
+print(tet0.tilt(V3))
+"""
+
+
+
+
+
 #Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
+
+
+
+"""
+
 Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
 
 tets_list = full_snappy_triang(Dest)
 
-#show_triangulation(tets_list)
+show_triangulation(tets_list)
 
-next_list = two_to_three(tets_list,tets_list[0],F1)
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() > 0)
+
+next_list = two_to_three(tets_list,tet0,F1)
 
 show_triangulation(next_list)
 
 tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
 
-#print(check_2_to_3_possible([tet0],tet0,F1))
+print(tet0.tilt(V1).evaluate())
+print(tet0.tilt(V2).evaluate())
+
+print(check_2_to_3_possible([tet0],tet0,F1))
 
 next_list = two_to_three([tet0],tet0,F1)
 
 show_triangulation(next_list)
 
-print(next_list[0],next_list[1])
+"""
+
 
 
 """

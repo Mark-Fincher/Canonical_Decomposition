@@ -10,7 +10,7 @@ from HoroTriangle import*
 from tetrahedron import*
 from vertex import*
 from Dest_to_Triang import*
-#from sagestuff import*
+from sagestuff import*
 
 """
 Need interval arithmetic for this.
@@ -220,6 +220,8 @@ def two_to_three(triang,tet,face):
 		new_tet0.detach(F3)
 		new_tet0.detach(F0)
 		new_tet0.attach(F0,new_tet0,[3,1,2,0])
+		# Now it could be that F1 and F2 are glued to new_tet1 or new_tet2,
+		# in that case need to detach then attach to correct face of new_tet0.... to be done later.
 		new_tets = [new_tet0]
 		for T in triang:
 			if T != tet and T != other_tet:
