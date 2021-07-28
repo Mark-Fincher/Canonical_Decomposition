@@ -77,6 +77,7 @@ def two_to_three(triang,tet,face):
 	# for what they're about.
 	perm_key = {(tet,b1):Perm4((a1,b1,d1,c1)),(tet,a1):Perm4((a1,b1,d1,c1)),(tet,c1):Perm4((c1,b1,a1,d1)),(other_tet,b2):Perm4((a2,d2,b2,c2)),(other_tet,a2):Perm4((d2,b2,a2,c2)),(other_tet,c2):Perm4((d2,b2,a2,c2))}
 	tet_key = {(tet,b1):new_tet0,(tet,a1):new_tet1,(tet,c1):new_tet2,(other_tet,b2):new_tet0,(other_tet,a2):new_tet1,(other_tet,c2):new_tet2} 
+	# Now we do the face pairings.
 	new_tet0.attach(F0,new_tet1,[1,0,2,3])
 	if tet.Neighbor[TwoSubsimplices[b1]] != None:
 		perm = tet.Gluing[TwoSubsimplices[b1]]
@@ -143,6 +144,7 @@ def two_to_three(triang,tet,face):
 	new_tet0.fill_edge_params(z0*w0/(z0 - ComplexSquareRootCombination.One() + w0))
 	new_tet1.fill_edge_params((z0 - ComplexSquareRootCombination.One() + w0)/w0)
 	new_tet2.fill_edge_params((w0 - ComplexSquareRootCombination.One())/(z0 - ComplexSquareRootCombination.One() + w0))
+	# Now we have to think about if the face was glued to itself, or if there was rotation.
 	if face_glued_to_self and not face_rotation:
 		# vert0 is the vertex fixed by the face gluing map
 		if vert0 == b1:	
@@ -150,6 +152,18 @@ def two_to_three(triang,tet,face):
 			new_tet0.detach(F3)
 			new_tet1.detach(F3)
 			new_tet1.attach(F3,new_tet1,[2,1,0,3])
+			# We're going to get rid of new_tet2, but some other faces of new_tet0 or new_tet1 could be
+			# attached to new_tet2. In that case we detach, then glue to a corresponding face of
+			# new_tet0 or new_tet1. 
+			if new_tet0.Neighbor[F1] == new_tet2:
+				perm = new_tet0.Gluing[F1]
+				new_tet0.detach(F1)
+				new_tet0.attach(F1,new_tet1,(Perm4((2,1,3,0))*perm).tuple())
+			if new_tet1.Neighbor[F0] == new_tet2:
+				perm = new_tet1.Gluing[F0]
+				new_tet1.detach(F0)
+				new_tet1.attach(F0,new_tet1,Perm4((2,1,3,0))*perm)
+
 			new_tets = [new_tet0,new_tet1]
 			for T in triang:
 				if T != tet:
@@ -161,6 +175,18 @@ def two_to_three(triang,tet,face):
 			new_tet1.detach(F3)
 			new_tet0.detach(F3)
 			new_tet0.attach(F3,new_tet0,[0,2,1,3])
+			# We're going to get rid of new_tet2, but some other faces of new_tet0 or new_tet1 could be
+			# attached to new_tet2. In that case we detach, then glue to a corresponding face of
+			# new_tet0 or new_tet1.
+			if new_tet0.Neighbor[F1] == new_tet2:
+				perm = new_tet0.Gluing[F1]
+				new_tet0.detach(F1)
+				new_tet0.attach(F1,new_tet0,(Perm4((2,3,0,1))*perm).tuple())
+			if new_tet1.Neighbor[F0] == new_tet2:
+				perm = new_tet1.Gluing[F0]
+				new_tet1.detach[F0]
+				new_tet1.attach(F0,new_tet0,(Perm4((2,3,0,1))*perm).tuple())
+
 			new_tets = [new_tet0,new_tet1]
 			for T in triang:
 				if T != tet:
@@ -172,6 +198,18 @@ def two_to_three(triang,tet,face):
 			new_tet2.detach(F2)
 			new_tet0.detach(F0)
 			new_tet0.attach(F0,new_tet0,[0,2,1,3])
+			# We're going to get rid of new_tet1, but some other faces of new_tet0 or new_tet2 could be
+			# attached to new_tet1. In that case we detach, then glue to a corresponding face of
+			# new_tet0 or new_tet2.
+			if new_tet0.Neighbor[F1] == new_tet1:
+				perm = new_tet0.Gluing[F1]
+				new_tet0.detach(F1)
+				new_tet0.attach(F1,new_tet0,(Perm4((2,0,1,3))*perm).tuple())
+			if new_tet2.Neighbor[F0] == new_tet1:
+				perm = new_tet2.Gluing[F0]
+				new_tet2.detach(F0)
+				new_tet2.attach(F0,new_tet0,(Perm4((2,0,1,3))*perm).tuple())
+
 			new_tets = [new_tet0,new_tet2]
 			for T in triang:
 				if T != tet:
