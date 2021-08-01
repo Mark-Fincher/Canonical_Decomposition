@@ -221,7 +221,25 @@ def two_to_three(triang,tet,face):
 		new_tet0.detach(F0)
 		new_tet0.attach(F0,new_tet0,[3,1,2,0])
 		# Now it could be that F1 and F2 are glued to new_tet1 or new_tet2,
-		# in that case need to detach then attach to correct face of new_tet0.... to be done later.
+		# in that case need to detach then attach to appropriate face of new_tet0. Perm4((1,3,2,0))
+		# is the rotation taking new_tet1 to new_tet0. Perm4((1,0,3,2)) is the rotation taking
+		# new_tet2 to new_tet0.
+		if new_tet0.Neighbor[F1] == new_tet1:
+			perm = new_tet0.Gluing[F1]
+			new_tet0.detach(F1)
+			new_tet0.attach(F1,new_tet0,(Perm4((1,3,2,0))*perm).tuple())
+		elif new_tet0.Neighbor[F1] == new_tet2:
+			perm = new_tet0.Gluing[F1]
+			new_tet0.detach(F1)
+			new_tet0.attach(F1,new_tet0,(Perm4((1,0,3,2))*perm).tuple())
+		if new_tet0.Neighbor[F2] == new_tet1:
+			perm = new_tet0.Gluing[F2]
+			new_tet0.detach(F2)
+			new_tet0.attach(F2,new_tet0,(Perm4((1,3,2,0))*perm).tuple())
+		elif new_tet0.Neighbor[F2] == new_tet2:
+			perm = new_tet0.Gluing[F2]
+			new_tet0.detach(F2)
+			new_tet0.attach(F2,new_tet0,(Perm4((1,0,3,2))*perm).tuple())
 		new_tets = [new_tet0]
 		for T in triang:
 			if T != tet and T != other_tet:
@@ -233,6 +251,19 @@ def two_to_three(triang,tet,face):
 		new_tet0.detach(F0)
 		new_tet0.attach(F0,new_tet0,[3,1,2,0])
 		new_tet0.Symmetries = [Perm4((0,1,2,3)),Perm4((3,2,1,0))]
+		# Again we have to consider the case that F1 and F2 of new_tet0 are glued to new_tet1
+		# or new_tet2, since we're going to remove those two tets. Again we use the permutation
+		# Perm4((1,3,2,0)), which is the rotation taking new_tet1 to new_tet0, and Perm4((1,0,3,2)),
+		# which is the rotation taking new_tet2 to new_tet0.
+		if new_tet0.Neighbor[F1] == new_tet1:
+			perm = new_tet0.Gluing[F1]
+			new_tet0.detach(F1)
+			new_tet0.attach(F1,new_tet0,(Perm4((1,3,2,0))*perm).tuple())
+		elif new_tet0.Neighbor[F1] == new_tet2:
+			perm = new_tet0.Gluing[F1]
+			new_tet0.detach(F1)
+			new_tet0.attach(F1,new_tet0,(Perm4((1,0,3,2))*perm).tuple())
+		# We don't worry about what F2 is attached to, since it's determined by F1 via the symmetry.
 		new_tets = [new_tet0]
 		for T in triang:
 			if T != tet:
