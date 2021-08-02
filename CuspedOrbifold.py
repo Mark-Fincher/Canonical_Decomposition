@@ -42,12 +42,14 @@ class CuspedOrbifold:
 		while active:
 			tet0, vert0 = active.pop()
 			for face0 in FacesAnticlockwiseAroundVertices[vert0]:
-				tet1, face1 = glued_to(tet0, face0)
-				vert1 = tet0.Gluing[face0].image(vert0)
-				if tet1.horotriangles[vert1] is None:
-					tet1.horotriangles[vert1] = HoroTriangle(tet1, vert1, face1,
-							tet0.horotriangles[vert0].lengths[face0])
-					active.append( (tet1, vert1) )
+				# Mark added the following line (and only that line) 8/2/2021. Because some faces might be unglued for us.
+				if tet0.Neighbor[face0] != None:
+					tet1, face1 = glued_to(tet0, face0)
+					vert1 = tet0.Gluing[face0].image(vert0)
+					if tet1.horotriangles[vert1] is None:
+						tet1.horotriangles[vert1] = HoroTriangle(tet1, vert1, face1,
+								tet0.horotriangles[vert0].lengths[face0])
+						active.append( (tet1, vert1) )
 
 	def _get_cusp(self, cusp):
 		"""

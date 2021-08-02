@@ -36,12 +36,14 @@ orb = CuspedOrbifold(tets_list)
 
 tet0 = orb.Tetrahedra[0]
 
+print(tet0.horotriangles[V0].area)
+
 print(tet0.tilt(V0))
-print(tet0.tild(V1))
+print(tet0.tilt(V1))
 print(tet0.tilt(V2))
 print(tet0.tilt(V3))
-
 """
+
 
 
 """
@@ -68,21 +70,26 @@ next_list = two_to_three(orb.Tetrahedra,orb.Tetrahedra[0],F2)
 
 show_triangulation(next_list)
 
-"""
-
-# issue doing the next line, which was expected. One face is glued to none, and the function making the cusp
-# neighborhoods doesn't know what to do with that at the moment.
-"""
 orb = CuspedOrbifold(next_list)
 
 tet0 = orb.Tetrahedra[0]
+
+print(tet0.horotriangles[V0].lengths)
+print(tet0.horotriangles[V0].circumradius)
+print(tet0.horotriangles[V1].lengths)
+print(tet0.horotriangles[V1].circumradius)
+print(tet0.horotriangles[V2].lengths)
+print(tet0.horotriangles[V2].circumradius)
+print(tet0.horotriangles[V3].lengths)
+print(tet0.horotriangles[V3].circumradius)
 
 print(tet0.tilt(V0))
 print(tet0.tilt(V1))
 print(tet0.tilt(V2))
 print(tet0.tilt(V3))
-"""
 
+# from checking tilt sums, this is canonical.
+"""
 
 
 
@@ -91,7 +98,7 @@ print(tet0.tilt(V3))
 
 
 
-"""
+
 
 Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
 
@@ -121,7 +128,19 @@ next_list = two_to_three([tet0],tet0,F1)
 
 show_triangulation(next_list)
 
-"""
+orb = CuspedOrbifold(next_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+print((tet0.tilt(V0) + tet1.tilt(V1)).evaluate() < 0)
+print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() < 0)
+print(tet1.tilt(V0).evaluate() < 0)
+#print(tet1.tilt(V1))
+#print(tet1.tilt(V2))
+print(tet1.tilt(V3).evaluate() < 0)
+
+
 
 
 

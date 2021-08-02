@@ -246,12 +246,12 @@ def show_triangulation(tets):
 		for sym in tets[i].Symmetries:
 			print(sym)
 		print('edge_params of',tets[i],'are')
-		print('edge 01',tets[i].edge_params[E01])
-		print('edge 02',tets[i].edge_params[E02])
-		print('edge 03',tets[i].edge_params[E03])
-		print('edge 12',tets[i].edge_params[E12])
-		print('edge 13',tets[i].edge_params[E13])
-		print('edge 23',tets[i].edge_params[E23])
+		print('edge 01',tets[i].edge_params[E01].real,'+',tets[i].edge_params[E01].imag,'* i')
+		print('edge 02',tets[i].edge_params[E02].real,'+',tets[i].edge_params[E02].imag,'* i')
+		print('edge 03',tets[i].edge_params[E03].real,'+',tets[i].edge_params[E03].imag,'* i')
+		print('edge 12',tets[i].edge_params[E12].real,'+',tets[i].edge_params[E12].imag,'* i')
+		print('edge 13',tets[i].edge_params[E13].real,'+',tets[i].edge_params[E13].imag,'* i')
+		print('edge 23',tets[i].edge_params[E23].real,'+',tets[i].edge_params[E23].imag,'* i')
 
 
 
