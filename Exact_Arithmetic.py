@@ -47,10 +47,14 @@ class SquareRootCombination:
         y = 1
         i = 2
         # Not an efficient algorithm, but good enough for our purposes.
+        """
+        in python 3, if a and b are ints and b divides a, then a/b still returns a float
+        even though it's an integer. So needed to change to a//b here. - mark 8/4/2021
+        """
         while i * i <= x:
             
             if x % (i * i) == 0:
-                x /= i * i
+                x = x//(i * i)
                 y *= i
             else:
                 i += 1

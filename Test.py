@@ -99,12 +99,12 @@ print(tet0.tilt(V3))
 
 
 
-
+"""
 Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
 
 tets_list = full_snappy_triang(Dest)
 
-show_triangulation(tets_list)
+#show_triangulation(tets_list)
 
 orb = CuspedOrbifold(tets_list)
 
@@ -115,7 +115,7 @@ print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() > 0)
 
 next_list = two_to_three(tets_list,tet0,F1)
 
-show_triangulation(next_list)
+#show_triangulation(next_list)
 
 tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
 
@@ -126,20 +126,44 @@ print(check_2_to_3_possible([tet0],tet0,F1))
 
 next_list = two_to_three([tet0],tet0,F1)
 
-show_triangulation(next_list)
+#show_triangulation(next_list)
 
 orb = CuspedOrbifold(next_list)
 
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 
+#print((tet0.tilt(V0) + tet1.tilt(V1))._entries)
+#print(tet0.tilt(V0) + tet1.tilt(V1))
+z = tet0.edge_params[E01]
+sq = z.real*z.real + z.imag*z.imag
+print(sq._entries)
+print(sq.sqrt()._entries)
+b = abs(z)
+a = z.real
+print(a)
+print(a._entries)
+print(b)
+print(b._entries)
+print(-a/b)
+
+a = SquareRootCombination([(1,Fraction(15,14))])
+b = SquareRootCombination([(7,Fraction(3,7))])
+"""
+
+
+a = SquareRootCombination([(9,1)])
+print(a.square_free(9))
+
+
+"""
 print((tet0.tilt(V0) + tet1.tilt(V1)).evaluate() < 0)
 print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() < 0)
 print(tet1.tilt(V0).evaluate() < 0)
 #print(tet1.tilt(V1))
 #print(tet1.tilt(V2))
 print(tet1.tilt(V3).evaluate() < 0)
-
+"""
 
 
 
