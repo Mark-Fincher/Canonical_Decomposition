@@ -94,7 +94,28 @@ print(tet0.tilt(V3))
 
 
 
-#Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
+Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
+
+tets_list = full_snappy_triang(Dest)
+
+show_triangulation(tets_list)
+
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+print(tet0.tilt(V0))
+print(tet0.tilt(V1))
+print(tet0.tilt(V2))
+print(tet0.tilt(V3))
+print(tet1.tilt(V2))
+# Tilts of the faces of tet0 which are glued to themselves are negative. But tet0.tilt(V3) + tet1.tilt(V2) = 0,
+# similarly tet1.tilt(Vi) + tet0.tilt(V3) = 0 for the other i's. This means we should attach a copy of tet0 to
+# each face of tet1 and remove the connecting faces, giving a cube. The canonical decomposition is then this cube
+# with a bunch of symmetries (all the ones preserving the inner tetrahedron) and the faces of the cube glued to
+# themselves, carried over from tet0.
+
 
 
 
@@ -104,7 +125,7 @@ Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
 
 tets_list = full_snappy_triang(Dest)
 
-#show_triangulation(tets_list)
+show_triangulation(tets_list)
 
 orb = CuspedOrbifold(tets_list)
 
@@ -115,7 +136,7 @@ print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() > 0)
 
 next_list = two_to_three(tets_list,tet0,F1)
 
-#show_triangulation(next_list)
+show_triangulation(next_list)
 
 tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
 
@@ -126,15 +147,34 @@ print(check_2_to_3_possible([tet0],tet0,F1))
 
 next_list = two_to_three([tet0],tet0,F1)
 
-#show_triangulation(next_list)
+show_triangulation(next_list)
 
 orb = CuspedOrbifold(next_list)
 
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 
-#print((tet0.tilt(V0) + tet1.tilt(V1))._entries)
-#print(tet0.tilt(V0) + tet1.tilt(V1))
+print(tet0.tilt(V0) + tet1.tilt(V1))
+print((tet0.tilt(V0) + tet1.tilt(V1)).evaluate() > 0)
+
+# returns false, so that face is fine. Now check the others.
+
+print(tet0.tilt(V1) + tet1.tilt(V2))
+print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() > 0)
+
+print(tet1.tilt(V0))
+print(tet1.tilt(V0).evaluate() > 0)
+
+print(tet1.tilt(V3))
+print(tet1.tilt(V3).evaluate() > 0)
+
+# all return false, so this is canonical!
+"""
+
+
+
+
+"""
 z = tet0.edge_params[E01]
 sq = z.real*z.real + z.imag*z.imag
 print(sq._entries)
@@ -151,9 +191,6 @@ a = SquareRootCombination([(1,Fraction(15,14))])
 b = SquareRootCombination([(7,Fraction(3,7))])
 """
 
-
-a = SquareRootCombination([(9,1)])
-print(a.square_free(9))
 
 
 """

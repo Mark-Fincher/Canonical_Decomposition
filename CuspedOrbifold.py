@@ -50,6 +50,17 @@ class CuspedOrbifold:
 						tet1.horotriangles[vert1] = HoroTriangle(tet1, vert1, face1,
 								tet0.horotriangles[vert0].lengths[face0])
 						active.append( (tet1, vert1) )
+			# Following added by Mark 8/9/2021 to acommodate symmetries in building horotriangles
+			for perm in tet0.Symmetries:
+				if perm.image(vert0) != vert0:
+					vert1 = perm.image(vert0)
+					if tet0.horotriangles[vert1] is None:
+						face_0 = FacesAnticlockwiseAroundVertices[vert0][0]
+						face1 = perm.image(face_0)
+						tet0.horotriangles[vert1] = HoroTriangle(tet0,vert1,face1,tet0.horotriangles[vert0].lengths[face_0])
+						active.append((tet0,vert1))
+
+
 
 	def _get_cusp(self, cusp):
 		"""
@@ -174,6 +185,11 @@ class CuspedOrbifold:
 						self.walk_vertex(vertex,
                                      tet.Gluing[two_subsimplex].image(zero_subsimplex),
                                      tet.Neighbor[two_subsimplex])
+			# Following added by Mark 8/9/2021, if two vertices in a tet are identified by a symmetry of
+			# the tet, they should be in the same vertex class.
+			for perm in tet.Symmetries:
+				if perm.image(zero_subsimplex) != zero_subsimplex:
+					self.walk_vertex(vertex,perm.image(zero_subsimplex),tet)
 
 
 

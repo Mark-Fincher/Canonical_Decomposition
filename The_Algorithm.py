@@ -10,7 +10,7 @@ from HoroTriangle import*
 from tetrahedron import*
 from vertex import*
 from Dest_to_Triang import*
-#from sagestuff import*
+from sagestuff import*
 
 """
 Need interval arithmetic for this.
@@ -23,8 +23,8 @@ def check_2_to_3_possible(tets,tet,face):
 			w = tet.Neighbor[face].edge_params[tet.Gluing[face].image(edge)]
 			if (z*w).imag.evaluate() < 0 or (z*w).imag == SquareRootCombination.Zero():
 				return False
-	# Now we check that tet doesn't have symmetries taking "face" to a a different face. If so, then a 2-3 move won't make
-	# sense in the universal cover.
+	# Now we check that tet doesn't have symmetries taking "face" to a different face. If so, then a 2-3 move won't make
+	# sense in the universal cover. Do the same for tet.Neighbor[face].
 	for perm in tet.Symmetries:
 		if perm[FaceIndex[face]] != FaceIndex[face]:
 			return False
