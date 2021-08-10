@@ -229,6 +229,8 @@ def full_snappy_triang(Dest):
 	for tet in tets:
 		for i in range(6):
 			tet.edge_params[OneSubsimplices[i]] = ComplexSquareRootCombination(SquareRootCombination([(1,Fraction(1/2))]),SquareRootCombination([(Fraction(3,1),Fraction(1/2))])) 
+	# see the comments preceeding the function "unglue_some_faces" below.
+	unglue_some_faces(tets)
 	# add indices
 	index_tets(tets)
 	return tets
@@ -252,6 +254,25 @@ def show_triangulation(tets):
 		print('edge 12',tets[i].edge_params[E12].real,'+',tets[i].edge_params[E12].imag,'* i')
 		print('edge 13',tets[i].edge_params[E13].real,'+',tets[i].edge_params[E13].imag,'* i')
 		print('edge 23',tets[i].edge_params[E23].real,'+',tets[i].edge_params[E23].imag,'* i')
+
+
+"""
+If a tetrahedron has symmetries, it's not necessary to specify all the face gluings. This is because
+you can use a symmetry to move an unglued face to a face which is glued, use that gluing data to say what
+the unglued face should be glued to. In fact, we should exploit this. We should, in most cases, prefer to
+have a face glued to None if possible, using symmetries. This makes things easier when we do 2-3 moves for
+instance. The only exception should be if a face is glued to itself (this just doesn't cause problems).
+The following function takes a list of tetrahedra and tries to unglue faces where the symmetries allow it.
+"""
+
+def unglue_some_faces(tets_list):
+	for tet in tets_list:
+		for face1 in TwoSubsimplices:
+			for perm in tet.Symmetries:
+				face2 = perm.image(face1)
+				if face1 != face2 and (tet.Neighbor[face1] != tet or tet.Gluing[face1].image(face1) != face1):
+					if tet.Neighbor[face1] != None and tet.Neighbor[face2] != None:
+						tet.detach(face2)
 
 
 
