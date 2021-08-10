@@ -8,6 +8,7 @@ from Dest_to_Triang import*
 """
 from The_Algorithm import*
 
+
 """
 z = ComplexSquareRootCombination(SquareRootCombination([(1,Fraction(1/2))]),SquareRootCombination([(Fraction(3,1),Fraction(1/2))]))
 tet0 = Tetrahedron()
@@ -93,7 +94,7 @@ print(tet0.tilt(V3))
 
 
 
-
+"""
 Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
 
 tets_list = full_snappy_triang(Dest)
@@ -115,7 +116,7 @@ print(tet1.tilt(V2))
 # each face of tet1 and remove the connecting faces, giving a cube. The canonical decomposition is then this cube
 # with a bunch of symmetries (all the ones preserving the inner tetrahedron) and the faces of the cube glued to
 # themselves, carried over from tet0.
-
+"""
 
 
 
@@ -174,6 +175,46 @@ print(tet1.tilt(V3).evaluate() > 0)
 
 
 
+# One of the degree 14 covers.
+Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10, 
+11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13] 
+
+tets_list = full_snappy_triang(Dest)
+
+show_triangulation(tets_list)
+# It's a pretty interesting triangulation, definitely the most complicated so far.
+
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+
+print(' ')
+print(tet0.tilt(V0))
+print(tet0.tilt(V1))
+print(tet0.tilt(V2))
+print(tet0.tilt(V3) + tet1.tilt(V2))
+# We see that this is positive. Let's check the other tilts before anything else though.
+print(' ')
+print(tet1.tilt(V0) + tet2.tilt(V2))
+print(tet2.tilt(V1))
+print(' ')
+
+# Alright, we're going to do a 2-3 move through face 3 of tet0 and face 2 of tet1. First
+# check that it's possible.
+
+print(check_2_to_3_possible(orb.Tetrahedra,tet0,F3))
+print(' ')
+
+# Returns true, so let's do it.
+
+next_list = two_to_three(orb.Tetrahedra,tet0,F3)
+
+show_triangulation(next_list)
+
+
+
 """
 z = tet0.edge_params[E01]
 sq = z.real*z.real + z.imag*z.imag
@@ -194,31 +235,6 @@ b = SquareRootCombination([(7,Fraction(3,7))])
 
 
 """
-print((tet0.tilt(V0) + tet1.tilt(V1)).evaluate() < 0)
-print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() < 0)
-print(tet1.tilt(V0).evaluate() < 0)
-#print(tet1.tilt(V1))
-#print(tet1.tilt(V2))
-print(tet1.tilt(V3).evaluate() < 0)
-"""
-
-
-
-
-"""
-print(tet0.tilt(V0).evaluate() < 0)
-print(tet0.tilt(V1).evaluate() < 0)
-print(tet0.tilt(V2).evaluate() < 0)
-print(tet0.tilt(V3).evaluate() < 0)
-"""
-
-
-
-#print(check_2_to_3_possible(tets_list,tets_list[0],F1))
-
-
-
-"""
 z0 = ComplexSquareRootCombination(SquareRootCombination([(1, Fraction(1, 2))]), SquareRootCombination([(Fraction(3,1), Fraction(1, 2))]))
 w0 = z0
 print(z0*w0/(z0 - ComplexSquareRootCombination.One() + w0))
@@ -226,3 +242,4 @@ print(z0*w0)
 print(z0 - ComplexSquareRootCombination.One() + w0)
 print(ComplexSquareRootCombination.One()/ComplexSquareRootCombination(SquareRootCombination([]), SquareRootCombination([(Fraction(3,1), Fraction(1, 1))])))
 """
+

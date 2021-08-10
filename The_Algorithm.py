@@ -163,7 +163,19 @@ def two_to_three(triang,tet,face):
 				perm = new_tet1.Gluing[F0]
 				new_tet1.detach(F0)
 				new_tet1.attach(F0,new_tet1,Perm4((2,1,3,0))*perm)
-
+			
+			# It could also be that some other tetrahedron in the triangulation is glued to
+			# F0 of new_tet2. In that case we need to instead glue that tetrahedron to
+			# F2 of new_tet1.
+			voisin = new_tet2.Neighbor[F0]
+			if voisin != None and voisin != new_tet0 and voisin != new_tet1:
+				perm = new_tet2.Gluing[F0]
+				new_tet2.detach(F0)
+				if voisin != new_tet2:
+					new_tet1.attach(F2,voisin,(perm*Perm4((3,1,0,2))).tuple())
+				else:
+					new_tet1.attach(F2,new_tet1,(inv(Perm4((3,1,0,2)))*perm*Perm4((3,1,0,2))).tuple())
+			
 			new_tets = [new_tet0,new_tet1]
 			for T in triang:
 				if T != tet:
@@ -187,6 +199,18 @@ def two_to_three(triang,tet,face):
 				new_tet1.detach[F0]
 				new_tet1.attach(F0,new_tet0,(Perm4((2,3,0,1))*perm).tuple())
 
+			# It could also be that some other tetrahedron in the triangulation is glued to
+			# F0 of new_tet2. In that case we need to instead glue that tetrahedron to
+			# F2 of new_tet0.
+			voisin = new_tet2.Neighbor[F0]
+			if voisin != None and voisin != new_tet0 and voisin != new_tet1:
+				perm = new_tet2.Gluing[F0]
+				new_tet2.detach(F0)
+				if voisin != new_tet2:
+					new_tet0.attach(F2,voisin,(perm*Perm4((2,3,0,1))).tuple())
+				else:
+					new_tet0.attach(F2,new_tet0,(inv(Perm4((2,3,0,1)))*perm*Perm4((2,3,0,1))).tuple())
+			
 			new_tets = [new_tet0,new_tet1]
 			for T in triang:
 				if T != tet:
@@ -209,6 +233,18 @@ def two_to_three(triang,tet,face):
 				perm = new_tet2.Gluing[F0]
 				new_tet2.detach(F0)
 				new_tet2.attach(F0,new_tet0,(Perm4((2,0,1,3))*perm).tuple())
+
+			# It could also be that some other tetrahedron in the triangulation is glued to
+			# F0 of new_tet1. In that case we need to instead glue that tetrahedron to
+			# F2 of new_tet0.
+			voisin = new_tet1.Neighbor[F0]
+			if voisin != None and voisin != new_tet0 and voisin != new_tet2:
+				perm = new_tet1.Gluing[F0]
+				new_tet1.detach(F0)
+				if voisin != new_tet1:
+					new_tet0.attach(F2,voisin,(perm*Perm4((1,2,0,3))).tuple())
+				else:
+					new_tet0.attach(F2,new_tet0,(inv(Perm4((1,2,0,3)))*perm*Perm4((1,2,0,3))).tuple())
 
 			new_tets = [new_tet0,new_tet2]
 			for T in triang:
@@ -240,6 +276,58 @@ def two_to_three(triang,tet,face):
 			perm = new_tet0.Gluing[F2]
 			new_tet0.detach(F2)
 			new_tet0.attach(F2,new_tet0,(Perm4((1,0,3,2))*perm).tuple())
+		
+		# Now consider the case that F1 and/or F2 are attached to None. This could happen,
+		# since the rotational symmetries of the original two tetrahedra mean not all their faces
+		# must be explicitly glued to something. And when we did the 2-3 move up to this point, we
+		# didn't account for that.
+		if new_tet0.Neighbor[F1] == None:
+			# by rotating, this face maps to F0 of new_tet1, or, by rotating the other direction,
+			# F0 of new_tet2. We see what those faces are glued to and attach F0 of new_tet0 to that.
+			if new_tet1.Neighbor[F0] != None:
+				voisin = new_tet1.Neighbor[F0]
+				perm = new_tet1.Gluing[F0]
+				new_tet1.detach(F0)
+				if voisin == new_tet1:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((3,0,2,1)))*perm*Perm4((3,0,2,1))).tuple())
+				elif voisin == new_tet2:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((1,0,3,2)))*perm*Perm4((3,0,2,1))).tuple())
+				else:
+					new_tet0.attach(F1,voisin,(perm*Perm4((3,0,2,1))).tuple())
+			elif new_tet2.Neighbor[F0] != None:
+				voisin = new_tet2.Neighbor[F0]
+				perm = new_tet2.Gluing[F0]
+				new_tet2.detach(F0)
+				if voisin == new_tet1:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((3,0,2,1)))*perm*Perm4((1,0,3,2))).tuple())
+				elif voisin == new_tet2:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((1,0,3,2)))*perm*Perm4((1,0,3,2))).tuple())
+				else:
+					new_tet0.attach(F1,voisin,(perm*Perm4((1,0,3,2))).tuple())
+		if new_tet0.Neighbor[F2] == None:
+			# by rotating, this face maps to F2 of new_tet1, or, in the other direction, F3 of new_tet2.
+			# we now do the same thing as above.
+			if new_tet1.Neighbor[F2] != None:
+				voisin = new_tet1.Neighbor[F2]
+				perm = new_tet1.Gluing[F2]
+				new_tet1.detach(F2)
+				if voisin == new_tet1:
+					new_tet0.attach(F2,new_tet0,(inv(Perm4((3,0,2,1)))*perm*Perm4((3,0,2,1))).tuple())
+				elif voisin == new_tet2:
+					new_tet0.attach(F2,new_tet0,(inv(Perm4((1,0,3,2)))*perm*Perm4((3,0,2,1))).tuple())
+				else:
+					new_tet0.attach(F2,voisin,(perm*Perm4((3,0,2,1))).tuple())
+			elif new_tet2.Neighbor[F3] != None:
+				voisin = new_tet2.Neighbor[F3]
+				perm = new_tet2.Gluing[F3]
+				new_tet2.detach(F3)
+				if voisin == new_tet1:
+					new_tet0.attach(F2,new_tet0,(inv(Perm4((3,0,2,1)))*perm*Perm4((1,0,3,2))).tuple())
+				elif voisin == new_tet2:
+					new_tet0.attach(F2,new_tet0,(inv(Perm4((1,0,3,2)))*perm*Perm4((1,0,3,2))).tuple())
+				else:
+					new_tet0.attach(F2,voisin,(perm*Perm4((1,0,3,2))).tuple())
+		# That concludes the case that F1 and/or F2 are attached to None.
 		new_tets = [new_tet0]
 		for T in triang:
 			if T != tet and T != other_tet:
@@ -264,6 +352,32 @@ def two_to_three(triang,tet,face):
 			new_tet0.detach(F1)
 			new_tet0.attach(F1,new_tet0,(Perm4((1,0,3,2))*perm).tuple())
 		# We don't worry about what F2 is attached to, since it's determined by F1 via the symmetry.
+		# It could be that F1 is attached to None. In that case we want to rotate it to F0 of new_tet1 or
+		# F0 of new_tet2 and see what they're attached to:
+		if new_tet0.Neighbor[F1] == None:
+			# by rotating, this face maps to F0 of new_tet1, or, by rotating the other direction,
+			# F0 of new_tet2. We see what those faces are glued to and attach F0 of new_tet0 to that.
+			if new_tet1.Neighbor[F0] != None:
+				voisin = new_tet1.Neighbor[F0]
+				perm = new_tet1.Gluing[F0]
+				new_tet1.detach(F0)
+				if voisin == new_tet1:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((3,0,2,1)))*perm*Perm4((3,0,2,1))).tuple())
+				elif voisin == new_tet2:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((1,0,3,2)))*perm*Perm4((3,0,2,1))).tuple())
+				else:
+					new_tet0.attach(F1,voisin,(perm*Perm4((3,0,2,1))).tuple())
+			elif new_tet2.Neighbor[F0] != None:
+				voisin = new_tet2.Neighbor[F0]
+				perm = new_tet2.Gluing[F0]
+				new_tet2.detach(F0)
+				if voisin == new_tet1:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((3,0,2,1)))*perm*Perm4((1,0,3,2))).tuple())
+				elif voisin == new_tet2:
+					new_tet0.attach(F1,new_tet0,(inv(Perm4((1,0,3,2)))*perm*Perm4((1,0,3,2))).tuple())
+				else:
+					new_tet0.attach(F1,voisin,(perm*Perm4((1,0,3,2))).tuple())
+			# That concludes the case that F0 of new_tet0 is attached to None.
 		new_tets = [new_tet0]
 		for T in triang:
 			if T != tet:
