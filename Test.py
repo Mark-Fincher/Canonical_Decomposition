@@ -175,8 +175,7 @@ print(tet1.tilt(V3).evaluate() > 0)
 
 
 
-
-
+"""
 # One of the degree 14 covers.
 Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10, 
 11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13] 
@@ -214,6 +213,62 @@ print(' ')
 next_list = two_to_three(orb.Tetrahedra,tet0,F3)
 
 show_triangulation(next_list)
+
+orb = CuspedOrbifold(next_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+"""
+
+One = ComplexSquareRootCombination.One()
+a1 = SquareRootCombination([(1,Fraction(1,2))])
+b1 = SquareRootCombination([(3,Fraction(1,2))])
+z1 = ComplexSquareRootCombination(a1,b1)
+a2 = SquareRootCombination([(1,Fraction(-1,2))])
+b2 = SquareRootCombination([(3,Fraction(1,2))])
+z2 = ComplexSquareRootCombination(a2,b2)
+z = z1*z1/(z1 + z2)
+print(z.real)
+print(z.imag)
+w = (z - One)/z
+u = One/(One - z)
+print(w.real)
+print(w.imag)
+print(u.real)
+print(u.imag)
+
+
+
+# From the gluing data, we know which tilts to check.
+
+"""
+print(' ')
+print((tet0.tilt(V0) + tet0.tilt(V3)).evaluate() < 0)
+print(tet0.tilt(V1).evaluate() < 0)
+print((tet0.tilt(V2) + tet1.tilt(V2)).evaluate() < 0)
+print(tet0.tilt(V2) + tet1.tilt(V2))
+print(tet1.tilt(V1))
+print(tet1.tilt(V3))
+print(tet1.tilt(V0))
+print(' ')
+
+print(check_2_to_3_possible(orb.Tetrahedra,tet0,F1))
+print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
+
+
+print(' ')
+print(tet0.horotriangles[V0].area)
+print(tet0.horotriangles[V1].area)
+print(tet0.horotriangles[V2].area)
+print(tet0.horotriangles[V3].area)
+print(tet1.horotriangles[V0].area)
+print(tet1.horotriangles[V1].area)
+print(tet1.horotriangles[V2].area)
+print(tet1.horotriangles[V3].area)
+
+"""
+
+
 
 
 
