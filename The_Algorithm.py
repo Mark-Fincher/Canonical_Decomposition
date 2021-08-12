@@ -10,7 +10,7 @@ from HoroTriangle import*
 from tetrahedron import*
 from vertex import*
 from Dest_to_Triang import*
-#from sagestuff import*
+from sagestuff import*
 
 """
 Need interval arithmetic for this.

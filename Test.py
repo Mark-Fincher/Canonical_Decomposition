@@ -218,30 +218,11 @@ orb = CuspedOrbifold(next_list)
 
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
-"""
-
-One = ComplexSquareRootCombination.One()
-a1 = SquareRootCombination([(1,Fraction(1,2))])
-b1 = SquareRootCombination([(3,Fraction(1,2))])
-z1 = ComplexSquareRootCombination(a1,b1)
-a2 = SquareRootCombination([(1,Fraction(-1,2))])
-b2 = SquareRootCombination([(3,Fraction(1,2))])
-z2 = ComplexSquareRootCombination(a2,b2)
-z = z1*z1/(z1 + z2)
-print(z.real)
-print(z.imag)
-w = (z - One)/z
-u = One/(One - z)
-print(w.real)
-print(w.imag)
-print(u.real)
-print(u.imag)
-
 
 
 # From the gluing data, we know which tilts to check.
 
-"""
+
 print(' ')
 print((tet0.tilt(V0) + tet0.tilt(V3)).evaluate() < 0)
 print(tet0.tilt(V1).evaluate() < 0)
@@ -255,6 +236,9 @@ print(' ')
 print(check_2_to_3_possible(orb.Tetrahedra,tet0,F1))
 print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 
+# We're stuck. It's not canonical, but no 2-3 moves are allowed. It's possible the tilts are wrong,
+# will do testing.
+
 
 print(' ')
 print(tet0.horotriangles[V0].area)
@@ -266,9 +250,45 @@ print(tet1.horotriangles[V1].area)
 print(tet1.horotriangles[V2].area)
 print(tet1.horotriangles[V3].area)
 
+print(' ')
+print(tet0.horotriangles[V0].lengths[F1])
+print(tet0.horotriangles[V0].lengths[F2])
+print(tet0.horotriangles[V0].lengths[F3])
+print(tet0.horotriangles[V1].lengths[F0])
+print(tet0.horotriangles[V1].lengths[F2])
+print(tet0.horotriangles[V1].lengths[F3])
+print(tet0.horotriangles[V2].lengths[F0])
+print(tet0.horotriangles[V2].lengths[F1])
+print(tet0.horotriangles[V2].lengths[F3])
+print(tet1.horotriangles[V0].lengths[F1])
+print(tet1.horotriangles[V0].lengths[F2])
+print(tet1.horotriangles[V0].lengths[F3])
 """
 
 
+
+"""
+# Another degree 14 cover.
+Dest = [1,1,1,2, 0,0,0,3, 4,4,5,0, 6,7,6,1, 2,8,2,6, 8,2,9,7, 3,3,10,4, 10,11,3,5, 5,12,4,11, 
+12,5,12,12, 7,6,13,13, 13,13,7,8, 9,9,8,9, 11,10,11,10]
+
+tets_list = full_snappy_triang(Dest)
+
+show_triangulation(tets_list)
+
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+tet3 = orb.Tetrahedra[3]
+
+print(tet0.tilt(V2) + tet1.tilt(V2))
+print(tet0.tilt(V0) + tet2.tilt(V2))
+print(tet2.tilt(V0) + tet3.tilt(V2))
+
+# All negative, so it's canonical. That's good, because I don't think any 2-3 moves were possible here.
+"""
 
 
 
