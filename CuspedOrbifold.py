@@ -20,12 +20,15 @@ class CuspedOrbifold:
 		self.Edges = []
 		self.Faces = []
 		self.Vertices = []
+		self.is_canonical = None
+		self.DestSeq = None
 		for T in self.Tetrahedra:
 			T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		self.build_vertex_classes()
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
+		self.see_if_canonical()
 
 	def add_cusp_cross_sections(self):
 		for cusp in self.Vertices:
@@ -191,7 +194,18 @@ class CuspedOrbifold:
 				if perm.image(zero_subsimplex) != zero_subsimplex:
 					self.walk_vertex(vertex,perm.image(zero_subsimplex),tet)
 
-
+	# set self.is_canonical to True or False
+	def see_if_canonical(self):
+		for tet1 in self.Tetrahedra:
+			for face1 in TwoSubsimplices:
+				if tet1.Neighbor[face1] != None:
+					tet2 = tet1.Neighbor[face1]
+					face2 = tet1.Gluing[face1].image(face1)
+					if (tet1.tilt(comp(face2)) + tet2.tilt(comp(face2))).evaluate() > 0:
+						self.is_canonical = False
+						return
+		# if it hasn't already returned, set it to True.
+		self.is_canonical = True
 
 
 

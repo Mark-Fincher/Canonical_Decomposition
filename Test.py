@@ -239,6 +239,12 @@ print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 # We're stuck. It's not canonical, but no 2-3 moves are allowed. It's possible the tilts are wrong,
 # will do testing.
 
+# IMPORTANT. As pointed out by Jason (see his email), there's a different kind of move you can do here.
+# Take two copies of tet0, attach to the two faces of tet1 it should be attached to. That collection of
+# three tetrahedra is mapped to itself by the symmetry of tet1. Can divide that up into some tet pieces.
+# I'm not going to deal with this right now. Will work on other examples, will be interesting to see if
+# this situation occurs again.
+
 
 print(' ')
 print(tet0.horotriangles[V0].area)
@@ -288,6 +294,126 @@ print(tet0.tilt(V0) + tet2.tilt(V2))
 print(tet2.tilt(V0) + tet3.tilt(V2))
 
 # All negative, so it's canonical. That's good, because I don't think any 2-3 moves were possible here.
+"""
+
+
+
+"""
+# The one triangulation with 9 tetrahedra.
+
+Dest = [0,0,0,1, 2,3,4,0, 1,5,6,2, 6,6,1,4, 5,1,5,3, 4,4,2,7, 3,2,3,8, 8,8,8,5, 7,7,7,6]
+
+tets_list = full_snappy_triang(Dest)
+
+show_triangulation(tets_list)
+
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+print(tet0.tilt(V0) + tet1.tilt(V2))
+print(tet0.tilt(V2))
+
+# Both are negative, so this is canonical.
+"""
+
+
+"""
+# A triangulation with 12 tetrahedra.
+Dest = [0,1,1,2, 1,0,0,3, 4,5,5,0, 6,7,7,1, 2,8,8,4, 8,2,2,7,
+ 3,9,9,6, 9,3,3,5, 5,4,4,10, 7,6,6,11, 11,10,10,8, 10,11,11,9]
+
+orb = dest_to_orb(Dest)
+
+show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
+print(orb.DestSeq)
+
+tet0 = orb.Tetrahedra[0]
+
+print(tet0.tilt(V0) + tet0.tilt(V1))
+print((tet0.tilt(V0) + tet0.tilt(V1)).evaluate())
+print(tet0.tilt(V2))
+print(tet0.tilt(V3))
+
+# It's canonical.
+"""
+
+
+"""
+# Next with 12 tets.
+Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
+ 9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
+
+tets_list = full_snappy_triang(Dest)
+
+show_triangulation(tets_list)
+
+orb = CuspedOrbifold(tets_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+
+print(tet0.tilt(V2))
+# this is positive
+
+print(tet0.tilt(V0) + tet1.tilt(V2))
+
+print(tet1.tilt(V3) + tet2.tilt(V2))
+# this is also positive
+
+print(tet2.tilt(V0))
+
+# We should be able to do a 2-3 move through either of the two bad faces.
+
+print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
+print(check_2_to_3_possible(orb.Tetrahedra,tet1,F3))
+
+next_list = two_to_three(orb.Tetrahedra,tet0,F2)
+
+show_triangulation(next_list)
+
+orb = CuspedOrbifold(next_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+
+print(tet0.tilt(V0) + tet0.tilt(V3))
+print(tet0.tilt(V1) + tet1.tilt(V2))
+print(tet1.tilt(V3) + tet2.tilt(V2))
+# This is still a problem.
+
+print(check_2_to_3_possible(orb.Tetrahedra,tet1,F3))
+
+next_list = two_to_three(orb.Tetrahedra,tet1,F3)
+
+show_triangulation(next_list)
+
+orb = CuspedOrbifold(next_list)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+print(tet0.tilt(V2))
+print(tet0.tilt(V1) + tet1.tilt(V1))
+# These are both positive, but we can't do a 2-3 to F1 of tet0, so let's do it to F2 of tet0.
+
+next_list = two_to_three(orb.Tetrahedra,tet0,F2)
+
+show_triangulation(next_list)
+
+orb = CuspedOrbifold(next_list)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+
+print(tet0.tilt(V0) + tet1.tilt(V1))
+# This is still positive, but we're no longer able to do any 2-3 moves because of the symmetry
+# of tet0. That means we have to do a different kind of move, as in a previous example. For now we leave
+# this example alone. 
 """
 
 

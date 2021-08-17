@@ -12,6 +12,16 @@ from vertex import*
 from Dest_to_Triang import*
 from sagestuff import*
 
+
+def dest_to_orb(Dest):
+	# input a Dest Seq, returns the cusped orbifold object you get using Dest_to_Triang.py
+	# and CuspedOrbifold.py.
+	tets_list = full_snappy_triang(Dest)
+	orb = CuspedOrbifold(tets_list)
+	orb.DestSeq = Dest
+	return orb
+
+
 """
 Need interval arithmetic for this.
 """
@@ -162,7 +172,7 @@ def two_to_three(triang,tet,face):
 			if new_tet1.Neighbor[F0] == new_tet2:
 				perm = new_tet1.Gluing[F0]
 				new_tet1.detach(F0)
-				new_tet1.attach(F0,new_tet1,Perm4((2,1,3,0))*perm)
+				new_tet1.attach(F0,new_tet1,(Perm4((2,1,3,0))*perm).tuple())
 			
 			# It could also be that some other tetrahedron in the triangulation is glued to
 			# F0 of new_tet2. In that case we need to instead glue that tetrahedron to
