@@ -417,32 +417,120 @@ print(tet0.tilt(V0) + tet1.tilt(V1))
 """
 
 
+"""
+# Let's do the same one as above, except do the other 2-3 move option at the first step
+Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
+ 9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
+
+orb = dest_to_orb(Dest)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+
+next_orb = CuspedOrbifold(two_to_three(orb.Tetrahedra,tet1,F3))
+
+tet0 = next_orb.Tetrahedra[0]
+tet1 = next_orb.Tetrahedra[1]
+
+#show_triangulation(next_orb.Tetrahedra)
+
+print(next_orb.is_canonical)
+# returns false. let's check where it's bad.
+
+print(tet0.tilt(V2))
+# this is positive
+
+print(tet0.tilt(V1) + tet1.tilt(V0))
+# this is zero
+
+print(tet1.tilt(V2))
+# this is positive
+
+print(tet0.tilt(V0) + tet0.tilt(V3))
+
+next_orb = CuspedOrbifold(two_to_three(next_orb.Tetrahedra,tet0,F2))
+
+#show_triangulation(next_orb.Tetrahedra)
+
+tet0 = next_orb.Tetrahedra[0]
+tet1 = next_orb.Tetrahedra[1]
+tet2 = next_orb.Tetrahedra[2]
+
+print(next_orb.is_canonical)
+# returns false still
+
+print(tet0.tilt(V0) + tet1.tilt(V1))
+# positive
+
+print(tet0.tilt(V1) + tet2.tilt(V0))
+
+print(tet1.tilt(V3))
+
+print(tet2.tilt(V2))
+# positive
+
+# Can't do a 2-3 move through F0 of tet0 like in the previous examples, could do the "new" move though.
+# But we can do a 2-3 move though F2 of tet2. Let's do that.
+
+next_orb = CuspedOrbifold(two_to_three(next_orb.Tetrahedra,tet2,F2))
+
+show_triangulation(next_orb.Tetrahedra)
+
+print(next_orb.is_canonical)
+# apparently this is canonical.
+"""
+
+
+
+
 
 """
-z = tet0.edge_params[E01]
-sq = z.real*z.real + z.imag*z.imag
-print(sq._entries)
-print(sq.sqrt()._entries)
-b = abs(z)
-a = z.real
-print(a)
-print(a._entries)
-print(b)
-print(b._entries)
-print(-a/b)
-
-a = SquareRootCombination([(1,Fraction(15,14))])
-b = SquareRootCombination([(7,Fraction(3,7))])
+The following program takes the dest seqs from enum36success.txt and makes them into a list, Dest_Seqs,
+where each element of the list is an integer list representing a dest seq. Then it turns them into
+Cuspedorbifold objects, storing them in the list Orbs_up_to_36. Then we sort those into two lists,
+Canonical_Orbs and Non_Canonical_Orbs, according to whether or not the decomposition is canonical.
+If all tilt sums are non-positive, we call it canonical.
 """
-
-
-
 """
-z0 = ComplexSquareRootCombination(SquareRootCombination([(1, Fraction(1, 2))]), SquareRootCombination([(Fraction(3,1), Fraction(1, 2))]))
-w0 = z0
-print(z0*w0/(z0 - ComplexSquareRootCombination.One() + w0))
-print(z0*w0)
-print(z0 - ComplexSquareRootCombination.One() + w0)
-print(ComplexSquareRootCombination.One()/ComplexSquareRootCombination(SquareRootCombination([]), SquareRootCombination([(Fraction(3,1), Fraction(1, 1))])))
+file1 = open("enum36success.txt","r")
+
+L_out = file1.readlines()
+
+int_strings = []
+for i in range(100):
+    int_strings.append(str(i))
+
+Dest_Seqs = []
+
+for word in L_out:
+    if word[0] in int_strings and word[1] == ",":
+        int_list = []
+        for i in range(len(word)):
+            if i == 0 or word[i-1] == "," or word[i-1] == " ":
+                if i != len(word) - 1:
+                    int_at_i = word[i]
+                    if word[i+1] in int_strings:
+                        int_at_i = int_at_i + word[i+1]
+                    int_list.append(int(int_at_i))
+        Dest_Seqs.append(int_list)
+
+Orbs_up_to_36 = []
+Canonical_Orbs = []
+Non_Canonical_Orbs = [] 
+
+for Dest in Dest_Seqs:
+    orb = dest_to_orb(Dest)
+    Orbs_up_to_36.append(orb)
+    if orb.is_canonical is True:
+        Canonical_Orbs.append(orb)
+    else:
+        Non_Canonical_Orbs.append(orb)
+
+print(len(Orbs_up_to_36))
+print(len(Canonical_Orbs))
+print(len(Non_Canonical_Orbs))
+for i in range(5):
+    print(Canonical_Orbs[i].DestSeq)
 """
 
