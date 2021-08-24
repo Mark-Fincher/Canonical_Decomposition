@@ -440,8 +440,10 @@ print(tet0.tilt(V0) + tet1.tilt(V1))
 
 
 
-
 """
+# WARNING. There's a problem with the following computations. Did 2-3 moves which were illegal
+# because of large dihedral angles (I think). Forgot to check beforehand. So we didn't succeed in getting to the canonical decomp,
+# in fact I don't think we can with only 2-3 moves, in this situation.
 # Let's do the same one as above, except do the other 2-3 move option at the first step
 Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
  9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
@@ -452,12 +454,14 @@ tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
 
+show_triangulation(orb.Tetrahedra)
+
 next_orb = CuspedOrbifold(two_to_three(orb.Tetrahedra,tet1,F3))
 
 tet0 = next_orb.Tetrahedra[0]
 tet1 = next_orb.Tetrahedra[1]
 
-#show_triangulation(next_orb.Tetrahedra)
+show_triangulation(next_orb.Tetrahedra)
 
 
 print(next_orb.is_canonical)
@@ -476,7 +480,7 @@ print(tet0.tilt(V0) + tet0.tilt(V3))
 
 next_orb = CuspedOrbifold(two_to_three(next_orb.Tetrahedra,tet0,F2))
 
-#show_triangulation(next_orb.Tetrahedra)
+show_triangulation(next_orb.Tetrahedra)
 
 tet0 = next_orb.Tetrahedra[0]
 tet1 = next_orb.Tetrahedra[1]
@@ -502,60 +506,80 @@ next_orb = CuspedOrbifold(two_to_three(next_orb.Tetrahedra,tet2,F2))
 
 show_triangulation(next_orb.Tetrahedra)
 
-#print(next_orb.is_canonical)
+print(next_orb.is_canonical)
 # apparently this is canonical.
 """
 
 
 
+"""
+Now let's do some testing for my canonize function, found in The_Algorithm.py.
+"""
+"""
+Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
+orb = dest_to_orb(Dest)
+canonical_orb = canonize(orb)
+print(canonical_orb.DestSeq)
+print(canonical_orb.PachnerPath)
+show_triangulation(canonical_orb.Tetrahedra)
+"""
+"""
+Dest = [0,0,0,0]
+orb = dest_to_orb(Dest)
+canonical_orb = canonize(orb)
+"""
+"""
+Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
+orb = dest_to_orb(Dest)
+canonical_orb = canonize(orb)
+"""
+"""
+Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
+orb = dest_to_orb(Dest)
+canonical_orb = canonize(orb)
+print(canonical_orb.DestSeq)
+print(canonical_orb.PachnerPath)
+show_triangulation(canonical_orb.Tetrahedra)
+"""
+"""
+Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10, 
+11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13]
+orb = dest_to_orb(Dest)
+canonical_orb = canonize(orb)
+# this is the one where you get stuck if you only do 2-3 moves. And canonize gives the
+# correct error message.
+"""
+"""
+Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
+ 9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
+orb = dest_to_orb(Dest)
+canonical_orb = canonize(orb)
+print(canonical_orb.DestSeq)
+print(canonical_orb.PachnerPath)
+show_triangulation(canonical_orb.Tetrahedra)
+"""
 
 
 """
-The following program takes the dest seqs from enum36success.txt and makes them into a list, Dest_Seqs,
-where each element of the list is an integer list representing a dest seq. Then it turns them into
-Cuspedorbifold objects, storing them in the list Orbs_up_to_36. We also sort those into two lists,
-Canonical_Orbs and Non_Canonical_Orbs, according to whether or not the decomposition is canonical.
-If all tilt sums are non-positive, we call it canonical. So, in Goerner et al's language, they're actually
-only proto-canonical.
-"""
-"""
-file1 = open("enum36success.txt","r")
+Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
+ 9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
+orb = dest_to_orb(Dest)
 
-L_out = file1.readlines()
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
 
-int_strings = []
-for i in range(100):
-    int_strings.append(str(i))
+print(tet0.horotriangles)
+print(tet1.horotriangles)
+print(tet2.horotriangles)
 
-Dest_Seqs = []
+next_orb = CuspedOrbifold(two_to_three(orb.Tetrahedra,tet0,F2))
 
-for word in L_out:
-    if word[0] in int_strings and word[1] == ",":
-        int_list = []
-        for i in range(len(word)):
-            if i == 0 or word[i-1] == "," or word[i-1] == " ":
-                if i != len(word) - 1:
-                    int_at_i = word[i]
-                    if word[i+1] in int_strings:
-                        int_at_i = int_at_i + word[i+1]
-                    int_list.append(int(int_at_i))
-        Dest_Seqs.append(int_list)
+tet0 = next_orb.Tetrahedra[0]
+tet1 = next_orb.Tetrahedra[1]
+tet2 = next_orb.Tetrahedra[2]
 
-Orbs_up_to_36 = []
-Canonical_Orbs = []
-Non_Canonical_Orbs = [] 
-
-for Dest in Dest_Seqs:
-    orb = dest_to_orb(Dest)
-    Orbs_up_to_36.append(orb)
-    if orb.is_canonical is True:
-        Canonical_Orbs.append(orb)
-    else:
-        Non_Canonical_Orbs.append(orb)
-
-print(len(Orbs_up_to_36))
-print(len(Canonical_Orbs))
-print(len(Non_Canonical_Orbs))
-for i in range(10):
-    print(Non_Canonical_Orbs[i].DestSeq)
+print(tet0.horotriangles)
+print(tet1.horotriangles)
+print(tet2.horotriangles)
 """

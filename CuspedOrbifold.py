@@ -22,6 +22,7 @@ class CuspedOrbifold:
 		self.Vertices = []
 		self.is_canonical = None
 		self.DestSeq = None
+		self.PachnerPath = []
 		for T in self.Tetrahedra:
 			T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		self.build_vertex_classes()

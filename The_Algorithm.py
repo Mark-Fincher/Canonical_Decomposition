@@ -46,6 +46,47 @@ def check_2_to_3_possible(tets,tet,face):
 
 
 
+# function that tries to find the canonical decomposition of the input_orb, for now only using 2-3 moves.
+def canonize(input_orb):
+	if input_orb.is_canonical is True:
+		print('inputted orb is already canonical')
+		return input_orb
+	loop_limit = 100
+	loop_count = 0
+	active = [input_orb]
+	while active:
+		loop_count = loop_count + 1
+		if loop_count < loop_limit:
+			orb = active.pop()
+			faces_seen = []
+			for tet1 in orb.Tetrahedra:
+				for face1 in TwoSubsimplices:
+					if (tet1,face1) not in faces_seen and tet1.Neighbor[face1] != None:
+						tet2,face2 = glued_to(tet1,face1)
+						faces_seen.append((tet1,face1))
+						faces_seen.append((tet2,face2))
+						if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
+							if check_2_to_3_possible(orb.Tetrahedra,tet1,face1) is True:
+								print("did 2-3")
+								orb_copy = copy.deepcopy(orb)
+								tet1_index = orb.Tetrahedra.index(tet1)
+								new_orb = CuspedOrbifold(two_to_three(orb_copy.Tetrahedra,orb_copy.Tetrahedra[tet1_index],face1))
+								new_orb.DestSeq = orb.DestSeq
+								new_orb.PachnerPath = copy.deepcopy(orb.PachnerPath)
+								new_orb.PachnerPath.append((orb,tet1,TwoSubsimplices.index(face1)))
+								active = [new_orb] + active
+								if new_orb.is_canonical is True:
+									return new_orb
+		else:
+			print('loop_limit reached')
+			return
+	print('failure: got stuck, could not reach the canonical decomposition with 2-3 moves')
+	return
+
+
+
+
+
 def two_to_three(triang,tet,face):
 	#currently triang should be a list of tets, not a CuspedOrbifold object. That could change.
 	if tet.Neighbor[face] == tet and tet.Gluing[face][FaceIndex[face]] == FaceIndex[face]:
