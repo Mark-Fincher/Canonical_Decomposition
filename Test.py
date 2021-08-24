@@ -52,7 +52,7 @@ Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 
 tets_list = full_snappy_triang(Dest)
 
-show_triangulation(tets_list)
+#show_triangulation(tets_list)
 
 orb = CuspedOrbifold(tets_list)
 
@@ -65,7 +65,7 @@ print(tet0.tilt(V3))
 
 # tet0.tilt(V2) is positive, and F2 is glued to itself, so that face is bad. Do 2-3 move through it.
 
-print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
+#print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 
 next_list = two_to_three(orb.Tetrahedra,orb.Tetrahedra[0],F2)
 
@@ -219,9 +219,7 @@ orb = CuspedOrbifold(next_list)
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 
-
 # From the gluing data, we know which tilts to check.
-
 
 print(' ')
 print((tet0.tilt(V0) + tet0.tilt(V3)).evaluate() < 0)
@@ -244,32 +242,56 @@ print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 # three tetrahedra is mapped to itself by the symmetry of tet1. Can divide that up into some tet pieces.
 # I'm not going to deal with this right now. Will work on other examples, will be interesting to see if
 # this situation occurs again.
-
-
-print(' ')
-print(tet0.horotriangles[V0].area)
-print(tet0.horotriangles[V1].area)
-print(tet0.horotriangles[V2].area)
-print(tet0.horotriangles[V3].area)
-print(tet1.horotriangles[V0].area)
-print(tet1.horotriangles[V1].area)
-print(tet1.horotriangles[V2].area)
-print(tet1.horotriangles[V3].area)
-
-print(' ')
-print(tet0.horotriangles[V0].lengths[F1])
-print(tet0.horotriangles[V0].lengths[F2])
-print(tet0.horotriangles[V0].lengths[F3])
-print(tet0.horotriangles[V1].lengths[F0])
-print(tet0.horotriangles[V1].lengths[F2])
-print(tet0.horotriangles[V1].lengths[F3])
-print(tet0.horotriangles[V2].lengths[F0])
-print(tet0.horotriangles[V2].lengths[F1])
-print(tet0.horotriangles[V2].lengths[F3])
-print(tet1.horotriangles[V0].lengths[F1])
-print(tet1.horotriangles[V0].lengths[F2])
-print(tet1.horotriangles[V0].lengths[F3])
 """
+
+"""
+Following is the triangulation you get after doing a new move on the immediately above triangulation,
+where we got stuck. See write-ups for explanantion of this move. It seems to work.
+"""
+
+"""
+tet0 = Tetrahedron()
+tet1 = Tetrahedron()
+tet2 = Tetrahedron()
+
+tet0.Index = 0
+tet1.Index = 1
+tet2.Index = 2
+
+a = SquareRootCombination([(1,2)])
+b = SquareRootCombination([(3,2)])
+tet0.fill_edge_params(ComplexSquareRootCombination(a,b))
+
+a = SquareRootCombination.Zero()
+b = SquareRootCombination([(3,Fraction(1,6))])
+tet1.fill_edge_params(ComplexSquareRootCombination(a,b))
+
+a = SquareRootCombination([(1,Fraction(21,18))])
+b = SquareRootCombination([(3,Fraction(1,6))])
+tet2.fill_edge_params(ComplexSquareRootCombination(a,b))
+
+tet0.attach(F0,tet1,(1,0,2,3))
+tet0.attach(F2,tet1,(1,0,2,3))
+tet1.attach(F0,tet2,(3,1,2,0))
+tet1.attach(F3,tet2,(3,1,2,0))
+
+tet0.Symmetries = [Perm4((0,1,2,3)),Perm4((1,0,3,2))]
+tet2.Symmetries = [Perm4((0,1,2,3)),Perm4((2,3,0,1))]
+
+orb = CuspedOrbifold([tet0,tet1,tet2])
+
+show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
+
+print(tet0.tilt(V0) + tet1.tilt(V1))
+print(tet0.tilt(V2) + tet1.tilt(V2))
+print(tet1.tilt(V0) + tet2.tilt(V3))
+print(tet1.tilt(V3) + tet2.tilt(V0))
+
+# Yay! It seems like this is canonical. So we had to do a crazy new move, but it worked. 
+"""
+
+
 
 
 
@@ -417,6 +439,8 @@ print(tet0.tilt(V0) + tet1.tilt(V1))
 """
 
 
+
+
 """
 # Let's do the same one as above, except do the other 2-3 move option at the first step
 Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
@@ -434,6 +458,7 @@ tet0 = next_orb.Tetrahedra[0]
 tet1 = next_orb.Tetrahedra[1]
 
 #show_triangulation(next_orb.Tetrahedra)
+
 
 print(next_orb.is_canonical)
 # returns false. let's check where it's bad.
@@ -477,7 +502,7 @@ next_orb = CuspedOrbifold(two_to_three(next_orb.Tetrahedra,tet2,F2))
 
 show_triangulation(next_orb.Tetrahedra)
 
-print(next_orb.is_canonical)
+#print(next_orb.is_canonical)
 # apparently this is canonical.
 """
 
@@ -488,9 +513,10 @@ print(next_orb.is_canonical)
 """
 The following program takes the dest seqs from enum36success.txt and makes them into a list, Dest_Seqs,
 where each element of the list is an integer list representing a dest seq. Then it turns them into
-Cuspedorbifold objects, storing them in the list Orbs_up_to_36. Then we sort those into two lists,
+Cuspedorbifold objects, storing them in the list Orbs_up_to_36. We also sort those into two lists,
 Canonical_Orbs and Non_Canonical_Orbs, according to whether or not the decomposition is canonical.
-If all tilt sums are non-positive, we call it canonical.
+If all tilt sums are non-positive, we call it canonical. So, in Goerner et al's language, they're actually
+only proto-canonical.
 """
 """
 file1 = open("enum36success.txt","r")
@@ -530,7 +556,6 @@ for Dest in Dest_Seqs:
 print(len(Orbs_up_to_36))
 print(len(Canonical_Orbs))
 print(len(Non_Canonical_Orbs))
-for i in range(5):
-    print(Canonical_Orbs[i].DestSeq)
+for i in range(10):
+    print(Non_Canonical_Orbs[i].DestSeq)
 """
-
