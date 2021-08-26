@@ -76,6 +76,7 @@ def canonize(input_orb):
 								new_orb.PachnerPath.append((orb,tet1,TwoSubsimplices.index(face1)))
 								active = [new_orb] + active
 								if new_orb.is_canonical is True:
+									print('Success! Found the canonical decomposition')
 									return new_orb
 		else:
 			print('loop_limit reached')

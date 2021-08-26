@@ -1,4 +1,5 @@
 from The_Algorithm import*
+import json
 
 """
 The following program takes the dest seqs from enum36success.txt and makes them into a list, Dest_Seqs,
@@ -58,7 +59,6 @@ for Dest in Dest_Seqs:
     else:
         Non_Canonical_Orbs.append(orb)
 
-
 newly_canonical = []
 stuck_orbs = []
 for orb in Non_Canonical_Orbs:
@@ -71,4 +71,32 @@ for orb in Non_Canonical_Orbs:
 print(len(newly_canonical))
 print(len(stuck_orbs))
 
+already_canonical_dest_seqs = []
+for orb in Canonical_Orbs:
+    already_canonical_dest_seqs.append(orb.DestSeq)
+
+with open("already_canonical_dest_seqs.json", "w") as write_file:
+    json.dump(already_canonical_dest_seqs, write_file)
+
+newly_canonical_dest_seqs = []
+for orb in newly_canonical:
+    newly_canonical_dest_seqs.append(orb.DestSeq)
+
+with open("newly_canonical_dest_seqs.json", "w") as write_file:
+    json.dump(newly_canonical_dest_seqs, write_file)
+
+stuck_dest_seqs = []
+for orb in stuck_orbs:
+    stuck_dest_seqs.append(orb.DestSeq)
+
+with open("stuck_dest_seqs.json", "w") as write_file:
+    json.dump(stuck_dest_seqs, write_file)
+
+"""
+with open("data_file.json", "r") as read_file:
+    decoded_data = json.load(read_file)
+
+print(type(decoded_data))
+print(decoded_data)
+"""
 
