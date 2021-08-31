@@ -92,11 +92,4 @@ for orb in stuck_orbs:
 with open("stuck_dest_seqs.json", "w") as write_file:
     json.dump(stuck_dest_seqs, write_file)
 
-"""
-with open("data_file.json", "r") as read_file:
-    decoded_data = json.load(read_file)
-
-print(type(decoded_data))
-print(decoded_data)
-"""
 
