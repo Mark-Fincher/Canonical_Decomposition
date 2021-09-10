@@ -27,6 +27,7 @@ class Edge:
         self.LeftBdryArrow = None   # Arrows representing the two boundary faces,
         self.RightBdryArrow = None  # if this is a boundary edge. 
         self._edge_orient_cache = dict()
+        self.LocusOrder = None      # Added by MF, 9/8/2021, order of rotation around the edge
 
     def __repr__(self):
         if self.Index > -1:

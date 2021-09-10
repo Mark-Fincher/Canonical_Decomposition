@@ -27,24 +27,49 @@ show_triangulation(New_triang)
 """
 
 
-"""
+
 Dest = [0,0,0,0]
 
 tets_list = full_snappy_triang(Dest)
 
-show_triangulation(tets_list)
+#show_triangulation(tets_list)
 
 orb = CuspedOrbifold(tets_list)
 
 tet0 = orb.Tetrahedra[0]
 
-print(tet0.horotriangles[V0].area)
+print(orb.Edges)
+
+edge0 = orb.Edges[0]
+edge1 = orb.Edges[1]
+edge2 = orb.Edges[2]
+
+print(edge0.Corners)
+print(edge1.Corners)
+print(edge2.Corners)
+
+print(edge0.LocusOrder)
+print(edge1.LocusOrder)
+print(edge2.LocusOrder)
 
 print(tet0.tilt(V0))
 print(tet0.tilt(V1))
 print(tet0.tilt(V2))
 print(tet0.tilt(V3))
-"""
+
+print(' ')
+
+tet0.detach(F0)
+tet0.detach(F1)
+tet0.detach(F2)
+tet0.clear_Class()
+tet0.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+show_triangulation([tet0])
+
+orb = CuspedOrbifold([tet0])
+
+#print(orb.Edges)
+
 
 
 
@@ -584,25 +609,17 @@ print(tet0.horotriangles)
 print(tet1.horotriangles)
 print(tet2.horotriangles)
 """
+
 """
 with open("stuck_dest_seqs.json", "r") as read_file:
     stuck_dest_seqs = json.load(read_file)
 
-dest = stuck_dest_seqs[5]
+dest = stuck_dest_seqs[3]
 print(dest)
 
 orb = dest_to_orb(dest)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-
-show_triangulation(orb.Tetrahedra)
-
-orb = CuspedOrbifold(two_to_three(orb.Tetrahedra,tet0,F3))
-
-show_triangulation(orb.Tetrahedra)
 """
+
 
 
 """
@@ -611,6 +628,7 @@ because of large dihedral angles. But one angle sum is actually pi, resulting in
 and it turns out we can do a modified 2-3 move, modified in the sense that we can just remove the flat
 tetrahedron resulting from the 2-3 move. See my notebook for more info. I constructed by hand the resulting 
 triangulation, here it is.
+"""
 """
 tet0 = Tetrahedron()
 tet0.Index = 0
@@ -634,6 +652,43 @@ orb = CuspedOrbifold([tet0,tet1])
 
 print(orb.is_canonical)
 show_triangulation(orb.Tetrahedra)
+
+print(orb.Vertices)
+print(orb.Vertices[0].Corners)
+print(orb.Vertices[1].Corners)
+"""
+
+"""
+tet0 = Tetrahedron()
+tet0.Index = 0
+tet1 = Tetrahedron()
+tet1.Index = 1
+
+tet0.attach(F0,tet1,(1,3,0,2))
+tet0.attach(F1,tet1,(1,3,0,2))
+tet0.attach(F2,tet1,(1,3,0,2))
+tet0.attach(F3,tet1,(1,3,0,2))
+
+a = SquareRootCombination.One()
+b = SquareRootCombination([(3,Fraction(1,3))])
+tet0.fill_edge_params(ComplexSquareRootCombination(a,b))
+
+a = SquareRootCombination.Zero()
+b = SquareRootCombination([(3,Fraction(1,3))])
+tet1.fill_edge_params(ComplexSquareRootCombination(a,b))
+
+orb = CuspedOrbifold([tet0,tet1])
+
+print(orb.is_canonical)
+show_triangulation(orb.Tetrahedra)
+
+print(orb.Vertices)
+print(orb.Vertices[0].Corners)
+print(orb.Vertices[1].Corners)
+print(orb.Vertices[2].Corners)
+print(orb.Vertices[3].Corners)
+"""
+
 
 
 

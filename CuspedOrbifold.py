@@ -26,6 +26,7 @@ class CuspedOrbifold:
 		for T in self.Tetrahedra:
 			T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		self.build_vertex_classes()
+		self.build_edge_classes()
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
@@ -194,6 +195,68 @@ class CuspedOrbifold:
 			for perm in tet.Symmetries:
 				if perm.image(zero_subsimplex) != zero_subsimplex:
 					self.walk_vertex(vertex,perm.image(zero_subsimplex),tet)
+
+	
+	def build_edge_classes(self):
+		for tet in self.Tetrahedra:
+			for one_subsimplex in OneSubsimplices:
+				if tet.Class[one_subsimplex] == None:
+					newEdge = Edge()
+					self.Edges.append(newEdge)
+					first_arrow = Arrow(one_subsimplex,RightFace[one_subsimplex],tet)
+					a = first_arrow.copy()
+					sanity_check = 0
+					while 1:
+						print(a)
+						if sanity_check > 6*len(self.Tetrahedra):
+							print("error building edge classes")
+							break
+						newEdge._add_corner(a)
+						a.Tetrahedron.Class[a.Edge] = newEdge
+						if a.next() == None:
+							print("starting from edge",SubsimplexName[one_subsimplex])
+							print("the following arrow has no next",a)
+							# For us, that doesn't mean we hit the boundary, because there is
+							# no boundary. It just means we need to apply a symmetry to get the
+							# face gluing data. In this case, the arrow a was not changed, though
+							# typically a.next() does change a.
+							for sym in a.Tetrahedron.Symmetries:
+								if a.Tetrahedron.Neighbor[sym.image(a.Face)] != None:
+									print(sym)
+									a = Arrow(sym.image(a.Edge),sym.image(a.Face),a.Tetrahedron)
+									print(a)
+									a.next()
+									print(a)
+									break
+						if a == first_arrow:
+							break
+						sanity_check = sanity_check + 1
+		for i in range(len(self.Edges)):
+			self.Edges[i].Index = i
+		for edge in self.Edges:
+			z = ComplexSquareRootCombination.One()
+			for corner in edge.Corners:
+				z = z*corner.Tetrahedron.edge_params[corner.Subsimplex]
+			# Now find n s.t. z^n = 1
+			n = 0
+			w = ComplexSquareRootCombination.One()
+			while n < 1000:
+				w = w*z
+				n = n + 1
+				# So w = z^n
+				if w == ComplexSquareRootCombination.One():
+					break
+				if n == 999:
+					print("error in LocusOrder")
+			edge.LocusOrder = n
+
+
+
+
+
+
+
+
 
 	# set self.is_canonical to True or False
 	def see_if_canonical(self):

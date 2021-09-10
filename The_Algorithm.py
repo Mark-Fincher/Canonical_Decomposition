@@ -231,7 +231,7 @@ def two_to_three(triang,tet,face):
 			new_tets = [new_tet0,new_tet1]
 			for T in triang:
 				if T != tet:
-					# clear vertex classes and horotriangles! if they're not set to None then there are problems when you make
+					# clear classes and horotriangles! if they're not set to None then there are problems when you make
 					# a cusped orbifold from this list of tets.
 					T.clear_Class()
 					T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
@@ -270,7 +270,7 @@ def two_to_three(triang,tet,face):
 			new_tets = [new_tet0,new_tet1]
 			for T in triang:
 				if T != tet:
-					# clear vertex classes and horotriangles! if they're not set to None then there are problems when you make
+					# clear classes and horotriangles! if they're not set to None then there are problems when you make
 					# a cusped orbifold from this list of tets.
 					T.clear_Class()
 					T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
@@ -309,7 +309,7 @@ def two_to_three(triang,tet,face):
 			new_tets = [new_tet0,new_tet2]
 			for T in triang:
 				if T != tet:
-					# clear vertex classes and horotriangles! if they're not set to None then there are problems when you make
+					# clear classes and horotriangles! if they're not set to None then there are problems when you make
 					# a cusped orbifold from this list of tets.
 					T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 					T.clear_Class()
@@ -395,7 +395,7 @@ def two_to_three(triang,tet,face):
 		new_tets = [new_tet0]
 		for T in triang:
 			if T != tet and T != other_tet:
-				# clear vertex classes and horotriangles! if they're not set to None then there are problems when you make
+				# clear classes and horotriangles! if they're not set to None then there are problems when you make
 				# a cusped orbifold from this list of tets.
 				T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 				T.clear_Class()
@@ -449,7 +449,7 @@ def two_to_three(triang,tet,face):
 		new_tets = [new_tet0]
 		for T in triang:
 			if T != tet:
-				# clear vertex classes and horotriangles! if they're not set to None then there are problems when you make
+				# clear classes and horotriangles! if they're not set to None then there are problems when you make
 				# a cusped orbifold from this list of tets.
 				T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 				T.clear_Class()
@@ -460,7 +460,7 @@ def two_to_three(triang,tet,face):
 		new_tets = [new_tet0,new_tet1,new_tet2]
 		for T in triang:
 			if T != tet and T != other_tet:
-				# clear vertex classes and horotriangles! if they're not set to None then there are problems when you make
+				# clear classes and horotriangles! if they're not set to None then there are problems when you make
 				# a cusped orbifold from this list of tets.
 				T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 				T.clear_Class()
