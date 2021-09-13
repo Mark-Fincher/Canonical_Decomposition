@@ -27,7 +27,7 @@ show_triangulation(New_triang)
 """
 
 
-
+"""
 Dest = [0,0,0,0]
 
 tets_list = full_snappy_triang(Dest)
@@ -40,40 +40,15 @@ tet0 = orb.Tetrahedra[0]
 
 print(orb.Edges)
 
-edge0 = orb.Edges[0]
-edge1 = orb.Edges[1]
-edge2 = orb.Edges[2]
-
-print(edge0.Corners)
-print(edge1.Corners)
-print(edge2.Corners)
-
-print(edge0.LocusOrder)
-print(edge1.LocusOrder)
-print(edge2.LocusOrder)
-
-print(tet0.tilt(V0))
-print(tet0.tilt(V1))
-print(tet0.tilt(V2))
-print(tet0.tilt(V3))
-
-print(' ')
-
-tet0.detach(F0)
-tet0.detach(F1)
-tet0.detach(F2)
-tet0.clear_Class()
-tet0.horotriangles = {V0:None, V1:None, V2:None, V3:None}
-show_triangulation([tet0])
-
-orb = CuspedOrbifold([tet0])
-
-#print(orb.Edges)
-
-
-
-
+edge = orb.Edges[0]
+print(edge.Corners)
+print(edge.LocusOrder)
+print(tet0.Class)
 """
+
+
+
+
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 
 tets_list = full_snappy_triang(Dest)
@@ -101,22 +76,22 @@ orb = CuspedOrbifold(next_list)
 
 tet0 = orb.Tetrahedra[0]
 
-print(tet0.horotriangles[V0].lengths)
-print(tet0.horotriangles[V0].circumradius)
-print(tet0.horotriangles[V1].lengths)
-print(tet0.horotriangles[V1].circumradius)
-print(tet0.horotriangles[V2].lengths)
-print(tet0.horotriangles[V2].circumradius)
-print(tet0.horotriangles[V3].lengths)
-print(tet0.horotriangles[V3].circumradius)
-
 print(tet0.tilt(V0))
 print(tet0.tilt(V1))
 print(tet0.tilt(V2))
 print(tet0.tilt(V3))
 
 # from checking tilt sums, this is canonical.
-"""
+
+print(orb.Edges)
+edge0 = orb.Edges[0]
+edge1 = orb.Edges[1]
+edge2 = orb.Edges[2]
+
+print(edge0.Corners)
+print(edge0.LocusOrder)
+print(tet0.Class)
+
 
 
 

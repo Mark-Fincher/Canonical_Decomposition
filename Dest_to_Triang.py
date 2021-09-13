@@ -225,6 +225,8 @@ def full_snappy_triang(Dest):
 					if k == 4:
 						perms.append(sigma*s[j]*t2*sigma)
 		tets[i].Symmetries = perms
+		if len(perms) == 0:
+			tets[i].Symmetries = [e]
 	# Now add the shape parameters. Since the tetrahedra are regular, all edges get the same param, 1/2 + sqrt(3)*i/2
 	for tet in tets:
 		for i in range(6):

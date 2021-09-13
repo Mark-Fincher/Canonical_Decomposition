@@ -197,6 +197,87 @@ class CuspedOrbifold:
 					self.walk_vertex(vertex,perm.image(zero_subsimplex),tet)
 
 	
+	"""
+	Two edges are in the same edge class if they're identified by a face pairing or symmetry.
+	We want to determine all the edge classes. We also want to determine if an edge is part of the
+	singular locus or not. And if it is, what is the order of that local group? This function figures
+	out all of these things.
+
+	Getting the local group order is a little tricky. You can move around a quotient edge in multiple
+	ways, because of the symmetries of some tets. If one path takes you fully around a quotient edge
+	in pi/3 radians, and another path takes you around in pi/6 radians, then the group element of the
+	first is the square of the group element of the second. Need to find the path with smallest total
+	angle; that will correspond to the generator of the local group.
+
+	Each quotient edge corresponds to a distinct Edge object. The corners of the Edge object
+	correspond to a particular shortest walk around the quotient edge. So not every one-simplex
+	which quotients to that edge will be in the corners list. You can see which Edge object
+	a one-simplex is assigned as Tet.Class[one_simplex].
+	"""
+	def build_edge_classes(self):
+		for tet in self.Tetrahedra:
+			for one_subsimplex in OneSubsimplices:
+				if tet.Class[one_subsimplex] is None:
+					a = Arrow(one_subsimplex,RightFace[one_subsimplex],tet)
+					first_arrow = a.copy()
+					completed_walks = []
+					active = [[a]]
+					while active:
+						walk = active.pop()
+						a = walk[-1]
+						for sym in a.Tetrahedron.Symmetries:
+							new_a = Arrow(sym.image(a.Edge),sym.image(a.Face),a.Tetrahedron)
+							new_a.next()
+							# if new_a is None, we don't do anything.
+							if new_a != None:
+								# now we want to check if new_a, or the image under some symmetry
+								# of new_a, is first_arrow. If so, then walk is a complete walk.
+								complete = False
+								if new_a.Tetrahedron == first_arrow.Tetrahedron:
+									for other_sym in new_a.Tetrahedron.Symmetries:
+										if other_sym.image(new_a.Edge) == first_arrow.Edge and other_sym.image(new_a.Face) == first_arrow.Face:
+											complete = True
+								if complete:
+									completed_walks.append(walk)
+								else:
+									walk.append(new_a)
+									active.append(walk)
+					shortest_walk = completed_walks[0]
+					for walk in completed_walks:
+						if len(walk) < len(shortest_walk):
+							shortest_walk = walk
+					new_edge = Edge()
+					z = ComplexSquareRootCombination.One()
+					for a in shortest_walk:
+						z = z*a.Tetrahedron.edge_params[a.Edge]
+						new_edge._add_corner(a)
+						for sym in a.Tetrahedron.Symmetries:
+							a.Tetrahedron.Class[sym.image(a.Edge)] = new_edge
+					# Now find n s.t. z^n = 1
+					n = 0
+					w = ComplexSquareRootCombination.One()
+					while n < 1000:
+						w = w*z
+						n = n + 1
+						# So w = z^n
+						if w == ComplexSquareRootCombination.One():
+							break
+						if n == 999:
+							print("error in LocusOrder")
+					new_edge.LocusOrder = n
+					self.Edges.append(new_edge)
+		for i in range(len(self.Edges)):
+			self.Edges[i].Index = i
+					
+
+
+
+
+
+
+
+
+	"""
 	def build_edge_classes(self):
 		for tet in self.Tetrahedra:
 			for one_subsimplex in OneSubsimplices:
@@ -249,8 +330,7 @@ class CuspedOrbifold:
 				if n == 999:
 					print("error in LocusOrder")
 			edge.LocusOrder = n
-
-
+	"""
 
 
 
