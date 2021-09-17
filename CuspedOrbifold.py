@@ -353,4 +353,110 @@ class CuspedOrbifold:
 
 
 
-    
+	"""
+	Now I'm going to make the isometry_group and are_isometric functions. 
+
+	The function valid_tet_to_tet(self,tet_a,tet_b,map_a_to_b) checks if mapping tet_a to tet_b with map_a_to_b
+	respects symmetries and the locus orders of the edges.
+    """
+
+	def valid_tet_to_tet(self,tet_a,tet_b,map_a_to_b):
+		for sym_a in tet_a.Symmetries:
+			if (map_a_to_b*sym_a*inv(map_a_to_b)).tuple() not in [sym_b.tuple() for sym_b in tet_b.Symmetries]:
+				return False
+		for sym_b in tet_b.Symmetries:
+			if (inv(map_a_to_b)*sym_b*map_a_to_b).tuple() not in [sym_a.tuple() for sym_a in tet_a.Symmetries]:
+				return False
+		for edge in OneSubsimplices:
+			if tet_a.Class[edge].LocusOrder != tet_b.Class[map_a_to_b.image(edge)].LocusOrder:
+				return False
+		return True
+
+	
+	"""
+	The next function tries to extend perm: tet0 --> teti to an isometry defined on every tet, given as a dictionary
+	"isom" whose assignments are: if tetj is mapped to tetk via "phi" then isom[tetj] = (phi, tetk).
+
+	It could be that perm already does not descend to a well-defined map on the orbifold. We chech this with
+	valid_tet_to_tet.
+
+	If perm is valid, to extend perm we look at the neighbors of tet0 and extend the map to them in the unique way (unique
+	up to post-composition with a symmetry), then check the maps on those tetrahedra are valid with valid_tet_to_tet,
+	then add those tets to a queue. Then we pop the last element of the queue and see if its neighbors have 
+	been mapped to something yet. If a neighbor hasn't, then we extend the map to it and add it to the queue. 
+	If isom is already defined on a neighbor, then we leave it alone. After all neighbors are inspected, we pop 
+	another tet off the queue and keep going until the queue is empty.
+
+	At this point we have a map isom which is defined on every tet, but it might not descend to a well-defined
+	map of the orbifold. In the last part of the function we check if it gives an actual isometry of the
+	orbifold. If it does, we return isom. If not, we return None.
+	"""
+	def check_extends(self,perm,image_of_tet0):
+		isom = {self.Tetrahedra[0]:(perm,image_of_tet0)}
+		if self.valid_tet_to_tet(self.Tetrahedra[0],image_of_tet0,perm) is False:
+			return None
+		for tet in self.Tetrahedra:
+			if tet.Index > 0:
+				isom[tet] = None
+		active = [self.Tetrahedra[0]]
+		while active:
+			tet = active.pop()
+			image_of_tet = isom[tet][1]
+			for face in TwoSubsimplices:
+				voisin = tet.Neighbor[face]
+				if voisin != None:
+					# if we've already defined what the isom should do to voisin, then we do nothing.
+					# otherwise we now define what it does to voisin and add it to active.
+					if isom[voisin] is None:
+						phi = isom[tet][0]*inv(tet.Gluing[face])
+						for sym in image_of_tet.Symmetries:
+							if image_of_tet.Neighbor[sym.image(isom[tet][0].image(face))] != None:
+								image_of_voisin = image_of_tet.Neighbor[sym.image(isom[tet][0].image(face))]
+								isom[voisin] = (image_of_voisin.Gluing[sym.image(isom[tet][0].image(face))]*sym*phi,image_of_voisin)
+								if self.valid_tet_to_tet(voisin,image_of_voisin,isom[voisin][0]) is False:
+									return None
+								break
+						active.append(voisin)
+		# first check that isom respects the face gluings. By construction it respects some face gluings, but maybe not all.
+		for tet1 in self.Tetrahedra:
+			for face1 in TwoSubsimplices:
+				if tet1.Neighbor[face1] != None:
+					tet2,face2 = glued_to(tet1,face1)
+					well_defined_on_face1_and_face2 = False
+					for sym1 in isom[tet1][1].Symmetries:
+						for sym2 in isom[tet2][1].Symmetries:
+							image_of_face1 = (sym1*isom[tet1][0]).image(face1)
+							image_of_face2 = (sym2*isom[tet2][0]).image(face2)
+							if isom[tet1][1].Neighbor[image_of_face1] != None:
+								if glued_to(isom[tet1][1],image_of_face1) == (isom[tet2][1],image_of_face2):
+									if (isom[tet1][1].Gluing[image_of_face1]*sym1*isom[tet1][0]).tuple() == (sym2*isom[tet2][0]).tuple():
+										well_defined_on_face1_and_face2 = True
+					if well_defined_on_face1_and_face2 is False:
+						return None
+		# if we haven't returned None by now, then isom is a valid isometry.
+		return isom
+
+
+	"""
+	Finally, the next function computes the isometry group of an orbifold using the above two functions.
+	The isometries are given as dictionaries as described in the above function's comments.
+	"""
+
+	def isometries(self):
+		isometries = []
+		seen_maps_of_tet0 = []
+		for tet in self.Tetrahedra:
+			for permutation in Perm4.S4():
+				if (permutation.tuple(),tet) not in seen_maps_of_tet0:
+					for sym in tet.Symmetries:
+						seen_maps_of_tet0.append(((sym*permutation).tuple(),tet))
+					isom = self.check_extends(permutation,tet)
+					if isom != None:
+						isometries.append(isom)
+		return isometries
+
+
+
+
+
+

@@ -27,7 +27,7 @@ show_triangulation(New_triang)
 """
 
 
-"""
+
 Dest = [0,0,0,0]
 
 tets_list = full_snappy_triang(Dest)
@@ -38,17 +38,14 @@ orb = CuspedOrbifold(tets_list)
 
 tet0 = orb.Tetrahedra[0]
 
-print(orb.Edges)
+print(orb.check_extends(Perm4((0,1,3,2)),tet0))
+# check_extends is saying this isn't a valid isometry, which is wrong. think it's something in how
+# it checks that the map respects face pairings.
 
-edge = orb.Edges[0]
-print(edge.Corners)
-print(edge.LocusOrder)
-print(tet0.Class)
+
+
+
 """
-
-
-
-
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 
 tets_list = full_snappy_triang(Dest)
@@ -91,7 +88,7 @@ edge2 = orb.Edges[2]
 print(edge0.Corners)
 print(edge0.LocusOrder)
 print(tet0.Class)
-
+"""
 
 
 
@@ -360,6 +357,8 @@ print((tet0.tilt(V0) + tet0.tilt(V1)).evaluate())
 print(tet0.tilt(V2))
 print(tet0.tilt(V3))
 
+print(orb.is_canonical)
+
 # It's canonical.
 """
 
@@ -586,13 +585,12 @@ print(tet2.horotriangles)
 """
 
 """
-with open("stuck_dest_seqs.json", "r") as read_file:
-    stuck_dest_seqs = json.load(read_file)
+with open("newly_canonical_dest_seqs.json", "r") as read_file:
+    newly_canonical_dest_seqs = json.load(read_file)
 
-dest = stuck_dest_seqs[3]
-print(dest)
-
-orb = dest_to_orb(dest)
+for dest in newly_canonical_dest_seqs:
+    if len(dest) == 32:
+        print(dest)
 """
 
 
