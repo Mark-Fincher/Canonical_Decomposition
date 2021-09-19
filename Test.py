@@ -27,7 +27,7 @@ show_triangulation(New_triang)
 """
 
 
-
+"""
 Dest = [0,0,0,0]
 
 tets_list = full_snappy_triang(Dest)
@@ -42,6 +42,8 @@ print(orb.check_extends(Perm4((0,1,3,2)),tet0))
 # check_extends is saying this isn't a valid isometry, which is wrong. think it's something in how
 # it checks that the map respects face pairings.
 
+print(orb.isometries())
+"""
 
 
 
@@ -80,16 +82,8 @@ print(tet0.tilt(V3))
 
 # from checking tilt sums, this is canonical.
 
-print(orb.Edges)
-edge0 = orb.Edges[0]
-edge1 = orb.Edges[1]
-edge2 = orb.Edges[2]
-
-print(edge0.Corners)
-print(edge0.LocusOrder)
-print(tet0.Class)
+print(orb.isometries())
 """
-
 
 
 """
@@ -509,6 +503,30 @@ show_triangulation(next_orb.Tetrahedra)
 print(next_orb.is_canonical)
 # apparently this is canonical.
 """
+
+
+Dest = [1,2,2,1,0,3,3,0,3,0,0,4,2,1,1,5,6,5,5,2,7,4,4,3,4,7,7,7,5,6,6,6]
+
+#show_triangulation(full_snappy_triang(Dest))
+
+# this is a dest seq for which building edge classes causes problems
+
+orb = dest_to_orb(Dest)
+
+
+
+print(orb.Edges)
+
+for edge in orb.Edges:
+    print(edge)
+    print(edge.Corners)
+    print(edge.LocusOrder)
+    print(' ')
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+print(tet0.Class)
+print(tet1.Class)
 
 
 

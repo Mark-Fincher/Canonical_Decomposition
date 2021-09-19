@@ -222,16 +222,19 @@ class CuspedOrbifold:
 					first_arrow = a.copy()
 					completed_walks = []
 					active = [[a]]
+					sanity_check = 0
 					while active:
+						sanity_check = sanity_check + 1
+						if sanity_check > 200:
+							print('error building edge classes for starting arrow',first_arrow)
+							break
 						walk = active.pop()
 						a = walk[-1]
 						for sym in a.Tetrahedron.Symmetries:
 							new_a = Arrow(sym.image(a.Edge),sym.image(a.Face),a.Tetrahedron)
-							new_a.next()
-							# if new_a is None, we don't do anything.
-							if new_a != None:
-								# now we want to check if new_a, or the image under some symmetry
-								# of new_a, is first_arrow. If so, then walk is a complete walk.
+							if new_a.next() != None:
+								# now we want to check if new_a (which has been changed by .next()), or the image 
+								# under some symmetry of new_a, is first_arrow. If so, then walk is a complete walk.
 								complete = False
 								if new_a.Tetrahedron == first_arrow.Tetrahedron:
 									for other_sym in new_a.Tetrahedron.Symmetries:
@@ -240,8 +243,8 @@ class CuspedOrbifold:
 								if complete:
 									completed_walks.append(walk)
 								else:
-									walk.append(new_a)
-									active.append(walk)
+									walk_branch = walk + [new_a]
+									active.append(walk_branch)
 					shortest_walk = completed_walks[0]
 					for walk in completed_walks:
 						if len(walk) < len(shortest_walk):
@@ -250,9 +253,9 @@ class CuspedOrbifold:
 					z = ComplexSquareRootCombination.One()
 					for a in shortest_walk:
 						z = z*a.Tetrahedron.edge_params[a.Edge]
-						new_edge._add_corner(a)
-						for sym in a.Tetrahedron.Symmetries:
-							a.Tetrahedron.Class[sym.image(a.Edge)] = new_edge
+						new_edge.Corners.append(Corner(a.Tetrahedron,a.Edge))
+						for perm in a.Tetrahedron.Symmetries:
+							a.Tetrahedron.Class[perm.image(a.Edge)] = new_edge
 					# Now find n s.t. z^n = 1
 					n = 0
 					w = ComplexSquareRootCombination.One()
@@ -394,7 +397,7 @@ class CuspedOrbifold:
 	def check_extends(self,perm,image_of_tet0):
 		isom = {self.Tetrahedra[0]:(perm,image_of_tet0)}
 		if self.valid_tet_to_tet(self.Tetrahedra[0],image_of_tet0,perm) is False:
-			return None
+			return
 		for tet in self.Tetrahedra:
 			if tet.Index > 0:
 				isom[tet] = None
@@ -414,10 +417,10 @@ class CuspedOrbifold:
 								image_of_voisin = image_of_tet.Neighbor[sym.image(isom[tet][0].image(face))]
 								isom[voisin] = (image_of_voisin.Gluing[sym.image(isom[tet][0].image(face))]*sym*phi,image_of_voisin)
 								if self.valid_tet_to_tet(voisin,image_of_voisin,isom[voisin][0]) is False:
-									return None
+									return
 								break
 						active.append(voisin)
-		# first check that isom respects the face gluings. By construction it respects some face gluings, but maybe not all.
+		# check that isom respects the face gluings. By construction it respects some face gluings, but maybe not all.
 		for tet1 in self.Tetrahedra:
 			for face1 in TwoSubsimplices:
 				if tet1.Neighbor[face1] != None:
@@ -429,10 +432,10 @@ class CuspedOrbifold:
 							image_of_face2 = (sym2*isom[tet2][0]).image(face2)
 							if isom[tet1][1].Neighbor[image_of_face1] != None:
 								if glued_to(isom[tet1][1],image_of_face1) == (isom[tet2][1],image_of_face2):
-									if (isom[tet1][1].Gluing[image_of_face1]*sym1*isom[tet1][0]).tuple() == (sym2*isom[tet2][0]).tuple():
+									if (isom[tet1][1].Gluing[image_of_face1]*sym1*isom[tet1][0]).tuple() == (sym2*isom[tet2][0]*tet1.Gluing[face1]).tuple():
 										well_defined_on_face1_and_face2 = True
 					if well_defined_on_face1_and_face2 is False:
-						return None
+						return
 		# if we haven't returned None by now, then isom is a valid isometry.
 		return isom
 
