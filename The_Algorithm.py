@@ -67,7 +67,7 @@ def canonize(input_orb):
 						faces_seen.append((tet2,face2))
 						if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
 							if check_2_to_3_possible(orb.Tetrahedra,tet1,face1) is True:
-								print("did 2-3")
+								#print("did 2-3")
 								orb_copy = copy.deepcopy(orb)
 								tet1_index = orb.Tetrahedra.index(tet1)
 								new_orb = CuspedOrbifold(two_to_three(orb_copy.Tetrahedra,orb_copy.Tetrahedra[tet1_index],face1))
@@ -76,7 +76,7 @@ def canonize(input_orb):
 								new_orb.PachnerPath.append((orb,tet1,TwoSubsimplices.index(face1)))
 								active = [new_orb] + active
 								if new_orb.is_canonical is True:
-									print('Success! Found the canonical decomposition')
+									#print('Success! Found the canonical decomposition')
 									return new_orb
 		else:
 			print('loop_limit reached')

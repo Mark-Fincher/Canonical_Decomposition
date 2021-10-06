@@ -11,23 +11,6 @@ import json
 
 
 """
-z = ComplexSquareRootCombination(SquareRootCombination([(1,Fraction(1/2))]),SquareRootCombination([(Fraction(3,1),Fraction(1/2))]))
-tet0 = Tetrahedron()
-tet0.fill_edge_params(z)
-tet0.Index = 0
-#tet0.Symmetries = [Perm4((0,1,2,3)),Perm4((0,2,3,1)),Perm4((0,3,1,2))]
-tet1 = Tetrahedron()
-tet1.fill_edge_params(z)
-tet1.Index = 1
-tet1.Symmetries = tet0.Symmetries
-tet0.attach(F0,tet0,[0,1,3,2])
-show_triangulation([tet0])
-New_triang = two_to_three([tet0],tet0,F0)
-show_triangulation(New_triang)
-"""
-
-
-"""
 Dest = [0,0,0,0]
 
 tets_list = full_snappy_triang(Dest)
@@ -36,11 +19,9 @@ tets_list = full_snappy_triang(Dest)
 
 orb = CuspedOrbifold(tets_list)
 
-tet0 = orb.Tetrahedra[0]
+show_triangulation(orb.Tetrahedra)
 
-print(orb.check_extends(Perm4((0,1,3,2)),tet0))
-# check_extends is saying this isn't a valid isometry, which is wrong. think it's something in how
-# it checks that the map respects face pairings.
+tet0 = orb.Tetrahedra[0]
 
 print(orb.isometries())
 """
@@ -48,14 +29,24 @@ print(orb.isometries())
 
 
 """
+This is the 4 tet dest seq from Fact 5.5.
+"""
+"""
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 
 tets_list = full_snappy_triang(Dest)
 
-#show_triangulation(tets_list)
-
 orb = CuspedOrbifold(tets_list)
 
+print("Dest seq (index 4) is")
+print(Dest)
+print(' ')
+print("Regular triangulation is")
+print(show_triangulation(orb.Tetrahedra))
+print(' ')
+print("Isometry group of regular triangulation is")
+print(orb.isometries())
+print(' ')
 tet0 = orb.Tetrahedra[0]
 
 print(tet0.tilt(V0))
@@ -69,11 +60,12 @@ print(tet0.tilt(V3))
 
 next_list = two_to_three(orb.Tetrahedra,orb.Tetrahedra[0],F2)
 
-show_triangulation(next_list)
-
 orb = CuspedOrbifold(next_list)
+print("Canonical triangulation is")
+print(show_triangulation(orb.Tetrahedra))
 
 tet0 = orb.Tetrahedra[0]
+
 
 print(tet0.tilt(V0))
 print(tet0.tilt(V1))
@@ -81,9 +73,75 @@ print(tet0.tilt(V2))
 print(tet0.tilt(V3))
 
 # from checking tilt sums, this is canonical.
-
+print(' ')
+print("Isometry group of Canonical triangulation is")
 print(orb.isometries())
+print(' ')
 """
+
+
+"""
+This is one of the 8 tet dest seqs from Fact 5.5.
+"""
+"""
+Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
+
+tets_list = full_snappy_triang(Dest)
+
+#show_triangulation(tets_list)
+
+orb = CuspedOrbifold(tets_list)
+
+print("Dest seq (index 8) is")
+print(Dest)
+print(' ')
+print("Regular triangulation is")
+show_triangulation(orb.Tetrahedra)
+print(' ')
+print("Isometry group of regular triangulation is")
+print(orb.isometries())
+print(' ')
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+#print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() > 0)
+
+next_list = two_to_three(tets_list,tet0,F1)
+
+#show_triangulation(next_list)
+
+tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
+
+#print(tet0.tilt(V1).evaluate())
+#print(tet0.tilt(V2).evaluate())
+
+#print(check_2_to_3_possible([tet0],tet0,F1))
+
+next_list = two_to_three([tet0],tet0,F1)
+
+orb = CuspedOrbifold(next_list)
+
+print("Canonical triangulation is")
+
+show_triangulation(orb.Tetrahedra)
+
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+#print(orb.is_canonical)
+# It's canonical.
+
+print(' ')
+print("Isometry group of canonical triangulation is")
+print(orb.isometries())
+print(' ')
+"""
+
+
+
+
+
 
 
 """
@@ -113,62 +171,9 @@ print(tet1.tilt(V2))
 
 
 
-"""
-Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
-
-tets_list = full_snappy_triang(Dest)
-
-show_triangulation(tets_list)
-
-orb = CuspedOrbifold(tets_list)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-
-print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() > 0)
-
-next_list = two_to_three(tets_list,tet0,F1)
-
-show_triangulation(next_list)
-
-tet0 = CuspedOrbifold(next_list).Tetrahedra[0]
-
-print(tet0.tilt(V1).evaluate())
-print(tet0.tilt(V2).evaluate())
-
-print(check_2_to_3_possible([tet0],tet0,F1))
-
-next_list = two_to_three([tet0],tet0,F1)
-
-show_triangulation(next_list)
-
-orb = CuspedOrbifold(next_list)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-
-print(tet0.tilt(V0) + tet1.tilt(V1))
-print((tet0.tilt(V0) + tet1.tilt(V1)).evaluate() > 0)
-
-# returns false, so that face is fine. Now check the others.
-
-print(tet0.tilt(V1) + tet1.tilt(V2))
-print((tet0.tilt(V1) + tet1.tilt(V2)).evaluate() > 0)
-
-print(tet1.tilt(V0))
-print(tet1.tilt(V0).evaluate() > 0)
-
-print(tet1.tilt(V3))
-print(tet1.tilt(V3).evaluate() > 0)
-
-# all return false, so this is canonical!
-"""
-
-
-
 
 """
-# One of the degree 14 covers.
+# One of the degree 14 covers in Fact 5.5.
 Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10, 
 11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13] 
 
@@ -240,8 +245,22 @@ print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 Following is the triangulation you get after doing a new move on the immediately above triangulation,
 where we got stuck. See write-ups for explanantion of this move. It seems to work.
 """
-
 """
+Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10, 
+11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13]
+
+orb = dest_to_orb(Dest)
+print("Dest seq (index 14) is")
+print(Dest)
+print(' ')
+print("Regular triangulation is")
+show_triangulation(orb.Tetrahedra)
+print(' ')
+print("Isometry group of regular triangulation is")
+print(orb.isometries())
+print(' ')
+
+
 tet0 = Tetrahedron()
 tet1 = Tetrahedron()
 tet2 = Tetrahedron()
@@ -272,7 +291,14 @@ tet2.Symmetries = [Perm4((0,1,2,3)),Perm4((2,3,0,1))]
 
 orb = CuspedOrbifold([tet0,tet1,tet2])
 
+print("Canonical triangultion is")
 show_triangulation(orb.Tetrahedra)
+print(' ')
+print("Isometry group of canonical triangulation is")
+print(orb.isometries())
+
+
+
 print(orb.is_canonical)
 
 print(tet0.tilt(V0) + tet1.tilt(V1))
@@ -282,7 +308,6 @@ print(tet1.tilt(V3) + tet2.tilt(V0))
 
 # Yay! It seems like this is canonical. So we had to do a crazy new move, but it worked. 
 """
-
 
 
 
@@ -504,30 +529,22 @@ print(next_orb.is_canonical)
 # apparently this is canonical.
 """
 
-
+"""
+# the 8-tet dest seq whose isometry group jason wants to know.
 Dest = [1,2,2,1,0,3,3,0,3,0,0,4,2,1,1,5,6,5,5,2,7,4,4,3,4,7,7,7,5,6,6,6]
-
-#show_triangulation(full_snappy_triang(Dest))
-
-# this is a dest seq for which building edge classes causes problems
 
 orb = dest_to_orb(Dest)
 
+print("The data of the triangulation is")
 
+print(Dest)
 
-print(orb.Edges)
+show_triangulation(orb.Tetrahedra)
 
-for edge in orb.Edges:
-    print(edge)
-    print(edge.Corners)
-    print(edge.LocusOrder)
-    print(' ')
+print("The isometries are")
 
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-print(tet0.Class)
-print(tet1.Class)
-
+print(orb.isometries())
+"""
 
 
 """
@@ -685,3 +702,85 @@ print(orb.Vertices[3].Corners)
 
 
 
+"""
+For each dest seq in Dests, tries to get the isometry group of the canonical decomp and prints.
+At this point, can only get the canonical decomp using 2-3 moves. These are dest seqs which we know
+cover the 4-tet dest seq, which are important because they might cover stuff which is not in C_main.
+"""
+"""
+Dests = [[1, 2, 2, 1, 0, 3, 3, 0, 3, 0, 0, 4, 2, 1, 1, 5, 6, 5, 5, 2, 7, 4, 4, 3, 4, 7, 7, 7, 5, 6, 6, 6],[0, 1, 1, 2, 1, 0, 0, 3, 4, 5, 5, 0, 6, 7, 7, 1, 2, 8, 8, 4, 8, 2, 2, 7, 3, 9, 9, 6, 9, 3, 3, 5, 5, 4, 4, 10, 7, 6, 6, 11, 11, 10, 10, 8, 10, 11, 11, 9]
+,[0, 1, 2, 0, 2, 3, 0, 4, 1, 0, 5, 6, 5, 7, 1, 5, 8, 6, 6, 1, 3, 2, 7, 3, 9, 4, 4, 2, 7, 5, 3, 10, 4, 9, 9, 9, 6, 8, 8, 8, 11, 10, 10, 7, 10, 11, 11, 11]
+,[0, 1, 2, 3, 2, 3, 0, 4, 1, 0, 5, 6, 5, 7, 1, 0, 8, 4, 4, 1, 3, 2, 7, 5, 9, 10, 10, 2, 7, 5, 3, 10, 4, 8, 8, 9, 6, 11, 11, 8, 11, 6, 6, 7, 10, 9, 9, 11]
+,[0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 3, 6, 4, 2, 7, 0, 3, 7, 1, 4, 8, 9, 9, 1, 10, 6, 6, 2, 7, 3, 4, 9, 5, 11, 11, 10, 11, 5, 5, 7, 6, 10, 10, 8, 9, 8, 8, 11]
+,[0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 4, 2, 7, 9, 3, 6, 6, 6, 7, 5, 4, 10, 11, 9, 12, 4, 13, 12, 8, 5, 14, 15, 15, 7, 8, 16, 13, 13, 16, 8, 9, 15, 9, 11, 16, 11, 10, 17, 17, 14, 17, 10, 10, 12, 12, 13, 11, 18, 15, 14, 14, 19, 19, 18, 18, 16, 18, 19, 19, 17]
+,[0, 1, 2, 3, 2, 4, 0, 1, 1, 0, 5, 6, 7, 8, 9, 0, 5, 10, 1, 9, 4, 2, 10, 11, 6, 12, 13, 2, 3, 14, 15, 7, 15, 9, 3, 13, 14, 3, 8, 4, 10, 5, 4, 16, 17, 18, 19, 5, 13, 20, 6, 19, 12, 6, 16, 8, 9, 15, 7, 17, 8, 7, 14, 21, 20, 13, 22, 10, 11, 21, 23, 14, 23, 19, 11, 22, 21, 11, 18, 12, 16, 22, 12, 20, 19, 23, 17, 15, 22, 16, 20, 18, 18, 17, 21, 23]
+,[1, 2, 2, 2, 0, 3, 3, 4, 3, 0, 0, 0, 2, 1, 1, 5, 5, 6, 7, 1, 4, 8, 9, 3, 9, 10, 4, 9, 8, 4, 11, 8, 7, 12, 5, 7, 6, 5, 13, 6, 13, 14, 6, 15, 12, 7, 14, 16, 11, 17, 8, 18, 10, 9, 17, 19, 17, 11, 10, 17, 20, 19, 19, 10, 21, 18, 18, 11, 14, 13, 12, 14, 22, 16, 16, 12, 23, 15, 15, 13, 15, 23, 23, 23, 16, 22, 22, 22, 18, 21, 21, 21, 19, 20, 20, 20]
+,[1, 2, 2, 3, 0, 4, 4, 5, 4, 0, 0, 6, 7, 8, 8, 0, 2, 1, 1, 9, 10, 11, 11, 1, 12, 13, 13, 2, 3, 14, 14, 10, 14, 3, 3, 13, 15, 16, 16, 4, 5, 17, 17, 7, 17, 5, 5, 16, 6, 18, 18, 15, 18, 6, 6, 8, 8, 7, 7, 19, 9, 20, 20, 12, 20, 9, 9, 11, 11, 10, 10, 21, 13, 12, 12, 22, 22, 21, 21, 14, 16, 15, 15, 23, 23, 19, 19, 17, 19, 23, 23, 18, 21, 22, 22, 20]
+,[1, 2, 2, 3, 0, 4, 4, 5, 4, 0, 0, 6, 7, 8, 8, 0, 2, 1, 1, 9, 10, 11, 12, 1, 13, 14, 14, 2, 3, 15, 15, 10, 15, 3, 3, 14, 16, 17, 18, 4, 5, 18, 19, 7, 19, 20, 5, 18, 18, 5, 16, 17, 6, 21, 21, 16, 21, 6, 6, 8, 8, 7, 7, 20, 9, 12, 22, 13, 22, 23, 9, 12, 12, 9, 10, 11, 11, 10, 23, 22, 23, 22, 11, 15, 14, 13, 13, 23, 17, 16, 20, 19, 20, 19, 17, 21]
+,[1, 2, 2, 3, 0, 4, 4, 5, 4, 0, 0, 6, 7, 8, 8, 0, 2, 1, 1, 9, 10, 11, 12, 1, 13, 14, 14, 2, 3, 15, 15, 10, 15, 3, 3, 14, 16, 17, 18, 4, 5, 19, 17, 7, 17, 16, 5, 18, 19, 5, 20, 17, 6, 21, 21, 16, 21, 6, 6, 8, 8, 7, 7, 20, 9, 22, 11, 13, 11, 10, 9, 12, 22, 9, 23, 11, 12, 23, 10, 22, 23, 12, 22, 15, 14, 13, 13, 23, 18, 20, 16, 19, 20, 18, 19, 21]
+,[0, 1, 2, 3, 2, 4, 0, 1, 1, 0, 5, 6, 7, 8, 9, 0, 5, 10, 1, 9, 4, 2, 10, 11, 6, 12, 13, 2, 3, 14, 15, 7, 15, 16, 3, 13, 14, 3, 17, 4, 10, 5, 4, 18, 19, 17, 16, 5, 13, 20, 6, 16, 12, 6, 21, 8, 9, 22, 7, 19, 8, 7, 23, 23, 23, 11, 8, 12, 22, 9, 11, 24, 25, 24, 24, 10, 11, 23, 22, 14, 21, 26, 12, 21, 20, 13, 26, 20, 17, 19, 14, 27, 16, 15, 19, 15, 28, 18, 18, 17, 18, 28, 28, 25, 26, 21, 20, 29, 30, 27, 27, 22, 24, 25, 25, 30, 31, 29, 29, 26, 27, 30, 30, 28, 29, 31, 31, 31]
+,[0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 4, 2, 7, 9, 3, 6, 6, 6, 7, 5, 4, 10, 11, 9, 12, 4, 13, 14, 8, 5, 15, 16, 17, 7, 8, 18, 13, 13, 18, 8, 19, 16, 9, 11, 20, 11, 20, 21, 9, 17, 10, 17, 22, 15, 22, 23, 10, 12, 17, 10, 15, 14, 12, 24, 11, 25, 24, 12, 21, 26, 14, 13, 25, 20, 25, 19, 14, 22, 16, 15, 23, 21, 23, 22, 16, 27, 19, 25, 18, 28, 21, 20, 24, 18, 29, 27, 27, 19, 30, 26, 26, 23, 31, 28, 28, 24, 26, 30, 30, 31, 27, 29, 29, 30, 28, 31, 31, 29]
+,[0, 1, 1, 2, 1, 0, 0, 3, 4, 5, 6, 0, 7, 8, 9, 1, 2, 10, 11, 4, 11, 12, 2, 9, 10, 2, 13, 8, 3, 14, 15, 7, 15, 16, 3, 6, 14, 3, 17, 5, 6, 18, 4, 19, 5, 4, 20, 21, 20, 22, 5, 23, 18, 6, 22, 24, 9, 25, 7, 26, 8, 7, 27, 28, 27, 29, 8, 30, 25, 9, 29, 31, 13, 32, 10, 18, 28, 21, 33, 10, 12, 11, 32, 20, 26, 33, 19, 11, 32, 13, 12, 29, 23, 31, 31, 12, 24, 30, 30, 13, 17, 34, 14, 25, 21, 28, 35, 14, 16, 15, 34, 27, 19, 35, 26, 15, 34, 17, 16, 22, 30, 24, 24, 16, 31, 23, 23, 17, 22, 20, 18, 33, 35, 19, 21, 32, 29, 27, 25, 35, 33, 26, 28, 34]
+,[0, 1, 1, 2, 1, 0, 0, 3, 4, 5, 6, 0, 7, 8, 9, 1, 2, 10, 11, 4, 11, 12, 2, 9, 10, 2, 13, 8, 3, 14, 15, 7, 15, 16, 3, 6, 14, 3, 17, 5, 6, 18, 4, 19, 5, 4, 20, 21, 20, 22, 5, 23, 18, 6, 22, 24, 9, 25, 7, 26, 8, 7, 27, 28, 27, 29, 8, 30, 25, 9, 29, 31, 13, 32, 10, 20, 28, 21, 21, 10, 12, 11, 32, 18, 26, 19, 19, 11, 32, 13, 12, 29, 24, 31, 31, 12, 23, 30, 30, 13, 17, 33, 14, 27, 21, 28, 28, 14, 16, 15, 33, 25, 19, 26, 26, 15, 33, 17, 16, 22, 31, 24, 24, 16, 30, 23, 23, 17, 22, 20, 18, 34, 29, 27, 25, 35, 35, 34, 34, 32, 34, 35, 35, 33]
+,[0, 1, 2, 0, 2, 3, 0, 4, 1, 0, 5, 6, 5, 7, 1, 8, 9, 6, 10, 1, 3, 2, 7, 11, 12, 13, 4, 2, 7, 5, 3, 14, 15, 16, 17, 3, 4, 18, 12, 12, 18, 4, 19, 16, 20, 17, 21, 5, 6, 9, 22, 9, 22, 23, 6, 21, 24, 25, 25, 7, 8, 26, 27, 20, 27, 28, 8, 10, 26, 8, 11, 25, 10, 29, 9, 29, 29, 10, 23, 27, 11, 30, 26, 15, 30, 11, 28, 13, 13, 12, 31, 31, 31, 19, 13, 30, 14, 32, 32, 24, 32, 14, 14, 17, 17, 20, 15, 33, 16, 15, 34, 19, 34, 21, 16, 34, 19, 31, 18, 18, 21, 34, 20, 23, 23, 22, 29, 22, 25, 24, 24, 35, 35, 33, 33, 26, 28, 27, 30, 28, 33, 35, 35, 32]
+,[0, 1, 2, 0, 2, 3, 0, 4, 1, 0, 5, 6, 5, 7, 1, 8, 9, 6, 10, 1, 3, 2, 7, 11, 12, 13, 4, 2, 7, 5, 3, 14, 15, 16, 17, 3, 4, 18, 12, 12, 18, 4, 19, 16, 20, 21, 22, 5, 6, 9, 23, 9, 23, 24, 6, 22, 25, 26, 27, 7, 8, 17, 28, 20, 28, 29, 8, 10, 17, 8, 15, 26, 10, 30, 9, 30, 30, 10, 24, 28, 11, 31, 21, 15, 21, 20, 11, 27, 31, 11, 32, 13, 13, 12, 33, 33, 33, 19, 13, 31, 14, 34, 35, 25, 35, 27, 14, 17, 34, 14, 26, 21, 16, 15, 29, 19, 29, 28, 16, 29, 19, 33, 18, 18, 22, 32, 20, 24, 32, 22, 31, 32, 24, 23, 30, 23, 27, 35, 25, 34, 26, 25, 34, 35]
+,[0, 1, 2, 3, 2, 4, 0, 1, 1, 0, 5, 6, 7, 8, 9, 0, 5, 10, 1, 9, 4, 2, 10, 11, 6, 12, 13, 2, 3, 14, 15, 7, 15, 16, 3, 13, 14, 3, 17, 4, 10, 5, 4, 18, 19, 20, 21, 5, 13, 22, 6, 21, 12, 6, 23, 8, 9, 24, 7, 19, 8, 7, 25, 26, 25, 27, 8, 28, 24, 9, 27, 29, 30, 29, 31, 10, 11, 26, 32, 14, 32, 21, 11, 31, 26, 11, 20, 12, 23, 28, 12, 33, 22, 13, 28, 23, 17, 34, 14, 24, 16, 15, 34, 25, 21, 32, 19, 15, 34, 17, 16, 35, 28, 23, 22, 16, 29, 30, 18, 17, 18, 35, 29, 30, 35, 18, 33, 20, 20, 19, 26, 34, 33, 31, 35, 22, 27, 25, 24, 32, 31, 33, 30, 27]
+,[0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 4, 2, 7, 9, 3, 6, 6, 6, 7, 5, 4, 10, 11, 9, 12, 4, 13, 14, 8, 5, 15, 16, 17, 7, 8, 18, 13, 13, 18, 8, 19, 16, 9, 11, 20, 11, 20, 21, 9, 17, 10, 22, 23, 15, 23, 24, 10, 12, 22, 10, 25, 14, 12, 26, 11, 26, 26, 12, 21, 23, 14, 13, 27, 27, 27, 19, 14, 22, 17, 28, 15, 21, 16, 15, 29, 19, 29, 30, 16, 29, 28, 17, 30, 28, 19, 27, 18, 18, 21, 20, 26, 20, 25, 31, 22, 25, 24, 23, 31, 24, 31, 25, 24, 32, 30, 29, 28, 33, 34, 33, 33, 30, 35, 32, 32, 31, 32, 35, 35, 35, 33, 34, 34, 34]
+,[0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 6, 2, 7, 8, 9, 0, 6, 10, 1, 11, 5, 12, 13, 1, 4, 2, 10, 8, 3, 14, 15, 7, 15, 16, 3, 6, 14, 3, 17, 12, 10, 6, 4, 18, 19, 20, 21, 4, 13, 22, 5, 9, 12, 5, 23, 20, 9, 24, 7, 25, 8, 7, 26, 19, 26, 27, 8, 28, 24, 9, 27, 29, 30, 31, 28, 10, 11, 32, 25, 15, 25, 21, 11, 13, 32, 11, 20, 31, 23, 29, 12, 22, 22, 13, 29, 33, 17, 34, 14, 24, 20, 19, 32, 14, 16, 15, 34, 26, 34, 17, 16, 35, 28, 18, 30, 16, 29, 23, 22, 17, 18, 28, 35, 30, 35, 33, 18, 21, 21, 25, 19, 34, 33, 35, 31, 23, 27, 26, 24, 32, 31, 30, 33, 27]
+,[0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 6, 7, 8, 9, 9, 0, 6, 10, 1, 11, 12, 13, 14, 1, 4, 2, 10, 15, 16, 17, 13, 2, 3, 18, 18, 8, 18, 3, 3, 13, 10, 6, 4, 19, 20, 21, 21, 4, 5, 22, 23, 16, 23, 7, 5, 9, 22, 5, 19, 21, 24, 25, 25, 6, 7, 23, 26, 12, 26, 19, 7, 25, 9, 8, 8, 27, 28, 14, 17, 10, 11, 29, 29, 24, 29, 11, 11, 14, 14, 28, 12, 30, 13, 12, 16, 31, 15, 32, 32, 20, 32, 15, 15, 17, 17, 16, 28, 33, 31, 27, 27, 18, 19, 26, 22, 28, 21, 20, 20, 34, 34, 33, 33, 22, 27, 31, 31, 23, 25, 24, 24, 35, 35, 30, 30, 26, 30, 35, 35, 29, 33, 34, 34, 32]
+,[0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 6, 7, 8, 9, 9, 0, 6, 10, 1, 11, 12, 13, 14, 1, 4, 2, 10, 15, 16, 17, 13, 2, 3, 18, 18, 8, 18, 3, 3, 13, 10, 6, 4, 19, 20, 21, 22, 4, 5, 23, 24, 16, 24, 7, 5, 9, 23, 5, 25, 21, 26, 27, 28, 6, 7, 24, 29, 12, 29, 25, 7, 28, 9, 8, 8, 30, 25, 29, 23, 10, 11, 31, 32, 26, 32, 28, 11, 14, 31, 11, 27, 29, 14, 19, 12, 27, 13, 12, 16, 33, 19, 14, 17, 25, 15, 34, 35, 20, 35, 22, 15, 23, 34, 15, 21, 17, 17, 16, 19, 22, 33, 30, 30, 18, 22, 35, 20, 34, 21, 20, 34, 35, 30, 33, 33, 24, 28, 32, 26, 31, 27, 26, 31, 32]
+,[0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 6, 7, 8, 9, 10, 0, 6, 11, 1, 12, 13, 14, 15, 1, 4, 2, 11, 16, 17, 15, 18, 2, 3, 19, 20, 8, 20, 12, 3, 18, 19, 3, 16, 14, 11, 6, 4, 21, 22, 23, 9, 4, 5, 24, 25, 17, 25, 21, 5, 10, 24, 5, 7, 23, 26, 10, 23, 6, 7, 27, 24, 13, 27, 7, 21, 9, 10, 26, 8, 28, 9, 8, 22, 29, 30, 18, 14, 11, 12, 20, 31, 26, 31, 16, 12, 15, 15, 17, 13, 32, 14, 13, 30, 33, 16, 31, 19, 22, 18, 30, 17, 34, 33, 29, 29, 19, 34, 28, 28, 20, 21, 25, 27, 30, 23, 22, 26, 35, 35, 32, 32, 24, 28, 34, 34, 25, 29, 33, 33, 27, 32, 35, 35, 31]]
+
+
+for i in range(len(Dests)):
+    print(Dests[i])
+    orb = dest_to_orb(Dests[i])
+    if orb.is_canonical:
+        print(' ')
+        print("Orb with regular tet triangulation is already canonical. Its triangulation is")
+        print(' ')
+        show_triangulation(orb.Tetrahedra)
+        print(' ')
+        print("Its isometry group is")
+        print(" ")
+        print(orb.isometries())
+    else:
+        print(' ')
+        print("Orb with regular tet triangulation is not canonical. The number of symmetries of the regular triangulation is")
+        print(' ')
+        print(len(orb.isometries()))
+        print(' ')
+        orb = canonize(orb)
+        if orb != None:
+            print("Orb can be canonized with 2-3 moves.")
+            TiltSumZero = False
+            for tet1 in orb.Tetrahedra:
+                for face1 in TwoSubsimplices:
+                    if tet1.Neighbor[face1] != None:
+                        tet2 = tet1.Neighbor[face1]
+                        face2 = tet1.Gluing[face1].image(face1)
+                        if (tet1.tilt(comp(face2)) + tet2.tilt(comp(face2))).evaluate() == 0:
+                            TiltSumZero = True
+            if TiltSumZero:
+                print("Canonical decomp has non-tetrahedral cells. Will not compute isometry group.")
+            else:
+                print("Canonical triangulation is")
+                print(' ')
+                show_triangulation(orb.Tetrahedra)
+                print(' ')
+                print("Isometry group is")
+                print(" ")
+                print(orb.isometries())
+    print(" ")
+    print(" ")
+    print("------------------------------------------------------")
+    print(' ')
+    print(' ')
+"""
+
+Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
+orb = dest_to_orb(Dest)
+print(orb.is_canonical)
+tet0 = orb.Tetrahedra[0]
+orb.arrow_two_to_three(F2,tet0)
+show_triangulation(orb.Tetrahedra)

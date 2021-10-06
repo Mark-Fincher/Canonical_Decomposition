@@ -71,6 +71,26 @@ class Arrow:
     def south_tail(self):
         return self.Tetrahedron.Class[self.tail() | OppTail[self.tail(),self.head()]]
 
+# We might also want the actual edge one-simplices rather than the classes. Added by Mark 10/5/2021.
+    
+    def simplex_equator(self):
+        return comp(self.Edge)
+
+    def simplex_axis(self):
+        return self.Edge
+
+    def simplex_north_head(self):
+        return self.head() | OppTail[self.head(),self.tail()]
+
+    def simplex_south_head(self):
+        return self.head() | OppTail[self.tail(),self.head()]
+
+    def simplex_north_tail(self):
+        return self.tail() | OppTail[self.head(),self.tail()]
+
+    def simplex_south_tail(self):
+        return self.tail() | OppTail[self.tail(),self.head()]
+
     def is_null(self):
         if self.Tetrahedron is None:
             return 1
@@ -188,6 +208,12 @@ class Arrow:
             if a == self:
                 break
         return radius_list
+
+# Added by Mark Fincher 10/5/2021. This function adds to self.Tetrahedron's symmetry group
+# the permutation taking self to other.
+    def add_sym(self,other):
+        self.Tetrahedron.Symmetries.append(Perm4({ZeroSubsimplices.index(self.tail()):ZeroSubsimplices.index(other.tail()),
+            ZeroSubsimplices.index(self.head()):ZeroSubsimplices.index(other.head())},sign=0))
 
 
 # This class allows one to initialize an arrow by specifying the head and

@@ -132,3 +132,21 @@ class Tetrahedron:
         zpp = (z - One) / z
         self.edge_params = {E01:z, E23:z, E02:zp, E13:zp, E03:zpp, E12:zpp}
 
+    """
+    The folllowing returns true if the face is glued to itself, false otherwise. Added by Mark 10/1/2021.
+    """
+    def face_glued_to_self(self,two_subsimplex):
+        if self.Neighbor[two_subsimplex] != None:
+            if self.Gluing[two_subsimplex].image(two_subsimplex) == two_subsimplex:
+                return True
+        return False
+
+    """
+    The following returns true if there's a symmetry of the tet which rotates the face, false otherwise.
+    Added by Mark 10/1/2021.
+    """
+    def face_rotation(self,two_subsimplex):
+        for sym in self.Symmetries:
+            if sym.image(two_subsimplex) == two_subsimplex and sym.tuple() != (0,1,2,3):
+                return True
+        return False

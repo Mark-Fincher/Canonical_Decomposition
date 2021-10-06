@@ -17,6 +17,10 @@ from Exact_Arithmetic import*
 class CuspedOrbifold:
 	def __init__(self,tets_list):
 		self.Tetrahedra = tets_list
+		# Make sure all tets have at least the identity map in their Symmetries list, required by some functions.
+		for tet in self.Tetrahedra:
+			if len(tet.Symmetries) == 0:
+				tet.Symmetries.append(Perm4((0,1,2,3)))
 		self.Edges = []
 		self.Faces = []
 		self.Vertices = []
@@ -31,6 +35,20 @@ class CuspedOrbifold:
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
 		self.see_if_canonical()
+
+	def add_tet(self, tet):
+		self.Tetrahedra.append(tet)
+
+	# Add one new tetrahedron and return one of its arrows.
+	def new_arrow(self):
+		tet = Tetrahedron()
+		self.add_tet(tet)
+		return Arrow(E01,F3,tet)
+
+	# Or, add a whole bunch of them.
+	#
+	def new_arrows(self,n):
+		return [self.new_arrow() for i in range(n)]
 
 	def add_cusp_cross_sections(self):
 		for cusp in self.Vertices:
@@ -224,27 +242,34 @@ class CuspedOrbifold:
 					active = [[a]]
 					sanity_check = 0
 					while active:
+						if len(completed_walks) > 0:
+							shortest_completed_walk = completed_walks[0]
+							for walk in completed_walks:
+								if len(walk) < len(shortest_completed_walk):
+									shortest_completed_walk = walk
 						sanity_check = sanity_check + 1
-						if sanity_check > 200:
+						#print(sanity_check)
+						if sanity_check > 1000:
 							print('error building edge classes for starting arrow',first_arrow)
 							break
 						walk = active.pop()
-						a = walk[-1]
-						for sym in a.Tetrahedron.Symmetries:
-							new_a = Arrow(sym.image(a.Edge),sym.image(a.Face),a.Tetrahedron)
-							if new_a.next() != None:
-								# now we want to check if new_a (which has been changed by .next()), or the image 
-								# under some symmetry of new_a, is first_arrow. If so, then walk is a complete walk.
-								complete = False
-								if new_a.Tetrahedron == first_arrow.Tetrahedron:
-									for other_sym in new_a.Tetrahedron.Symmetries:
-										if other_sym.image(new_a.Edge) == first_arrow.Edge and other_sym.image(new_a.Face) == first_arrow.Face:
-											complete = True
-								if complete:
-									completed_walks.append(walk)
-								else:
-									walk_branch = walk + [new_a]
-									active.append(walk_branch)
+						if len(completed_walks) == 0 or len(walk) < len(shortest_completed_walk):
+							a = walk[-1]
+							for sym in a.Tetrahedron.Symmetries:
+								new_a = Arrow(sym.image(a.Edge),sym.image(a.Face),a.Tetrahedron)
+								if new_a.next() != None:
+									# now we want to check if new_a (which has been changed by .next()), or the image 
+									# under some symmetry of new_a, is first_arrow. If so, then walk is a complete walk.
+									complete = False
+									if new_a.Tetrahedron == first_arrow.Tetrahedron:
+										for other_sym in new_a.Tetrahedron.Symmetries:
+											if other_sym.image(new_a.Edge) == first_arrow.Edge and other_sym.image(new_a.Face) == first_arrow.Face:
+												complete = True
+									if complete:
+										completed_walks.append(walk)
+									else:
+										walk_branch = walk + [new_a]
+										active.append(walk_branch)
 					shortest_walk = completed_walks[0]
 					for walk in completed_walks:
 						if len(walk) < len(shortest_walk):
@@ -415,7 +440,7 @@ class CuspedOrbifold:
 						for sym in image_of_tet.Symmetries:
 							if image_of_tet.Neighbor[sym.image(isom[tet][0].image(face))] != None:
 								image_of_voisin = image_of_tet.Neighbor[sym.image(isom[tet][0].image(face))]
-								isom[voisin] = (image_of_voisin.Gluing[sym.image(isom[tet][0].image(face))]*sym*phi,image_of_voisin)
+								isom[voisin] = (image_of_tet.Gluing[sym.image(isom[tet][0].image(face))]*sym*phi,image_of_voisin)
 								if self.valid_tet_to_tet(voisin,image_of_voisin,isom[voisin][0]) is False:
 									return
 								break
@@ -459,7 +484,137 @@ class CuspedOrbifold:
 		return isometries
 
 
+	"""
+	Simplification moves.
+	"""
 
+	"""
+	2-3 move using arrows.
+	"""
+	"""
+	def arrow_two_to_three(self, two_subsimplex, tet):
+		if tet.face_glued_to_self(two_subsimplex):
+			face_glued_to_self = True
+			for one_subsimplex in OneSubsimplices:
+				if tet.Gluing[two_subsimplex].image(one_subsimplex) == one_subsimplex:
+					if is_subset(one_subsimplex,two_subsimplex):
+						a = Arrow(one_subsimplex,two_subsimplex,tet)
+						b = self.new_arrow()
+						b.Tetrahedron.fill_edge_params(a.Tetrahedron.edge_params[a.Edge])
+						#a.glue(b)
+						break
+		else:
+			face_glued_to_self = False
+			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
+			b = a.glued()
+		z = a.Tetrahedron.edge_params[a.south_head()]
+		w = b.Tetrahedron.edge_params[b.north_tail()]
+		new = self.new_arrows(3)
+		new[0].Tetrahedron.fill_edge_params((1-z)*(1-w)/(z*w))
+		new[1].Tetrahedron.fill_edge_params(z/(1-w))
+		new[2].Tetrahedron.fill_edge_params(w/(1-z))
+		for i in range(3):
+			new[i].glue(new[(i+1)%3])
+		a.reverse()
+		for c in new:
+			c.opposite()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				c.glue(a.glued())
+				c.glue(a.glued())
+			else:
+				c.glue(a.glued())
+			c.reverse()
+			if b.Tetrahedron.face_glued_to_self(b.Face):
+				c.glue(b.glued())
+				c.glue(b.glued())
+			else:
+				c.glue(b.glued())
+			a.rotate(-1)
+			b.rotate(1)
+		for tet in self.Tetrahedra:
+			tet.clear_Class()
+			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+		if tet.face_rotation(two_subsimplex) and tet.face_glued_to_self(two_subsimplex):
+			
+		self.Tetrahedra.remove(a.Tetrahedron)
+		self.Tetrahedra.remove(b.Tetrahedron)
+		"""
+
+	def arrow_two_to_three(self, two_subsimplex, tet):
+		# second copy, want to see if a different order of writing it looks better.
+		One = ComplexSquareRootCombination.One()
+		self.PachnerPath.append([self.Tetrahedra,tet,two_subsimplex])
+		if tet.face_glued_to_self(two_subsimplex):
+			for one_subsimplex in OneSubsimplices:
+				if tet.Gluing[two_subsimplex].image(one_subsimplex) == one_subsimplex:
+					if is_subset(one_subsimplex,two_subsimplex):
+						a = Arrow(one_subsimplex,two_subsimplex,tet)
+						b = self.new_arrow()
+						b.Tetrahedron.fill_edge_params(a.Tetrahedron.edge_params[a.Edge])
+						break
+			z = a.Tetrahedron.edge_params[a.simplex_south_head()]
+			w = b.Tetrahedron.edge_params[b.simplex_north_tail()]
+			new = self.new_arrows(1)
+			new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			new[0].add_sym(new[0].copy().reverse())
+			if tet.face_rotation(two_subsimplex):
+				new[0].glue(new[0].copy())
+			else:
+				new.append(self.new_arrow())
+				new[1].Tetrahedron.fill_edge_params(z/(One-w))
+				new[0].glue(new[1])
+				new[1].glue(new[1].copy().reverse())
+		elif tet.face_rotation(two_subsimplex):
+			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
+			b = a.glued()
+			z = a.Tetrahedron.edge_params[a.simplex_south_head()]
+			w = b.Tetrahedron.edge_params[b.simplex_north_tail()]
+			new = self.new_arrows(1)
+			new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			new[0].glue(new[0].copy())
+		else:
+			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
+			b = a.glued()
+			z = a.Tetrahedron.edge_params[a.simplex_south_head()]
+			w = b.Tetrahedron.edge_params[b.simplex_north_tail()]
+			new = self.new_arrows(3)
+			new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			new[1].Tetrahedron.fill_edge_params(z/(One-w))
+			new[2].Tetrahedron.fill_edge_params(w/(One-z))
+			for i in range(3):
+				new[i].glue(new[(i+1)%3])
+		#Gluing new tets to external faces can happen now, where "new" is a list with possibly 1, 2, or 3 elements.
+		a.reverse()
+		for c in new:
+			c.opposite()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				c.glue(a.glued())
+				c.glue(a.glued())
+			else:
+				c.glue(a.glued())
+			c.reverse()
+			if b.Tetrahedron.face_glued_to_self(b.Face):
+				c.glue(b.glued())
+				c.glue(b.glued())
+			else:
+				c.glue(b.glued())
+			a.rotate(-1)
+			b.rotate(1)
+		#Now remove the two starting tets.
+		self.Tetrahedra.remove(tet)
+		if not tet.face_glued_to_self(two_subsimplex):
+			self.Tetrahedra.remove(b.Tetrahedron)
+		for tet in self.Tetrahedra:
+			tet.clear_Class()
+			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+		"""
+		self.build_vertex_classes()
+		self.build_edge_classes()
+		self.add_cusp_cross_sections()
+		for cusp in self.Vertices:
+			self.normalize_cusp(cusp)
+		self.see_if_canonical()
+		"""
 
 
 
