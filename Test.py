@@ -780,7 +780,11 @@ for i in range(len(Dests)):
 
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 orb = dest_to_orb(Dest)
-print(orb.is_canonical)
+#show_triangulation(orb.Tetrahedra)
 tet0 = orb.Tetrahedra[0]
+"""
+orb = CuspedOrbifold(two_to_three(orb.Tetrahedra,tet0,F2))
+show_triangulation(orb.Tetrahedra)
+"""
 orb.arrow_two_to_three(F2,tet0)
 show_triangulation(orb.Tetrahedra)
