@@ -581,16 +581,16 @@ class CuspedOrbifold:
 				return 0
 			face_glued_to_self = False
 			for sym in a.Tetrahedron.Symmetries:
-				if sym.image(a.Edge) == a.Edge and sym.tuple() != (0,1,2,3):
-					face_glued_to_self = True
-					break
+				if sym.tuple() != (0,1,2,3):
+					if sym.image(a.Edge) == a.Edge:
+						face_glued_to_self = True
+					else:
+						return 0
 		elif edge.valence() == 3:
 			face_glued_to_self = False
 			for corner in edge.Corners:
 				a = Arrow(corner.Subsimplex,LeftFace[corner.Subsimplex],
 					corner.Tetrahedron)
-				if len(a.Tetrahedron.Symmetries) > 2:
-					return 0
 				for sym in a.Tetrahedron.Symmetries:
 					if sym.image(a.Edge) == a.Edge and sym.tuple() != (0,1,2,3):
 						face_glued_to_self = True
@@ -603,6 +603,9 @@ class CuspedOrbifold:
 					if len(corner.Tetrahedron.Symmetries) > 1:
 						return 0
 			else:
+				for sym in a.Tetrahedron.Symmetries:
+					if sym.image(a.Edge) != a.Edge:
+						return 0
 				if a.glued().Tetrahedron is None:
 					a.reverse()
 				check = a.copy()
@@ -617,6 +620,130 @@ class CuspedOrbifold:
 		else:
 			return 0
 		#If we haven't returned 0 by now, then a 3-2 move should be possible.
+		if face_glued_to_self and face_rotation:
+			b = self.new_arrow()
+			b_copy = b.copy()
+			b.glue(b_copy.reverse())
+			b.reverse()
+			b.add_sym(b_copy)
+			b.add_sym(b_copy.rotate(1))
+			b.add_sym(b_copy.rotate(1))
+			#add edge params here. will do this later, for now let's glue the other faces of b.Tetrahedron.
+			a.opposite()
+			if a.glued().Tetrahedron is None:
+				a.reverse()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				b.glue(a.glued())
+				b.glue(a.glued())
+			else:
+				b.glue(a.glued())
+			#Because b.Tetrahedron has rotations, we are done specifying its face pairings.
+			#Except if the face we just glued is glued to itself. Then the other faces will
+			#also be glued to themselves, and my convention is that I should do those gluings,
+			#even though they're implied by the symmetries. 
+			if b.Tetrahedron.face_glued_to_self(b.Face):
+				perm = b.Tetrahedron.Gluing[b.Face]
+				for sym in b.Tetrahedron.Symmetries:
+					if sym.tuple() != (0,1,2,3):
+						b.Tetrahedron.attach(sym.image(b.Face),b.Tetrahedron,(sym*perm*inv(sym)).tuple())
+		elif face_rotation:
+			b = self.new_arrow()
+			c = self.new_arrow()
+			b.glue(c)
+			b.reverse()
+			b_copy = b.copy()
+			b.add_sym(b_copy)
+			b.add_sym(b_copy.rotate(1))
+			b.add_sym(b_copy.rotate(1))
+			c_copy = c.copy()
+			c.add_sym(c_copy)
+			c.add_sym(c_copy.rotate(1))
+			c.add_sym(c_copy.rotate(1))
+			#now add edge params here, do later.
+			a.opposite()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				b.glue(a.glued())
+				b.glue(a.glued())
+			else:
+				b.glue(a.glued())
+			a.reverse()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				c.glue(a.glued())
+				c.glue(a.glued())
+			else:
+				c.glue(a.glued())
+			#Now if either of these faces was glued to itself, we do that for the others determined
+			#by the symmetries.
+			if b.Tetrahedron.face_glued_to_self(b.Face):
+				perm = b.Tetrahedron.Gluing[b.Face]
+				for sym in b.Tetrahedron.Symmetries:
+					if sym.tuple() != (0,1,2,3):
+						b.Tetrahedron.attach(sym.image(b.Face),b.Tetrahedron,(sym*perm*inv(sym)).tuple())
+			if c.Tetrahedron.face_glued_to_self(c.Face):
+				perm = c.Tetrahedron.Gluing[c.Face]
+				for sym in c.Tetrahedron.Symmetries:
+					if sym.tuple() != (0,1,2,3):
+						c.Tetrahedron.attach(sym.image(c.Face),c.Tetrahedron,(sym*perm*inv(sym)).tuple())
+		elif face_glued_to_self:
+			b = self.new_arrow()
+			b.glue(b.copy().reverse())
+			#add edge params here. will do this later, for now let's glue the other faces of b.Tetrahedron.
+			b.reverse()
+			a.opposite()
+			if a.glued().Tetrahedron is None:
+				a.reverse()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				b.glue(a.glued())
+				b.glue(a.glued())
+			else:
+				b.glue(a.glued())
+			a.opposite()
+			if a.glued().Tetrahedron is None:
+				a.reverse()
+				a.next()
+				b.rotate(-1)
+				b.glue(a.opposite())
+				b.rotate(-1)
+				b.glue(a.reverse())
+		else:
+			b = self.new_arrow()
+        	c = self.new_arrow()
+        	#add edge params later
+        	b.glue(c)
+        	b.reverse()
+        	for i in range(3):
+				a.opposite()
+				if a.Tetrahedron.face_glued_to_self(a.Face):
+					b.glue(a.glued())
+					b.glue(a.glued())
+				else:
+					b.glue(a.glued())
+				a.reverse()
+				if a.Tetrahedron.face_glued_to_self(a.Face):
+					c.glue(a.glued())
+					c.glue(a.glued())
+				else:
+					c.glue(a.glued())
+				b.rotate(-1)
+				c.rotate(1)
+				a.reverse().opposite().next()
+		for corner in edge.Corners:
+			if corner.Tetrahedron in self.Tetrahedra:
+				self.Tetrahedra.remove(corner.Tetrahedron)
+		for tet in self.Tetrahedra:
+			tet.clear_Class()
+			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+		for i in range(len(self.Tetrahedra)):
+			self.Tetrahedra[i].Index = i
+		self.build_vertex_classes()
+		self.build_edge_classes()
+		self.add_cusp_cross_sections()
+		for cusp in self.Vertices:
+			self.normalize_cusp(cusp)
+		self.see_if_canonical()
+
+
+
 
 
 
