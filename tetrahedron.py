@@ -136,9 +136,8 @@ class Tetrahedron:
     The folllowing returns true if the face is glued to itself, false otherwise. Added by Mark 10/1/2021.
     """
     def face_glued_to_self(self,two_subsimplex):
-        if self.Neighbor[two_subsimplex] != None:
-            if self.Gluing[two_subsimplex].image(two_subsimplex) == two_subsimplex:
-                return True
+        if self.Neighbor[two_subsimplex] == self and self.Gluing[two_subsimplex].image(two_subsimplex) == two_subsimplex:
+            return True
         return False
 
     """

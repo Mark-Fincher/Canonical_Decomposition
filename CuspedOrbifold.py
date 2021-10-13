@@ -573,6 +573,7 @@ class CuspedOrbifold:
 	3-2 move. Returns 0 if a 3-2 move is not possible, otherwise does the move on self and returns 1.
 	"""
 	def three_to_two(self,edge):
+		One = ComplexSquareRootCombination.One()
 		a = Arrow(edge.Corners[0].Subsimplex,LeftFace[edge.Corners[0].Subsimplex],
 				edge.Corners[0].Tetrahedron)
 		if edge.valence() == 1 and edge.LocusOrder == 3:
@@ -628,7 +629,9 @@ class CuspedOrbifold:
 			b.add_sym(b_copy)
 			b.add_sym(b_copy.rotate(1))
 			b.add_sym(b_copy.rotate(1))
-			#add edge params here. will do this later, for now let's glue the other faces of b.Tetrahedron.
+			v0 = a.Tetrahedron.edge_params[a.Edge]
+			v1 = a.Tetrahedron.edge_params[a.Edge]
+			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
 			a.opposite()
 			if a.glued().Tetrahedron is None:
 				a.reverse()
@@ -659,7 +662,10 @@ class CuspedOrbifold:
 			c.add_sym(c_copy)
 			c.add_sym(c_copy.rotate(1))
 			c.add_sym(c_copy.rotate(1))
-			#now add edge params here, do later.
+			v0 = a.Tetrahedron.edge_params[a.Edge]
+			v1 = a.Tetrahedron.edge_params[a.Edge]
+			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
+			c.Tetrahedron.fill_edge_params(One - v1*(v0 - One)/(One - v1))
 			a.opposite()
 			if a.Tetrahedron.face_glued_to_self(a.Face):
 				b.glue(a.glued())
@@ -686,8 +692,11 @@ class CuspedOrbifold:
 						c.Tetrahedron.attach(sym.image(c.Face),c.Tetrahedron,(sym*perm*inv(sym)).tuple())
 		elif face_glued_to_self:
 			b = self.new_arrow()
+			b.add_sym(b.copy())
 			b.glue(b.copy().reverse())
-			#add edge params here. will do this later, for now let's glue the other faces of b.Tetrahedron.
+			v0 = a.Tetrahedron.edge_params[a.Edge]
+			v1 = a.glued().Tetrahedron.edge_params[a.glued().Edge]
+			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
 			b.reverse()
 			a.opposite()
 			if a.glued().Tetrahedron is None:
@@ -707,11 +716,16 @@ class CuspedOrbifold:
 				b.glue(a.reverse())
 		else:
 			b = self.new_arrow()
-        	c = self.new_arrow()
-        	#add edge params later
-        	b.glue(c)
-        	b.reverse()
-        	for i in range(3):
+			c = self.new_arrow()
+			b.add_sym(b.copy())
+			c.add_sym(c.copy())
+			v0 = a.Tetrahedron.edge_params[a.Edge]
+			v1 = a.glued().Tetrahedron.edge_params[a.glued().Edge]
+			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
+			c.Tetrahedron.fill_edge_params(One - v1*(v0 - One)/(One - v1))
+			b.glue(c)
+			b.reverse()
+			for i in range(3):
 				a.opposite()
 				if a.Tetrahedron.face_glued_to_self(a.Face):
 					b.glue(a.glued())
@@ -741,6 +755,39 @@ class CuspedOrbifold:
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
 		self.see_if_canonical()
+
+	"""
+	Flat 2-3 move. It could be that when you do a 2-3 move, one of the resulting tetrahedra is flat.
+	Normally this is undesirable, so the 2-3 move should not be attempted. But if the flat tet corresponds
+	to a pair of faces glued to themselves, you can just discard the flat tet. Return 0 if the flat 2-3 move
+	doesn't make sense in this situation, otherwise do the move and return 1.
+	"""
+	def flat_two_to_three(self,two_subsimplex,tet):
+		for one_subsimplex in OneSubsimplices:
+			if is_subset(one_subsimplex,two_subsimplex):
+				z = tet.edge_params[one_subsimplex]
+				w = tet.Neighbor[two_subsimplex].edge_params[tet.Gluing[two_subsimplex].image(one_subsimplex)]
+				if (z*w).imag == SquareRootCombination.Zero():
+					break
+		if (z*w).imag != SquareRootCombination.Zero():
+			return 0
+		if (not tet.face_glued_to_self(one_subsimplex | comp(two_subsimplex)) 
+			or tet.Gluing[one_subsimplex | comp(two_subsimplex)].image(comp(two_subsimplex)) != two_subsimplex):
+			return 0
+		a = Arrow(one_subsimplex,two_subsimplex,tet)
+		b = a.glued()
+		a.reverse()
+		if (not a.Tetrahedron.face_glued_to_self(a.face()) 
+			or a.Tetrahedron.Gluing[a.Face].image(a.head()) != a.head()):
+			return 0
+		if (not b.Tetrahedron.face_glued_to_self(b.Face) 
+			or b.Tetrahedron.Gluing[b.Face].image(b.head()) != b.head()):
+			return 0
+		#For now I'm not considering the case that two_subsimplex is glued to itself. Might want
+		#to add that possibility later.
+		c = self.new_arrow()
+		d = self.new_arrow()
+		c.glue(d)
 
 
 

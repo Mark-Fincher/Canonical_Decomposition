@@ -628,7 +628,31 @@ for dest in newly_canonical_dest_seqs:
         print(dest)
 """
 
+"""
+with open("stuck_dest_seqs.json", "r") as read_file:
+    stuck_dest_seqs = json.load(read_file)
 
+Dest = stuck_dest_seqs[5]
+orb = dest_to_orb(Dest)
+show_triangulation(orb.Tetrahedra)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+
+orb.arrow_two_to_three(F3,tet0)
+show_triangulation(orb.Tetrahedra)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+print((tet0.tilt(V2)+tet1.tilt(V1)).evaluate() > 0)
+print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
+#this is where we get stuck, want to do a 2-3 move but there's a flat quad.
+"""
+
+a = 1
+b = 2
+if (a != 1
+    or b == 2):
+    print('ye')
 
 """
 For dest = stuck_dest_seqs[5], we can do one 2-3 move then we get stuck, can't do more 2-3 moves
@@ -777,14 +801,33 @@ for i in range(len(Dests)):
     print(' ')
     print(' ')
 """
-
+"""
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 orb = dest_to_orb(Dest)
-#show_triangulation(orb.Tetrahedra)
-tet0 = orb.Tetrahedra[0]
-"""
-orb = CuspedOrbifold(two_to_three(orb.Tetrahedra,tet0,F2))
 show_triangulation(orb.Tetrahedra)
-"""
+tet0 = orb.Tetrahedra[0]
+
 orb.arrow_two_to_three(F2,tet0)
 show_triangulation(orb.Tetrahedra)
+
+tet0 = orb.Tetrahedra[0]
+orb.three_to_two(tet0.Class[E01])
+show_triangulation(orb.Tetrahedra)
+#passes this test
+"""
+"""
+Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
+orb = dest_to_orb(Dest)
+show_triangulation(orb.Tetrahedra)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+
+orb.arrow_two_to_three(F1,tet0)
+show_triangulation(orb.Tetrahedra)
+tet0 = orb.Tetrahedra[0]
+
+orb.three_to_two(tet0.Class[E01])
+show_triangulation(orb.Tetrahedra)
+#Also works for this
+"""
+
