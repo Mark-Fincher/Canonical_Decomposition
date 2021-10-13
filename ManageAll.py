@@ -1,4 +1,4 @@
-#from The_Algorithm import*
+from The_Algorithm import*
 import json
 import copy
 
@@ -25,7 +25,7 @@ Non_Canonical_Orbs has the remaining 51
 Of those 51, 24 can be made canonical by canonize and the remaining 27 get stuck 
 
 """
-"""
+
 file1 = open("enum36success.txt","r")
 
 L_out = file1.readlines()
@@ -48,6 +48,7 @@ for word in L_out:
                     int_list.append(int(int_at_i))
         Dest_Seqs.append(int_list)
 
+"""
 OrbDictionary = {(1,0):Dest_Seqs[0]}
 
 max_tets = 1
@@ -72,7 +73,7 @@ with open("OrbDictionary.json", "w") as write_file:
     keyz = OrbDictionary.keys()
     valz = OrbDictionary.values()
     json.dump({str(k):OrbDictionary[k] for k in keyz}, write_file)
-"""
+
 
 with open("OrbDictionary.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
@@ -80,9 +81,9 @@ with open("OrbDictionary.json", "r") as read_file:
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
 print(OrbDictionary)
-
-
 """
+
+
 Orbs_up_to_36 = []
 Canonical_Orbs = []
 Non_Canonical_Orbs = [] 
@@ -94,6 +95,8 @@ for Dest in Dest_Seqs:
         Canonical_Orbs.append(orb)
     else:
         Non_Canonical_Orbs.append(orb)
+print(len(Canonical_Orbs))
+print(len(Non_Canonical_Orbs))
 
 newly_canonical = []
 stuck_orbs = []
@@ -107,6 +110,7 @@ for orb in Non_Canonical_Orbs:
 print(len(newly_canonical))
 print(len(stuck_orbs))
 
+"""
 already_canonical_dest_seqs = []
 for orb in Canonical_Orbs:
     already_canonical_dest_seqs.append(orb.DestSeq)

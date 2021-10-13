@@ -24,8 +24,8 @@ show_triangulation(orb.Tetrahedra)
 tet0 = orb.Tetrahedra[0]
 
 print(orb.isometries())
+print(orb.is_canonical)
 """
-
 
 
 """
@@ -129,7 +129,7 @@ show_triangulation(orb.Tetrahedra)
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 
-#print(orb.is_canonical)
+print(orb.is_canonical)
 # It's canonical.
 
 print(' ')
@@ -634,25 +634,40 @@ with open("stuck_dest_seqs.json", "r") as read_file:
 
 Dest = stuck_dest_seqs[5]
 orb = dest_to_orb(Dest)
-show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
+#show_triangulation(orb.Tetrahedra)
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
 
 orb.arrow_two_to_three(F3,tet0)
-show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
+#show_triangulation(orb.Tetrahedra)
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
-print((tet0.tilt(V2)+tet1.tilt(V1)).evaluate() > 0)
-print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
+#print((tet0.tilt(V2)+tet1.tilt(V1)).evaluate() > 0)
+#print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 #this is where we get stuck, want to do a 2-3 move but there's a flat quad.
+orb.flat_two_to_three(F2,tet0)
+print(orb.Vertices)
+print(orb.is_canonical)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet0.clear_Class()
+tet1.clear_Class()
+print(' ')
+orb = CuspedOrbifold([tet0,tet1])
+print(orb.Vertices)
+print(orb.is_canonical)
+print((tet0.tilt(V0) + tet1.tilt(V0)).evaluate() > 0)
+print((tet0.tilt(V1) + tet1.tilt(V1)).evaluate() > 0)
+print((tet0.tilt(V2) + tet1.tilt(V3)).evaluate() > 0)
+print((tet0.tilt(V3) + tet1.tilt(V2)).evaluate() > 0)
+print(' ')
+print(check_2_to_3_possible(orb.Tetrahedra,tet0,F1))
+orb.arrow_two_to_three(F1,tet0)
+print(orb.is_canonical)
 """
-
-a = 1
-b = 2
-if (a != 1
-    or b == 2):
-    print('ye')
 
 """
 For dest = stuck_dest_seqs[5], we can do one 2-3 move then we get stuck, can't do more 2-3 moves
@@ -682,14 +697,21 @@ tet1.fill_edge_params(ComplexSquareRootCombination(a,b))
 
 orb = CuspedOrbifold([tet0,tet1])
 
-print(orb.is_canonical)
 show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
+print((tet0.tilt(V0) + tet1.tilt(V1)).evaluate() > 0)
+print((tet0.tilt(V1) + tet1.tilt(V3)).evaluate())
+print((tet0.tilt(V2) + tet1.tilt(V0)).evaluate())
+print((tet0.tilt(V3) + tet1.tilt(V2)).evaluate())
 
 print(orb.Vertices)
 print(orb.Vertices[0].Corners)
 print(orb.Vertices[1].Corners)
 """
-
+"""
+I believe the following is for stuck_dest_seqs[6]. It's very similar to the above, you get stuck,
+but can do a flat_two_to_three move, this is the resulting triangulation, by hand. It's canonical.
+"""
 """
 tet0 = Tetrahedron()
 tet0.Index = 0
@@ -720,9 +742,6 @@ print(orb.Vertices[1].Corners)
 print(orb.Vertices[2].Corners)
 print(orb.Vertices[3].Corners)
 """
-
-
-
 
 
 
@@ -804,15 +823,18 @@ for i in range(len(Dests)):
 """
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 orb = dest_to_orb(Dest)
+print(orb.is_canonical)
 show_triangulation(orb.Tetrahedra)
 tet0 = orb.Tetrahedra[0]
 
 orb.arrow_two_to_three(F2,tet0)
 show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
 
 tet0 = orb.Tetrahedra[0]
 orb.three_to_two(tet0.Class[E01])
 show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
 #passes this test
 """
 """

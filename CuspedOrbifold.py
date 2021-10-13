@@ -305,7 +305,7 @@ class CuspedOrbifold:
 				if tet1.Neighbor[face1] != None:
 					tet2 = tet1.Neighbor[face1]
 					face2 = tet1.Gluing[face1].image(face1)
-					if (tet1.tilt(comp(face2)) + tet2.tilt(comp(face2))).evaluate() > 0:
+					if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
 						self.is_canonical = False
 						return
 		# if it hasn't already returned, set it to True.
@@ -557,6 +557,9 @@ class CuspedOrbifold:
 				b.rotate(1)
 		self.Tetrahedra.remove(tet)
 		self.Tetrahedra.remove(b.Tetrahedron)
+		self.Edges = []
+		self.Faces = []
+		self.Vertices = []
 		for tet in self.Tetrahedra:
 			tet.clear_Class()
 			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
@@ -568,6 +571,7 @@ class CuspedOrbifold:
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
 		self.see_if_canonical()
+		return 1
 
 	"""
 	3-2 move. Returns 0 if a 3-2 move is not possible, otherwise does the move on self and returns 1.
@@ -749,12 +753,16 @@ class CuspedOrbifold:
 			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		for i in range(len(self.Tetrahedra)):
 			self.Tetrahedra[i].Index = i
+		self.Edges = []
+		self.Faces = []
+		self.Vertices = []
 		self.build_vertex_classes()
 		self.build_edge_classes()
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
 		self.see_if_canonical()
+		return 1
 
 	"""
 	Flat 2-3 move. It could be that when you do a 2-3 move, one of the resulting tetrahedra is flat.
@@ -763,6 +771,7 @@ class CuspedOrbifold:
 	doesn't make sense in this situation, otherwise do the move and return 1.
 	"""
 	def flat_two_to_three(self,two_subsimplex,tet):
+		One = ComplexSquareRootCombination.One()
 		for one_subsimplex in OneSubsimplices:
 			if is_subset(one_subsimplex,two_subsimplex):
 				z = tet.edge_params[one_subsimplex]
@@ -771,13 +780,10 @@ class CuspedOrbifold:
 					break
 		if (z*w).imag != SquareRootCombination.Zero():
 			return 0
-		if (not tet.face_glued_to_self(one_subsimplex | comp(two_subsimplex)) 
-			or tet.Gluing[one_subsimplex | comp(two_subsimplex)].image(comp(two_subsimplex)) != two_subsimplex):
-			return 0
 		a = Arrow(one_subsimplex,two_subsimplex,tet)
 		b = a.glued()
 		a.reverse()
-		if (not a.Tetrahedron.face_glued_to_self(a.face()) 
+		if (not a.Tetrahedron.face_glued_to_self(a.Face) 
 			or a.Tetrahedron.Gluing[a.Face].image(a.head()) != a.head()):
 			return 0
 		if (not b.Tetrahedron.face_glued_to_self(b.Face) 
@@ -785,9 +791,61 @@ class CuspedOrbifold:
 			return 0
 		#For now I'm not considering the case that two_subsimplex is glued to itself. Might want
 		#to add that possibility later.
+		z = b.Tetrahedron.edge_params[b.simplex_south_tail()]
+		w = a.Tetrahedron.edge_params[a.simplex_axis()]
 		c = self.new_arrow()
 		d = self.new_arrow()
+		c.Tetrahedron.fill_edge_params((One - z)*(One - w)/(z*w))
+		d.Tetrahedron.fill_edge_params(z/(One - w))
+		c.add_sym(c.copy())
+		d.add_sym(d.copy())
 		c.glue(d)
+		d.glue(c)
+		c.opposite()
+		b.rotate(-1)
+		if b.Tetrahedron.face_glued_to_self(b.Face):
+			c.glue(b.glued())
+			c.glue(b.glued())
+		else:
+			c.glue(b.glued())
+		c.reverse()
+		a.rotate(1)
+		if a.Tetrahedron.face_glued_to_self(a.Face):
+			c.glue(a.glued())
+			c.glue(a.glued())
+		else:
+			c.glue(a.glued())
+		d.opposite()
+		b.rotate(-1)
+		if b.Tetrahedron.face_glued_to_self(b.Face):
+			d.glue(b.glued())
+			d.glue(b.glued())
+		else:
+			d.glue(b.glued())
+		d.reverse()
+		a.rotate(1)
+		if a.Tetrahedron.face_glued_to_self(a.Face):
+			d.glue(a.glued())
+			d.glue(a.glued())
+		else:
+			d.glue(a.glued())
+		for tet in self.Tetrahedra:
+			tet.clear_Class()
+			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+		self.Tetrahedra.remove(a.Tetrahedron)
+		self.Tetrahedra.remove(b.Tetrahedron)
+		for i in range(len(self.Tetrahedra)):
+			self.Tetrahedra[i].Index = i
+		self.Edges = []
+		self.Faces = []
+		self.Vertices = []
+		self.build_vertex_classes()
+		self.build_edge_classes()
+		self.add_cusp_cross_sections()
+		for cusp in self.Vertices:
+			self.normalize_cusp(cusp)
+		self.see_if_canonical()
+		return 1
 
 
 
