@@ -847,6 +847,47 @@ class CuspedOrbifold:
 		self.see_if_canonical()
 		return 1
 
+	"""
+	3-6 move. Assume that tet has a single non-trivial symmetry, taking two_subsimplex to another face.
+	Then the tetrahedron attached to tet along two_subsimplex is also attached to tet along that other
+	face, making three tetrahedra in total. We can divide those three tetrahedra into six which are invariant
+	w.r.t. the symmetry. Since the symmetry identifies some of these, we only need to take four of the six.
+	There are other cases to consider. For instance, you could do a 3-6 move without that nontrivial symmetry
+	existing. And you could do a flat version of it. And you could have two_subsimplex glued to itself. 
+	For now, this program does not consider other cases.
+
+	First, we check if the 3-6 move is possible. That means we check that the symmetry is there, and
+	we check certain geometric conditions are satisfied.
+
+	That this decomposition "makes sense" does require proof.
+	"""
+	def three_to_six(self,two_subsimplex,tet):
+		if len(tet.Symmetries) != 2:
+			return 0
+		for sym in tet.Symmetries:
+			if sym.tuple() != (0,1,2,3):
+				break
+		#now sym is the non-trivial symmetry.
+		for one_subsimplex in OneSubsimplices:
+			if is_subset(one_subsimplex,two_subsimplex) and sym.image(one_subsimplex) == one_subsimplex:
+				break
+		#now one_subsimplex is the edge of tet in two_subsimplex fixed by sym.
+		voisin = tet.Neighbor[two_subsimplex]
+		if voisin == tet:
+			return 0
+		z = tet.edge_params[one_subsimplex]
+		w = voisin.edge_params[tet.Gluing[two_subsimplex].image(one_subsimplex)]
+		if (z*w*w).imag == 0 or ((z*w*w).imag).evaluate() < 0:
+			return 0
+		for other_edge in OneSubsimplices:
+			if is_subset(other_edge,two_subsimplex) and other_edge != one_subsimplex:
+				z = tet.edge_params[other_edge]
+				w = voisin.edge_params[tet.Gluing[two_subsimplex].image(other_edge)]
+				if (z*w).imag == 0 or ((z*w).imag).evaluate() < 0:
+					return 0
+	
+
+
 
 
 

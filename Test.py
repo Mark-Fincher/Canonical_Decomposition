@@ -250,6 +250,17 @@ Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10,
 11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13]
 
 orb = dest_to_orb(Dest)
+show_triangulation(orb.Tetrahedra)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+print(orb.is_canonical)
+print(tet0.tilt(V3) + tet1.tilt(V2))
+orb.arrow_two_to_three(F3,tet0)
+show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
+#now is when you're stuck, and want to do a 3-6 move. This is done manually below.
+
 print("Dest seq (index 14) is")
 print(Dest)
 print(' ')
