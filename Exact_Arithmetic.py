@@ -6,8 +6,7 @@ use snappy, so I also comment that out.
 This program creates two classes, SquareRootCombination and ComplexSquareRootCombination. Each is supposed to represent
 a number which possibly has square roots, so wouldn't be stored in an exact form normally. In each class the definitions
 of addition, multiplication, etc. are changed to be what they should be for that class. So, for example, if a and b 
-are both objects in the ComplexSquareRootCombination class, running a*b will not produce an error (you would expect python
-to not understand what it means to multiply things which aren't numbers), but will instead give the correct 
+are both objects in the ComplexSquareRootCombination class, running a*b will give the correct 
 ComplexSquareRootCombination object. 
 """
 
@@ -121,7 +120,7 @@ class SquareRootCombination:
                             for r2, c2 in other._entries])
 
     """
-    Changed __div__ to __truediv__ because that's what python wants - Mark, 7/12/2021
+    Changed __div__ to __truediv__ because that's what python 3 wants - Mark, 7/12/2021
     """
     def __truediv__(self, other):
 
