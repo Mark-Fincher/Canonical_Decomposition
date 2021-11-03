@@ -172,7 +172,7 @@ print(tet1.tilt(V2))
 
 
 
-"""
+
 # One of the degree 14 covers in Fact 5.5.
 Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10, 
 11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13] 
@@ -213,6 +213,8 @@ show_triangulation(next_list)
 
 orb = CuspedOrbifold(next_list)
 
+show_triangulation(orb.Tetrahedra)
+
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 
@@ -231,6 +233,8 @@ print(' ')
 print(check_2_to_3_possible(orb.Tetrahedra,tet0,F1))
 print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 
+print(orb.three_to_six(F2,tet1))
+
 # We're stuck. It's not canonical, but no 2-3 moves are allowed. It's possible the tilts are wrong,
 # will do testing.
 
@@ -239,7 +243,7 @@ print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 # three tetrahedra is mapped to itself by the symmetry of tet1. Can divide that up into some tet pieces.
 # I'm not going to deal with this right now. Will work on other examples, will be interesting to see if
 # this situation occurs again.
-"""
+
 
 """
 Following is the triangulation you get after doing a new move on the immediately above triangulation,
