@@ -189,14 +189,8 @@ tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
 
 print(' ')
-print(tet0.tilt(V0))
-print(tet0.tilt(V1))
-print(tet0.tilt(V2))
 print(tet0.tilt(V3) + tet1.tilt(V2))
 # We see that this is positive. Let's check the other tilts before anything else though.
-print(' ')
-print(tet1.tilt(V0) + tet2.tilt(V2))
-print(tet2.tilt(V1))
 print(' ')
 
 # Alright, we're going to do a 2-3 move through face 3 of tet0 and face 2 of tet1. First
@@ -208,8 +202,6 @@ print(' ')
 # Returns true, so let's do it.
 
 next_list = two_to_three(orb.Tetrahedra,tet0,F3)
-
-show_triangulation(next_list)
 
 orb = CuspedOrbifold(next_list)
 
@@ -234,6 +226,8 @@ print(check_2_to_3_possible(orb.Tetrahedra,tet0,F1))
 print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
 
 print(orb.three_to_six(F2,tet1))
+
+show_triangulation(orb.Tetrahedra)
 
 # We're stuck. It's not canonical, but no 2-3 moves are allowed. It's possible the tilts are wrong,
 # will do testing.
@@ -568,11 +562,17 @@ Now let's do some testing for my canonize function, found in The_Algorithm.py.
 """
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 orb = dest_to_orb(Dest)
+show_triangulation(orb.Tetrahedra)
+print(orb.isometries())
 canonical_orb = canonize(orb)
+print(canonical_orb.is_canonical)
 print(canonical_orb.DestSeq)
 print(canonical_orb.PachnerPath)
 show_triangulation(canonical_orb.Tetrahedra)
+print(" ")
+print(canonical_orb.isometries())
 """
+
 """
 Dest = [0,0,0,0]
 orb = dest_to_orb(Dest)
