@@ -24,7 +24,7 @@ gives a dictionary "OrbDictionary". OrbDictionary[(n,k)] is the "destination seq
 position k among other destination sequences of the same index. For example, OrbDictionary[(1,0)] is PGL(2,O_3). In the below example, we turn it
 into a CuspedOrbifold object, get its info, then check if it's already canonical or not. It is already canonical. 
 
-'''
+```
 from canonize import*
 import json
 
@@ -37,5 +37,5 @@ orb = dest_to_orb(OrbDictionary[(1,0)])
 orb.info()
 print(orb.is_canonical)
     
-'''
+```
 
