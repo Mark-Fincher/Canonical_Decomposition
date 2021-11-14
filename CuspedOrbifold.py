@@ -36,6 +36,25 @@ class CuspedOrbifold:
 			self.normalize_cusp(cusp)
 		self.see_if_canonical()
 
+	def info(self):
+		tets = orb.Tetrahedra
+		print('number of tetrahedra is',len(tets))
+		for i in range(len(tets)):
+			print('gluing data for', tets[i], 'is')
+			for j in range(4):
+				print('face', j, 'of', tets[i], 'glued to', tets[i].Neighbor[TwoSubsimplices[j]])
+				print('with gluing map',tets[i].Gluing[TwoSubsimplices[j]])
+			print('symmetries of',tets[i],'are')
+			for sym in tets[i].Symmetries:
+				print(sym)
+			print('edge_params of',tets[i],'are')
+			print('edge 01',tets[i].edge_params[E01].real,'+',tets[i].edge_params[E01].imag,'* i')
+			print('edge 02',tets[i].edge_params[E02].real,'+',tets[i].edge_params[E02].imag,'* i')
+			print('edge 03',tets[i].edge_params[E03].real,'+',tets[i].edge_params[E03].imag,'* i')
+			print('edge 12',tets[i].edge_params[E12].real,'+',tets[i].edge_params[E12].imag,'* i')
+			print('edge 13',tets[i].edge_params[E13].real,'+',tets[i].edge_params[E13].imag,'* i')
+			print('edge 23',tets[i].edge_params[E23].real,'+',tets[i].edge_params[E23].imag,'* i')
+
 	def add_tet(self, tet):
 		self.Tetrahedra.append(tet)
 

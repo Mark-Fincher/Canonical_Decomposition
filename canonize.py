@@ -1,6 +1,6 @@
 """
-This file contains the canonical decomposition algorithm. Each function in the algorithm is
-a method in the CuspedOrbifold class (or not?).
+This file contains the canonize function and a few other things which will be moved. The canonize
+function will be updated soon.
 """
 from Exact_Arithmetic import*
 from simplex import*

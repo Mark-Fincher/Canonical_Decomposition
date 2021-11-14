@@ -6,7 +6,7 @@ from Exact_Arithmetic import*
 from simplex import*
 from Dest_to_Triang import*
 """
-from The_Algorithm import*
+from canonize import*
 import json
 
 
