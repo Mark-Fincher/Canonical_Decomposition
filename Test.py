@@ -13,11 +13,7 @@ import json
 """
 Dest = [0,0,0,0]
 
-tets_list = full_snappy_triang(Dest)
-
-#show_triangulation(tets_list)
-
-orb = CuspedOrbifold(tets_list)
+orb = dest_to_orb(Dest)
 
 show_triangulation(orb.Tetrahedra)
 
@@ -34,9 +30,7 @@ This is the 4 tet dest seq from Fact 5.5.
 """
 Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
 
-tets_list = full_snappy_triang(Dest)
-
-orb = CuspedOrbifold(tets_list)
+orb = dest_to_orb(Dest)
 
 print("Dest seq (index 4) is")
 print(Dest)
@@ -86,11 +80,7 @@ This is one of the 8 tet dest seqs from Fact 5.5.
 """
 Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
 
-tets_list = full_snappy_triang(Dest)
-
-#show_triangulation(tets_list)
-
-orb = CuspedOrbifold(tets_list)
+orb = dest_to_orb(Dest)
 
 print("Dest seq (index 8) is")
 print(Dest)
@@ -147,11 +137,8 @@ print(' ')
 """
 Dest = [0,1,2,3,2,2,0,2,1,0,1,1,4,3,3,0,3,4,4,4]
 
-tets_list = full_snappy_triang(Dest)
-
-show_triangulation(tets_list)
-
-orb = CuspedOrbifold(tets_list)
+orb = dest_to_orb(Dest)
+show_triangulation(orb.Tetrahedra)
 
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
@@ -167,76 +154,6 @@ print(tet1.tilt(V2))
 # with a bunch of symmetries (all the ones preserving the inner tetrahedron) and the faces of the cube glued to
 # themselves, carried over from tet0.
 """
-
-
-
-
-
-
-# One of the degree 14 covers in Fact 5.5.
-Dest = [0,1,2,3, 2,4,0,2, 1,0,5,1, 6,3,3,0, 5,7,1,8, 4,2,7,9, 3,6,6,6, 7,5,4,10, 
-11,9,11,4, 12,13,8,5, 13,12,13,7, 8,8,12,12, 9,11,10,11, 10,10,9,13] 
-
-tets_list = full_snappy_triang(Dest)
-
-show_triangulation(tets_list)
-# It's a pretty interesting triangulation, definitely the most complicated so far.
-
-orb = CuspedOrbifold(tets_list)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-
-print(' ')
-print(tet0.tilt(V3) + tet1.tilt(V2))
-# We see that this is positive. Let's check the other tilts before anything else though.
-print(' ')
-
-# Alright, we're going to do a 2-3 move through face 3 of tet0 and face 2 of tet1. First
-# check that it's possible.
-
-print(check_2_to_3_possible(orb.Tetrahedra,tet0,F3))
-print(' ')
-
-# Returns true, so let's do it.
-
-next_list = two_to_three(orb.Tetrahedra,tet0,F3)
-
-orb = CuspedOrbifold(next_list)
-
-show_triangulation(orb.Tetrahedra)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-
-# From the gluing data, we know which tilts to check.
-
-print(' ')
-print((tet0.tilt(V0) + tet0.tilt(V3)).evaluate() < 0)
-print(tet0.tilt(V1).evaluate() < 0)
-print((tet0.tilt(V2) + tet1.tilt(V2)).evaluate() < 0)
-print(tet0.tilt(V2) + tet1.tilt(V2))
-print(tet1.tilt(V1))
-print(tet1.tilt(V3))
-print(tet1.tilt(V0))
-print(' ')
-
-print(check_2_to_3_possible(orb.Tetrahedra,tet0,F1))
-print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
-
-print(orb.three_to_six(F2,tet1))
-
-show_triangulation(orb.Tetrahedra)
-
-# We're stuck. It's not canonical, but no 2-3 moves are allowed. It's possible the tilts are wrong,
-# will do testing.
-
-# IMPORTANT. As pointed out by Jason (see his email), there's a different kind of move you can do here.
-# Take two copies of tet0, attach to the two faces of tet1 it should be attached to. That collection of
-# three tetrahedra is mapped to itself by the symmetry of tet1. Can divide that up into some tet pieces.
-# I'm not going to deal with this right now. Will work on other examples, will be interesting to see if
-# this situation occurs again.
 
 
 """
@@ -255,20 +172,20 @@ tet2 = orb.Tetrahedra[2]
 print(orb.is_canonical)
 print(tet0.tilt(V3) + tet1.tilt(V2))
 orb.arrow_two_to_three(F3,tet0)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
 show_triangulation(orb.Tetrahedra)
 print(orb.is_canonical)
-#now is when you're stuck, and want to do a 3-6 move. This is done manually below.
-
-print("Dest seq (index 14) is")
-print(Dest)
-print(' ')
-print("Regular triangulation is")
 show_triangulation(orb.Tetrahedra)
-print(' ')
-print("Isometry group of regular triangulation is")
-print(orb.isometries())
-print(' ')
+print(tet0.tilt(V2) + tet1.tilt(V1))
+#Now we do a 3-6 move, with some flat tets.
+orb.three_to_six(F2,tet0)
+show_triangulation(orb.Tetrahedra)
+print(orb.is_canonical)
+#And we get something canonical.
 
+#Below we get the same canonical triangulation "by hand". I did this before I programmed the 3-6 move,
+#to see if it would actually help in this situation.
 
 tet0 = Tetrahedron()
 tet1 = Tetrahedron()
@@ -300,22 +217,14 @@ tet2.Symmetries = [Perm4((0,1,2,3)),Perm4((2,3,0,1))]
 
 orb = CuspedOrbifold([tet0,tet1,tet2])
 
-print("Canonical triangultion is")
 show_triangulation(orb.Tetrahedra)
-print(' ')
-print("Isometry group of canonical triangulation is")
-print(orb.isometries())
-
-
 
 print(orb.is_canonical)
 
 print(tet0.tilt(V0) + tet1.tilt(V1))
 print(tet0.tilt(V2) + tet1.tilt(V2))
 print(tet1.tilt(V0) + tet2.tilt(V3))
-print(tet1.tilt(V3) + tet2.tilt(V0))
-
-# Yay! It seems like this is canonical. So we had to do a crazy new move, but it worked. 
+print(tet1.tilt(V3) + tet2.tilt(V0)) 
 """
 
 
@@ -326,11 +235,7 @@ print(tet1.tilt(V3) + tet2.tilt(V0))
 Dest = [1,1,1,2, 0,0,0,3, 4,4,5,0, 6,7,6,1, 2,8,2,6, 8,2,9,7, 3,3,10,4, 10,11,3,5, 5,12,4,11, 
 12,5,12,12, 7,6,13,13, 13,13,7,8, 9,9,8,9, 11,10,11,10]
 
-tets_list = full_snappy_triang(Dest)
-
-show_triangulation(tets_list)
-
-orb = CuspedOrbifold(tets_list)
+orb = dest_to_orb(Dest)
 
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
@@ -351,11 +256,7 @@ print(tet2.tilt(V0) + tet3.tilt(V2))
 
 Dest = [0,0,0,1, 2,3,4,0, 1,5,6,2, 6,6,1,4, 5,1,5,3, 4,4,2,7, 3,2,3,8, 8,8,8,5, 7,7,7,6]
 
-tets_list = full_snappy_triang(Dest)
-
-show_triangulation(tets_list)
-
-orb = CuspedOrbifold(tets_list)
+orb = dest_to_orb(Dest)
 
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
@@ -396,11 +297,7 @@ print(orb.is_canonical)
 Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
  9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
 
-tets_list = full_snappy_triang(Dest)
-
-show_triangulation(tets_list)
-
-orb = CuspedOrbifold(tets_list)
+orb = dest_to_orb(Dest)
 
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
@@ -467,76 +364,64 @@ print(tet0.tilt(V0) + tet1.tilt(V1))
 """
 
 
-
-"""
-# WARNING. There's a problem with the following computations. Did 2-3 moves which were illegal
-# because of large dihedral angles (I think). Forgot to check beforehand. So we didn't succeed in getting to the canonical decomp,
-# in fact I don't think we can with only 2-3 moves, in this situation.
-# Let's do the same one as above, except do the other 2-3 move option at the first step
 Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
  9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
 
 orb = dest_to_orb(Dest)
-
+show_triangulation(orb.Tetrahedra)
+#print(orb.is_canonical)
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
-
+#print(tet0.tilt(V2))
+orb.arrow_two_to_three(F2,tet0)
+#print(orb.is_canonical)
+#show_triangulation(orb.Tetrahedra)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+#print(tet2.tilt(V0) + tet0.tilt(V2))
+#print(tet0.tilt(V3) + tet1.tilt(V2))
+orb.arrow_two_to_three(F3,tet0)
+#show_triangulation(orb.Tetrahedra)
+#print(orb.is_canonical)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+#print(tet0.tilt(V0) + tet1.tilt(V0))
+#Think you do a 3-2 now.
+print(orb.three_to_two(tet0.Class[E23]))
 show_triangulation(orb.Tetrahedra)
-
-next_orb = CuspedOrbifold(two_to_three(orb.Tetrahedra,tet1,F3))
-
-tet0 = next_orb.Tetrahedra[0]
-tet1 = next_orb.Tetrahedra[1]
-
-show_triangulation(next_orb.Tetrahedra)
-
-
-print(next_orb.is_canonical)
-# returns false. let's check where it's bad.
-
+print(orb.is_canonical)
+tet0 = orb.Tetrahedra[0]
+print(tet0.tilt(V0) + tet0.tilt(V1))
 print(tet0.tilt(V2))
-# this is positive
+print(tet0.tilt(V3))
 
-print(tet0.tilt(V1) + tet1.tilt(V0))
-# this is zero
-
-print(tet1.tilt(V2))
-# this is positive
-
-print(tet0.tilt(V0) + tet0.tilt(V3))
-
-next_orb = CuspedOrbifold(two_to_three(next_orb.Tetrahedra,tet0,F2))
-
-show_triangulation(next_orb.Tetrahedra)
-
-tet0 = next_orb.Tetrahedra[0]
-tet1 = next_orb.Tetrahedra[1]
-tet2 = next_orb.Tetrahedra[2]
-
-print(next_orb.is_canonical)
-# returns false still
-
-print(tet0.tilt(V0) + tet1.tilt(V1))
-# positive
-
-print(tet0.tilt(V1) + tet2.tilt(V0))
-
-print(tet1.tilt(V3))
-
-print(tet2.tilt(V2))
-# positive
-
-# Can't do a 2-3 move through F0 of tet0 like in the previous examples, could do the "new" move though.
-# But we can do a 2-3 move though F2 of tet2. Let's do that.
-
-next_orb = CuspedOrbifold(two_to_three(next_orb.Tetrahedra,tet2,F2))
-
-show_triangulation(next_orb.Tetrahedra)
-
-print(next_orb.is_canonical)
-# apparently this is canonical.
 """
+a = Arrow(E23,F0,tet0)
+new_tet = Tetrahedron()
+b = Arrow(E03,F2,new_tet)
+b.Tetrahedron.Index = 2
+b.reverse()
+a.opposite()
+b.glue(a.glued())
+b.glue(a.glued())
+b.rotate(-1)
+a.opposite().next()
+b.glue(a.opposite().glued())
+b.rotate(-1)
+b.glue(a.reverse().glued())
+#b.rotate(-1)
+#a.reverse()
+print(a)
+print(b)
+#b.glue(a.glued())
+tet1.info()
+b.Tetrahedron.info()
+"""
+
+
+
 
 """
 # the 8-tet dest seq whose isometry group jason wants to know.

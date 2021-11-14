@@ -454,7 +454,8 @@ class CuspedOrbifold:
 			new.Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
 			new.add_sym(new.copy().reverse())
 			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
-			new.glue(new.copy())
+			new.glue(new.copy().reverse())
+			new.copy().reverse().glue(new)
 			a.reverse()
 			new.opposite()
 			if a.glued().Tetrahedron is None:
@@ -616,11 +617,12 @@ class CuspedOrbifold:
 		One = ComplexSquareRootCombination.One()
 		a = Arrow(edge.Corners[0].Subsimplex,LeftFace[edge.Corners[0].Subsimplex],
 				edge.Corners[0].Tetrahedron)
+		face_glued_to_self = False
+		face_rotation = False
 		if edge.valence() == 1 and edge.LocusOrder == 3:
 			face_rotation = True
 			if len(a.Tetrahedron.Symmetries) > 2:
 				return 0
-			face_glued_to_self = False
 			for sym in a.Tetrahedron.Symmetries:
 				if sym.tuple() != (0,1,2,3):
 					if sym.image(a.Edge) == a.Edge:
@@ -628,35 +630,24 @@ class CuspedOrbifold:
 					else:
 						return 0
 		elif edge.valence() == 3:
-			face_glued_to_self = False
 			for corner in edge.Corners:
 				a = Arrow(corner.Subsimplex,LeftFace[corner.Subsimplex],
 					corner.Tetrahedron)
 				for sym in a.Tetrahedron.Symmetries:
-					if sym.image(a.Edge) == a.Edge and sym.tuple() != (0,1,2,3):
-						face_glued_to_self = True
-						break
-				if face_glued_to_self:
-					break
-			#Now, if face_glued_to_self, a is in the tet with the symmetry. Some final checking:
-			if not face_glued_to_self:
-				for corner in edge.Corners:
-					if len(corner.Tetrahedron.Symmetries) > 1:
-						return 0
-			else:
-				for sym in a.Tetrahedron.Symmetries:
 					if sym.image(a.Edge) != a.Edge:
 						return 0
+					elif sym.tuple() != (0,1,2,3):
+						face_glued_to_self = True
+				if face_glued_to_self:
+					break
+			#Now, if face_glued_to_self, a is in the tet with the symmetry.
+			if face_glued_to_self:
 				if a.glued().Tetrahedron is None:
 					a.reverse()
-				check = a.copy()
-				check.next()
+				check = a.copy().next()
 				if len(check.Tetrahedron.Symmetries) > 1:
 					return 0
-				check.next()
-				check.next()
-				check.reverse()
-				if check != a:
+				if check.next().next().reverse() != a:
 					return 0
 		else:
 			return 0
@@ -749,11 +740,11 @@ class CuspedOrbifold:
 			a.opposite()
 			if a.glued().Tetrahedron is None:
 				a.reverse()
-				a.next()
-				b.rotate(-1)
-				b.glue(a.opposite())
-				b.rotate(-1)
-				b.glue(a.reverse())
+			a.next()
+			b.rotate(-1)
+			b.glue(a.opposite().glued())
+			b.rotate(-1)
+			b.glue(a.reverse().glued())
 		else:
 			b = self.new_arrow()
 			c = self.new_arrow()
@@ -954,19 +945,10 @@ class CuspedOrbifold:
 			self.arrow_two_to_three(new_b.Face,new_b.Tetrahedron,0)
 			c = b.copy().reverse().next()
 			c.add_sym(c.copy().opposite())
-			print('added a sym')
-			c.opposite().next().next()
+			c.opposite().next()
 			d = b.copy().reverse().rotate(-1).next()
 			d.add_sym(d.copy().reverse())
-			print('added a sym')
-			b.reverse()
-			b.glue(c.glued())
-			c.rotate(-1)
-			b.rotate(-1)
-			b.glue(c.glued())
-			c.reverse()
-			b.reverse()
-			b.glue(c.glued())
+			c.Tetrahedron.erase()
 			self.Tetrahedra.remove(c.Tetrahedron)
 		elif flat_u0_u1_v1_w1:
 			self.arrow_two_to_three(a.Face,a.Tetrahedron,0)
@@ -981,14 +963,7 @@ class CuspedOrbifold:
 			b.opposite().next()
 			d = c.copy().rotate(-1).next()
 			d.add_sym(d.copy().opposite())
-			b.reverse()
-			b.glue(c.glued())
-			c.rotate(-1)
-			b.rotate(-1)
-			b.glue(c.glued())
-			c.reverse()
-			b.reverse()
-			b.glue(c.glued())
+			c.Tetrahedron.erase()
 			self.Tetrahedra.remove(c.Tetrahedron)
 		else:
 			x = tet.edge_params[a.simplex_north_tail()]
@@ -1027,17 +1002,10 @@ class CuspedOrbifold:
 						d.glue(e.glued())
 					else:
 						d.glue(e.glued())
-				e.reverse()
-				d.reverse()
-				d.glue(e.glued())
+				e.Tetrahedron.erase()
 				c.reverse().rotate(-1)
 				c.glue(f.glued())
-				f.rotate(1)
-				c.rotate(1)
-				c.glue(f.glued())
-				f.reverse()
-				c.reverse()
-				c.glue(f.glued())
+				f.Tetrahedron.erase()
 				self.Tetrahedra.remove(e.Tetrahedron)
 				self.Tetrahedra.remove(f.Tetrahedron)
 			elif (w0/complex_abs_w0).real.evaluate() > (w1/complex_abs_w1).real.evaluate():
@@ -1060,7 +1028,6 @@ class CuspedOrbifold:
 				b.add_sym(b.copy().opposite())
 				b.rotate(1).next()
 				#Now we adjust face gluings and remove two tets.
-				e.glue(d.glued())
 				d.rotate(1)
 				e.rotate(1)
 				if d.glued().Tetrahedron != None:
@@ -1072,14 +1039,11 @@ class CuspedOrbifold:
 				d.reverse()
 				e.reverse()
 				e.glue(d.glued())
-				f.rotate(-1).reverse()
-				f.glue(b.glued())
+				d.Tetrahedron.erase()
 				b.rotate(-1)
-				f.rotate(-1)
+				f.rotate(1)
 				f.glue(b.glued())
-				f.reverse()
-				b.reverse()
-				f.glue(b.glued())
+				b.Tetrahedron.erase()
 				self.Tetrahedra.remove(d.Tetrahedron)
 				self.Tetrahedra.remove(b.Tetrahedron)
 			else:
@@ -1093,12 +1057,12 @@ class CuspedOrbifold:
 			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		for i in range(len(self.Tetrahedra)):
 			self.Tetrahedra[i].Index = i
-		#self.build_vertex_classes()
-		#self.build_edge_classes()
-		#self.add_cusp_cross_sections()
-		#for cusp in self.Vertices:
-		#	self.normalize_cusp(cusp)
-		#self.see_if_canonical()
+		self.build_vertex_classes()
+		self.build_edge_classes()
+		self.add_cusp_cross_sections()
+		for cusp in self.Vertices:
+			self.normalize_cusp(cusp)
+		self.see_if_canonical()
 		return 1
 
 
