@@ -46,8 +46,10 @@ def check_2_to_3_possible(tets,tet,face):
 
 
 
+
+
 # function that tries to find the canonical decomposition of the input_orb, for now only using 2-3 moves.
-def canonize(input_orb):
+def old_canonize(input_orb):
 	if input_orb.is_canonical is True:
 		print('inputted orb is already canonical')
 		return input_orb

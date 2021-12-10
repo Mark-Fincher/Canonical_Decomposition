@@ -15,7 +15,7 @@ Dest = [0,0,0,0]
 
 orb = dest_to_orb(Dest)
 
-show_triangulation(orb.Tetrahedra)
+orb.info()
 
 tet0 = orb.Tetrahedra[0]
 
@@ -292,83 +292,14 @@ print(orb.is_canonical)
 """
 
 
+
 """
-# Next with 12 tets.
 Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
  9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
 
 orb = dest_to_orb(Dest)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-
-print(tet0.tilt(V2))
-# this is positive
-
-print(tet0.tilt(V0) + tet1.tilt(V2))
-
-print(tet1.tilt(V3) + tet2.tilt(V2))
-# this is also positive
-
-print(tet2.tilt(V0))
-
-# We should be able to do a 2-3 move through either of the two bad faces.
-
-print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
-print(check_2_to_3_possible(orb.Tetrahedra,tet1,F3))
-
-next_list = two_to_three(orb.Tetrahedra,tet0,F2)
-
-show_triangulation(next_list)
-
-orb = CuspedOrbifold(next_list)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-
-print(tet0.tilt(V0) + tet0.tilt(V3))
-print(tet0.tilt(V1) + tet1.tilt(V2))
-print(tet1.tilt(V3) + tet2.tilt(V2))
-# This is still a problem.
-
-print(check_2_to_3_possible(orb.Tetrahedra,tet1,F3))
-
-next_list = two_to_three(orb.Tetrahedra,tet1,F3)
-
-show_triangulation(next_list)
-
-orb = CuspedOrbifold(next_list)
-
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-
-print(tet0.tilt(V2))
-print(tet0.tilt(V1) + tet1.tilt(V1))
-# These are both positive, but we can't do a 2-3 to F1 of tet0, so let's do it to F2 of tet0.
-
-next_list = two_to_three(orb.Tetrahedra,tet0,F2)
-
-show_triangulation(next_list)
-
-orb = CuspedOrbifold(next_list)
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-
-print(tet0.tilt(V0) + tet1.tilt(V1))
-# This is still positive, but we're no longer able to do any 2-3 moves because of the symmetry
-# of tet0. That means we have to do a different kind of move, as in a previous example. For now we leave
-# this example alone. 
-"""
-
-
-Dest = [0,1,2,0, 2,3,0,4, 1,0,5,6, 5,7,1,5, 8,6,6,1, 3,2,7,3,
- 9,4,4,2, 7,5,3,10, 4,9,9,9, 6,8,8,8, 11,10,10,7, 10,11,11,11]
-
-orb = dest_to_orb(Dest)
-show_triangulation(orb.Tetrahedra)
+print(orb.Vertices)
+orb.info()
 #print(orb.is_canonical)
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
@@ -376,51 +307,31 @@ tet2 = orb.Tetrahedra[2]
 #print(tet0.tilt(V2))
 orb.arrow_two_to_three(F2,tet0)
 #print(orb.is_canonical)
-#show_triangulation(orb.Tetrahedra)
+#orb.info()
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
 #print(tet2.tilt(V0) + tet0.tilt(V2))
 #print(tet0.tilt(V3) + tet1.tilt(V2))
 orb.arrow_two_to_three(F3,tet0)
-#show_triangulation(orb.Tetrahedra)
+#orb.info()
 #print(orb.is_canonical)
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 #print(tet0.tilt(V0) + tet1.tilt(V0))
 #Think you do a 3-2 now.
 print(orb.three_to_two(tet0.Class[E23]))
-show_triangulation(orb.Tetrahedra)
+orb.info()
 print(orb.is_canonical)
 tet0 = orb.Tetrahedra[0]
 print(tet0.tilt(V0) + tet0.tilt(V1))
 print(tet0.tilt(V2))
 print(tet0.tilt(V3))
-
+#This is canonical. Interestingly, it's also a triangulation with all regular tets,
+#like the starting triangulation. This was also an interesting example because it required
+#a 3-2 move.
+print(orb.Vertices)
 """
-a = Arrow(E23,F0,tet0)
-new_tet = Tetrahedron()
-b = Arrow(E03,F2,new_tet)
-b.Tetrahedron.Index = 2
-b.reverse()
-a.opposite()
-b.glue(a.glued())
-b.glue(a.glued())
-b.rotate(-1)
-a.opposite().next()
-b.glue(a.opposite().glued())
-b.rotate(-1)
-b.glue(a.reverse().glued())
-#b.rotate(-1)
-#a.reverse()
-print(a)
-print(b)
-#b.glue(a.glued())
-tet1.info()
-b.Tetrahedron.info()
-"""
-
-
 
 
 """
@@ -753,3 +664,23 @@ show_triangulation(orb.Tetrahedra)
 #Also works for this
 """
 
+with open("OrbDictionary.json", "r") as read_file:
+    OrbDictionary = json.load(read_file)
+    keyz = OrbDictionary.keys()
+    OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
+"""
+already_canonical = []
+not_canonical = []
+for key in OrbDictionary.keys():
+    dest = OrbDictionary[key]
+    orb = dest_to_orb(dest)
+    if orb.is_canonical:
+        already_canonical.append(dest)
+    else:
+        not_canonical.append(dest)
+"""
+dest = OrbDictionary[(16,0)]
+orb = dest_to_orb(dest)
+orb.info()
+new_orb = orb.copy()
+new_orb.info()

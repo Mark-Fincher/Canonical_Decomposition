@@ -24,7 +24,6 @@ class CuspedOrbifold:
 		self.Edges = []
 		self.Faces = []
 		self.Vertices = []
-		self.is_canonical = None
 		self.DestSeq = None
 		self.PachnerPath = []
 		for T in self.Tetrahedra:
@@ -34,10 +33,9 @@ class CuspedOrbifold:
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
-		self.see_if_canonical()
 
 	def info(self):
-		tets = orb.Tetrahedra
+		tets = self.Tetrahedra
 		print('number of tetrahedra is',len(tets))
 		for i in range(len(tets)):
 			print('gluing data for', tets[i], 'is')
@@ -54,6 +52,27 @@ class CuspedOrbifold:
 			print('edge 12',tets[i].edge_params[E12].real,'+',tets[i].edge_params[E12].imag,'* i')
 			print('edge 13',tets[i].edge_params[E13].real,'+',tets[i].edge_params[E13].imag,'* i')
 			print('edge 23',tets[i].edge_params[E23].real,'+',tets[i].edge_params[E23].imag,'* i')
+
+	def copy(self):
+		new_tets = []
+		new_to_old = {}
+		old_to_new = {}
+		for tet in self.Tetrahedra:
+			new_tet = Tetrahedron()
+			old_to_new[tet] = new_tet
+			new_to_old[new_tet] = tet
+			new_tets.append(new_tet)
+		for new_tet in new_tets:
+			new_tet.Index = new_to_old[new_tet].Index
+			for edge in OneSubsimplices:
+				new_tet.edge_params[edge] = new_to_old[new_tet].edge_params[edge]
+			for sym in new_to_old[new_tet].Symmetries:
+				new_tet.Symmetries.append(sym)
+			for face in TwoSubsimplices:
+				if new_to_old[new_tet].Neighbor[face] != None:
+					new_tet.attach(face,old_to_new[new_to_old[new_tet].Neighbor[face]],
+						new_to_old[new_tet].Gluing[face].tuple())
+		return CuspedOrbifold(new_tets)
 
 	def add_tet(self, tet):
 		self.Tetrahedra.append(tet)
@@ -317,18 +336,18 @@ class CuspedOrbifold:
 			self.Edges[i].Index = i
 
 
-	# set self.is_canonical to True or False
-	def see_if_canonical(self):
+	#Checks if the triangulation is canonical or not. It will return true even if some tilt sums
+	#are 0, so this is really just checking if it's "proto-canonical".
+	def is_canonical(self):
 		for tet1 in self.Tetrahedra:
 			for face1 in TwoSubsimplices:
 				if tet1.Neighbor[face1] != None:
 					tet2 = tet1.Neighbor[face1]
 					face2 = tet1.Gluing[face1].image(face1)
 					if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
-						self.is_canonical = False
-						return
+						return False
 		# if it hasn't already returned, set it to True.
-		self.is_canonical = True
+		return True
 
 
 
@@ -418,6 +437,9 @@ class CuspedOrbifold:
 
 	"""
 	Finally, the next function computes the isometry group of an orbifold using the above two functions.
+	Really they're the combinatorial automorphisms of the triangulation. If the triangulation is canonical,
+	they will be all isometries. It includes the orientation reversing isometries.
+
 	The isometries are given as dictionaries as described in the above function's comments.
 	"""
 
@@ -436,21 +458,60 @@ class CuspedOrbifold:
 
 
 	"""
+	If we just want the orientation preserving isometries.
+	"""
+	
+	def isometriesOP(self):
+		isometries = self.isometries()
+		isometriesOP = [iso for iso in isometries if iso[self.Tetrahedra[0]][0].sign() == 0]
+		return isometriesOP
+	
+
+
+	"""
 	Simplification moves.
 	"""
 
 	"""
-	2-3 move using arrows. It will automatically do a flat 2-3 move if necessary. There's an optional argument
-	called build. By default, it is 1. But if it's set to 0, then the 2-3 move will be done without
-	updating quotient edges, faces, or vertices, nor updating horotriangles.
+	First, the function check_two_to_three(self,two_subsimplex,tet) checks if a 2-3 move through
+	two_subsimplex of tet is possible. It is impossible if certain dihedral angles are too large
+	or if tet has symmetries which don't preserve two_subsimplex.
+
+	Next, the function two_to_three(self,two_subsimplex,tet) actually does the 2-3 move. I chose
+	to implement it using arrows. It will automatically do a "flat" 2-3 move if possible. Also,
+	there's an optional argument called "build". By default, it's 1. But if it's set to 0, then
+	the 2-3 move will be done without updating quotient edges, faces, or vertices, nor updating
+	horotriangles. This is useful when we do the 3-6 move further down.
 	"""
-	def arrow_two_to_three(self, two_subsimplex, tet, build = 1):
+	def check_two_to_three(self,two_subsimplex,tet):
+		if tet.Neighbor[two_subsimplex] is None:
+			return 0
+		for one_subsimplex in OneSubsimplices:
+			if is_subset(one_subsimplex,two_subsimplex):
+				z = tet.edge_params[one_subsimplex]
+				w = tet.Neighbor[two_subsimplex].edge_params[tet.Gluing[two_subsimplex].image(one_subsimplex)]
+				if (z*w).imag.evaluate() < 0:
+					return 0
+				if (z*w).imag == SquareRootCombination.Zero():
+					face = flip_face(one_subsimplex,two_subsimplex)
+					if not tet.face_glued_to_self(face):
+						return 0
+					if tet.Gluing[face].image(one_subsimplex) != one_subsimplex:
+						return 0
+		for perm in tet.Symmetries:
+			if perm.image(two_subsimplex) != two_subsimplex:
+				return 0
+		for perm in tet.Neighbor[two_subsimplex].Symmetries:
+			if perm.image(tet.Gluing[two_subsimplex].image(two_subsimplex)) != tet.Gluing[two_subsimplex].image(two_subsimplex):
+				return 0
+		return 1
+
+	def two_to_three(self, two_subsimplex, tet, build = 1):
 		#Third try. Have to be more careful with gluing to external faces when there are symmetries.
 		if tet.Neighbor[two_subsimplex] is None:
 			return 0
 		flat_tets = []
 		One = ComplexSquareRootCombination.One()
-		self.PachnerPath.append([self.Tetrahedra,two_subsimplex,tet])
 		if tet.face_glued_to_self(two_subsimplex):
 			for one_subsimplex in OneSubsimplices:
 				if tet.Gluing[two_subsimplex].image(one_subsimplex) == one_subsimplex:
@@ -631,6 +692,7 @@ class CuspedOrbifold:
 
 	"""
 	3-2 move. Returns 0 if a 3-2 move is not possible, otherwise does the move on self and returns 1.
+	Currently it does not reverse a flat 2-3 move.
 	"""
 	def three_to_two(self,edge):
 		One = ComplexSquareRootCombination.One()
