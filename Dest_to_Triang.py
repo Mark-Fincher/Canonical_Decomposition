@@ -237,6 +237,14 @@ def full_snappy_triang(Dest):
 	index_tets(tets)
 	return tets
 
+def dest_to_orb(Dest):
+	# input a Dest Seq, returns the cusped orbifold object you get using Dest_to_Triang.py
+	# and CuspedOrbifold.py.
+	tets_list = full_snappy_triang(Dest)
+	orb = CuspedOrbifold(tets_list)
+	orb.DestSeq = Dest
+	return orb
+
 
 """
 If a tetrahedron has symmetries, it's not necessary to specify all the face gluings. This is because

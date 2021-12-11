@@ -338,7 +338,7 @@ class CuspedOrbifold:
 
 	#Checks if the triangulation is canonical or not. It will return true even if some tilt sums
 	#are 0, so this is really just checking if it's "proto-canonical".
-	def is_canonical(self):
+	def is_proto_canonical(self):
 		for tet1 in self.Tetrahedra:
 			for face1 in TwoSubsimplices:
 				if tet1.Neighbor[face1] != None:
@@ -687,7 +687,6 @@ class CuspedOrbifold:
 			self.add_cusp_cross_sections()
 			for cusp in self.Vertices:
 				self.normalize_cusp(cusp)
-			self.see_if_canonical()
 		return 1
 
 	"""
@@ -869,7 +868,6 @@ class CuspedOrbifold:
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
-		self.see_if_canonical()
 		return 1
 
 	"""
@@ -975,6 +973,8 @@ class CuspedOrbifold:
 	
 	def three_to_six(self,two_subsimplex,tet):
 		One = ComplexSquareRootCombination.One()
+		if tet.Neighbor[two_subsimplex] is None:
+			return 0
 		if len(tet.Symmetries) != 2:
 			return 0
 		for sym in tet.Symmetries:
@@ -1016,14 +1016,14 @@ class CuspedOrbifold:
 			return 0
 		if flat_u0_u1_v0_w1:
 			a.reverse()
-			self.arrow_two_to_three(a.Face,a.Tetrahedron,0)
+			self.two_to_three(a.Face,a.Tetrahedron,0)
 			b.reverse()
 			new_b = b.copy()
 			b.next().opposite().next()
-			self.arrow_two_to_three(new_b.Face,new_b.Tetrahedron,0)
+			self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
 			new_b = b.copy()
 			b.reverse().next()
-			self.arrow_two_to_three(new_b.Face,new_b.Tetrahedron,0)
+			self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
 			c = b.copy().reverse().next()
 			c.add_sym(c.copy().opposite())
 			c.opposite().next()
@@ -1032,13 +1032,13 @@ class CuspedOrbifold:
 			c.Tetrahedron.erase()
 			self.Tetrahedra.remove(c.Tetrahedron)
 		elif flat_u0_u1_v1_w1:
-			self.arrow_two_to_three(a.Face,a.Tetrahedron,0)
+			self.two_to_three(a.Face,a.Tetrahedron,0)
 			new_c = c.copy()
 			c.next().opposite().next()
-			self.arrow_two_to_three(new_c.Face,new_c.Tetrahedron,0)
+			self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
 			new_c = c.copy().reverse()
 			c.next()
-			self.arrow_two_to_three(new_c.Face,new_c.Tetrahedron,0)
+			self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
 			b = c.copy().next()
 			b.add_sym(b.copy().opposite().reverse())
 			b.opposite().next()
@@ -1056,14 +1056,14 @@ class CuspedOrbifold:
 			complex_abs_w1 = ComplexSquareRootCombination(abs(w1),SquareRootCombination.Zero())
 			if (w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate():
 				#This is the case [u_0,w_1] "beneath" [u_1,w_0].
-				self.arrow_two_to_three(two_subsimplex,tet,0)
+				self.two_to_three(two_subsimplex,tet,0)
 				c.next()
 				new_c = c.copy().reverse()
 				c.opposite().next().reverse()
-				self.arrow_two_to_three(new_c.Face,new_c.Tetrahedron,0)
+				self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
 				new_c = c.copy()
 				c.reverse().next()
-				self.arrow_two_to_three(new_c.Face,new_c.Tetrahedron,0)
+				self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
 				d = c.copy()
 				c.reverse().next()
 				e = c.copy().opposite().reverse()
@@ -1091,13 +1091,13 @@ class CuspedOrbifold:
 				self.Tetrahedra.remove(f.Tetrahedron)
 			elif (w0/complex_abs_w0).real.evaluate() > (w1/complex_abs_w1).real.evaluate():
 				#This is the case [u_0,w_1] "above" [u_1,w_0].
-				self.arrow_two_to_three(c.Face,c.Tetrahedron,0)
+				self.two_to_three(c.Face,c.Tetrahedron,0)
 				b.reverse()
 				new_b = b.copy()
 				b.next().opposite().next()
-				self.arrow_two_to_three(new_b.Face,new_b.Tetrahedron,0)
+				self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
 				new_b = b.copy().next()
-				self.arrow_two_to_three(new_b.Face,new_b.Tetrahedron,0)
+				self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
 				#Now add symmetries.
 				d = b.copy()
 				b.next()
@@ -1143,7 +1143,6 @@ class CuspedOrbifold:
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
-		self.see_if_canonical()
 		return 1
 
 

@@ -12,39 +12,89 @@ from vertex import*
 from Dest_to_Triang import*
 from sagestuff import*
 
-
-def dest_to_orb(Dest):
-	# input a Dest Seq, returns the cusped orbifold object you get using Dest_to_Triang.py
-	# and CuspedOrbifold.py.
-	tets_list = full_snappy_triang(Dest)
-	orb = CuspedOrbifold(tets_list)
-	orb.DestSeq = Dest
-	return orb
-
-
 """
-Need interval arithmetic for this.
+proto_canonize tries to find a proto-canonical triangulation of an orbifold, which is analogous
+to a proto-canonical triangulation of a manifold. If the orbifold's canonical decomposition is
+a triangulation, as is usually the case, then its proto-canonical triangulation will actually
+be its canonical decomposition
+
+This function is written just like the proto_canonize function for manifolds in the SnapPy kernel, in 
+canonize_part_1.c, with changes accounting for orbifolds.
+
+This function will modify orb, so make a copy of it if you want to save it. If it succesfully makes
+orb proto-canonical, it returns 1. Otherwise, it returns 0.
 """
+def proto_canonize(orb):
+	MAX_MOVES = 1000
+	for i in range(MAX_MOVES):
+		if attempt_two_to_three(orb):
+			continue
+		if attempt_three_to_two(orb):
+			continue
+		if attempt_three_to_six(orb):
+			continue
+		#If none of the attempts work, then either it's proto-canonical, or the algorithm is stuck.
+		#In either case, we break out of the loop.
+		break
+	if orb.is_proto_canonical():
+		return 1
+	else:
+		return 0
 
-def check_2_to_3_possible(tets,tet,face):
-	for edge in OneSubsimplices:
-		if is_subset(edge,face):
-			z = tet.edge_params[edge]
-			w = tet.Neighbor[face].edge_params[tet.Gluing[face].image(edge)]
-			if (z*w).imag.evaluate() < 0 or (z*w).imag == SquareRootCombination.Zero():
-				return False
-	# Now we check that tet doesn't have symmetries taking "face" to a different face. If so, then a 2-3 move won't make
-	# sense in the universal cover. Do the same for tet.Neighbor[face].
-	for perm in tet.Symmetries:
-		if perm[FaceIndex[face]] != FaceIndex[face]:
-			return False
-	for perm in tet.Neighbor[face].Symmetries:
-		if perm[tet.Gluing[face][FaceIndex[face]]] != tet.Gluing[face][FaceIndex[face]]:
-			return False
-	# If we haven't returned False by now, then return True.
-	return True
+def attempt_two_to_three(orb):
+	for tet in orb.Tetrahedra:
+		for face in TwoSubsimplices:
+			if concave_face(face,tet) and orb.check_two_to_three(face,tet):
+				if orb.two_to_three(face,tet):
+					return 1
+				else:
+					#This shouldn't happen
+					print('error in attempt_two_to_three')
+					return 0
+	return 0
 
+def attempt_three_to_two(orb):
+	for edge in orb.Edges:
+		if edge.valence() in {1,3} and concave_edge(edge):
+			if orb.three_to_two(edge):
+				return 1
+	return 0
 
+def attempt_three_to_six(orb):
+	for tet in orb.Tetrahedra:
+		for face in TwoSubsimplices:
+			if concave_face(face,tet) and orb.three_to_six(face,tet):
+				return 1
+	return 0
+
+def concave_edge(edge):
+	#Checks if there is any face adjacent to edge with positive tilt sum.
+	#It should be that if any face adjacent to edge has positive tilt sum, then
+	#they all do (except those which are glued to None), but it could be that,
+	#for a given corner, both adjacent faces are glued to None. So we need to
+	#loop through all the corners.
+	for corner in edge.Corners:
+		tet = corner.Tetrahedron
+		face = RightFace[corner.Subsimplex]
+		for i in range(2):
+			if tet.Neighbor[face] != None:
+				other_tet = tet.Neighbor[face]
+				other_face = tet.Gluing[face].image(face)
+				if (tet.tilt(comp(face)) + other_tet.tilt(comp(other_face))).evaluate() > 0:
+					return 1
+			face = LeftFace[corner.Subsimplex]
+	return 0
+
+def concave_face(face,tet):
+	if tet.Neighbor[face] is None:
+		return 0
+	else:
+		other_tet = tet.Neighbor[face]
+		other_face = tet.Gluing[face].image(face)
+		if (tet.tilt(comp(face)) + other_tet.tilt(comp(other_face))).evaluate() > 0:
+			return 1
+		else:
+			return 0
 
 
 
@@ -85,9 +135,6 @@ def old_canonize(input_orb):
 			return
 	print('failure: got stuck, could not reach the canonical decomposition with 2-3 moves')
 	return
-
-
-
 
 
 def two_to_three(triang,tet,face):

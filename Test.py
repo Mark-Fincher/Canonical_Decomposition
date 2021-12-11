@@ -304,6 +304,8 @@ orb.info()
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
+orb.two_to_three(F2,tet0)
+orb.info()
 #print(tet0.tilt(V2))
 orb.arrow_two_to_three(F2,tet0)
 #print(orb.is_canonical)
@@ -446,7 +448,7 @@ with open("stuck_dest_seqs.json", "r") as read_file:
 Dest = stuck_dest_seqs[5]
 orb = dest_to_orb(Dest)
 print(orb.is_canonical)
-#show_triangulation(orb.Tetrahedra)
+orb.info()
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
@@ -674,13 +676,24 @@ not_canonical = []
 for key in OrbDictionary.keys():
     dest = OrbDictionary[key]
     orb = dest_to_orb(dest)
-    if orb.is_canonical:
-        already_canonical.append(dest)
-    else:
-        not_canonical.append(dest)
+    if orb.is_proto_canonical() is False:
+        print('dest at', key, 'is not canonical')
+        if proto_canonize(orb):
+            print('canonize succeeded')
+        else:
+            print('canonize failed')
+        print(' ')
+
 """
-dest = OrbDictionary[(16,0)]
+dest = OrbDictionary[(28,7)]
 orb = dest_to_orb(dest)
 orb.info()
-new_orb = orb.copy()
-new_orb.info()
+print(orb.is_proto_canonical())
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+tet3 = orb.Tetrahedra[3]
+tet4 = orb.Tetrahedra[4]
+tet5 = orb.Tetrahedra[5]
+#Something goes wrong with this orbifold in canonize. It looks like there could be a bug
+#in the part of three_to_six which this goes down.
