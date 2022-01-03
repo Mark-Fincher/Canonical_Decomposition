@@ -1,7 +1,5 @@
 """
-Cusped orbifold class. Like the t3m triangulation class, except we only include stuff we need,
-and our triangulations are of orbifolds. Much of this is copied from Goerner et al, and that is
-built on snappy.
+Cusped orbifold class. Similar to the SnapPy t3m mcomplex class.
 """
 
 from HoroTriangle import*
@@ -73,6 +71,24 @@ class CuspedOrbifold:
 					new_tet.attach(face,old_to_new[new_to_old[new_tet].Neighbor[face]],
 						new_to_old[new_tet].Gluing[face].tuple())
 		return CuspedOrbifold(new_tets)
+
+	"""
+	Clear all classes and horotriangles, then rebuild this data. Want to do this after changing
+	the triangulation.
+	"""
+	def clear_and_rebuild(self):
+		self.Edges = []
+		self.Vertices = []
+		for tet in self.Tetrahedra:
+			tet.clear_Class()
+			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+		for i in range(len(self.Tetrahedra)):
+			self.Tetrahedra[i].Index = i
+		self.build_vertex_classes()
+		self.build_edge_classes()
+		self.add_cusp_cross_sections()
+		for cusp in self.Vertices:
+			self.normalize_cusp(cusp)
 
 	def add_tet(self, tet):
 		self.Tetrahedra.append(tet)
@@ -486,27 +502,189 @@ class CuspedOrbifold:
 	def check_two_to_three(self,two_subsimplex,tet):
 		if tet.Neighbor[two_subsimplex] is None:
 			return 0
+		if tet.Neighbor[two_subsimplex] == tet and not tet.face_glued_to_self(two_subsimplex):
+			return 0
 		for one_subsimplex in OneSubsimplices:
 			if is_subset(one_subsimplex,two_subsimplex):
 				z = tet.edge_params[one_subsimplex]
 				w = tet.Neighbor[two_subsimplex].edge_params[tet.Gluing[two_subsimplex].image(one_subsimplex)]
 				if (z*w).imag.evaluate() < 0:
 					return 0
+				""""
+				This part is used to make sure that, if a flat tet is created, we can cancel it
+				right away. But maybe we won't be able to cancel it immediately, but will be able to
+				cancel it later. So I don't want this part anymore, will delete it eventually.
 				if (z*w).imag == SquareRootCombination.Zero():
 					face = flip_face(one_subsimplex,two_subsimplex)
 					if not tet.face_glued_to_self(face):
 						return 0
 					if tet.Gluing[face].image(one_subsimplex) != one_subsimplex:
 						return 0
-		for perm in tet.Symmetries:
-			if perm.image(two_subsimplex) != two_subsimplex:
+				"""
+		for sym in tet.Symmetries:
+			if sym.image(two_subsimplex) != two_subsimplex:
 				return 0
-		for perm in tet.Neighbor[two_subsimplex].Symmetries:
-			if perm.image(tet.Gluing[two_subsimplex].image(two_subsimplex)) != tet.Gluing[two_subsimplex].image(two_subsimplex):
+		for sym in tet.Neighbor[two_subsimplex].Symmetries:
+			if sym.image(tet.Gluing[two_subsimplex].image(two_subsimplex)) != tet.Gluing[two_subsimplex].image(two_subsimplex):
 				return 0
 		return 1
 
+	
+
+	"""
+	Re-doing 2-3 move so it allows flat tets to be created.	
+	"""
 	def two_to_three(self, two_subsimplex, tet, build = 1):
+		#Third try. Have to be more careful with gluing to external faces when there are symmetries.
+		if tet.Neighbor[two_subsimplex] is None:
+			return 0
+		One = ComplexSquareRootCombination.One()
+		if tet.face_glued_to_self(two_subsimplex):
+			for one_subsimplex in OneSubsimplices:
+				if tet.Gluing[two_subsimplex].image(one_subsimplex) == one_subsimplex:
+					if is_subset(one_subsimplex,two_subsimplex):
+						a = Arrow(one_subsimplex,two_subsimplex,tet)
+						b = self.new_arrow()
+						b.Tetrahedron.fill_edge_params(a.Tetrahedron.edge_params[a.Edge])
+						break
+		else:
+			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
+			b = a.glued()
+		z = a.Tetrahedron.edge_params[a.simplex_south_head()]
+		w = b.Tetrahedron.edge_params[b.simplex_north_tail()]
+		#Now we make the new tets. We consider each case separately. That means some redundant
+		#lines are written, but I think it's easier to understand this way. 
+		if tet.face_glued_to_self(two_subsimplex) and tet.face_rotation(two_subsimplex):
+			new = self.new_arrow()
+			new.Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			new.add_sym(new.copy().reverse())
+			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new.glue(new.copy().reverse())
+			new.copy().reverse().glue(new)
+			a.reverse()
+			new.opposite()
+			if a.glued().Tetrahedron is None:
+				#Then must apply a rotation to see what the face of new is glued to.
+				a.rotate(1)
+				if a.glued().Tetrahedron is None:
+					#Then when we rotate one more time, that face must be glued to something.
+					a.rotate(1)
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				new.glue(a.glued())
+				new.glue(a.glued())
+			else:
+				new.glue(a.glued())
+			#Now new is glued either to itself or to another tet which is not a.Tetrahedron
+			#nor b.Tetrahedron. So all the data for new.Tetrahedron is assigned.
+		elif tet.face_rotation(two_subsimplex):
+			new = self.new_arrow()
+			new.Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new.glue(new.copy())
+			a.reverse()
+			new.opposite()
+			if a.glued().Tetrahedron is None:
+				#Then must apply a rotation to see what the face of new is glued to.
+				a.rotate(1)
+				if a.glued().Tetrahedron is None:
+					#Then when we rotate one more time, that face must be glued to something.
+					a.rotate(1)
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				new.glue(a.glued())
+				new.glue(a.glued())
+			else:
+				new.glue(a.glued())
+			new.reverse()
+			if b.glued().Tetrahedron is None:
+				#Then must apply a rotation to see what the face of new is glued to.
+				b.rotate(1)
+				if b.glued().Tetrahedron is None:
+					#Then when we rotate one more time, that face must be glued to something.
+					b.rotate(1)
+			if b.Tetrahedron.face_glued_to_self(b.Face):
+				new.glue(b.glued())
+				new.glue(b.glued())
+			else:
+				new.glue(b.glued())
+			#Now all the data for new is assigned.
+		elif tet.face_glued_to_self(two_subsimplex):
+			new = self.new_arrows(2)
+			for c in new:
+				c.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			new[0].add_sym(new[0].copy().reverse())
+			new[1].Tetrahedron.fill_edge_params(z/(One-w))
+			new[0].glue(new[1])
+			new[1].glue(new[1].copy().reverse())
+			#Now we glue the external faces.
+			a.reverse()
+			new[0].opposite()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				new[0].glue(a.glued())
+				new[0].glue(a.glued())
+			else:
+				new[0].glue(a.glued())
+			a.rotate(-1)
+			new[1].opposite()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				new[1].glue(a.glued())
+				new[1].glue(a.glued())
+			else:
+				new[1].glue(a.glued())
+			a.rotate(-1)
+			new[1].reverse()
+			#No faces of b.Tetrahedron are glued to anything, since it's a copy of a.Tetrahedron.
+			#So we instead glue new[1] to what a is glued to.
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				new[1].glue(a.glued())
+				new[1].glue(a.glued())
+			else:
+				new[1].glue(a.glued())
+		else:
+			#Assuming there is no face rotation nor is the face glued to itself.
+			#Then this is just a normal 2-3 move.
+			new = self.new_arrows(3)
+			new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			new[1].Tetrahedron.fill_edge_params(z/(One-w))
+			new[2].Tetrahedron.fill_edge_params(w/(One-z))
+			for i in range(3):
+				new[i].glue(new[(i+1)%3])
+			a.reverse()
+			for c in new:
+				c.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+				c.opposite()
+				if a.Tetrahedron.face_glued_to_self(a.Face):
+					c.glue(a.glued())
+					c.glue(a.glued())
+				else:
+					c.glue(a.glued())
+				c.reverse()
+				if b.Tetrahedron.face_glued_to_self(b.Face):
+					c.glue(b.glued())
+					c.glue(b.glued())
+				else:
+					c.glue(b.glued())
+				a.rotate(-1)
+				b.rotate(1)		
+		if tet in self.Tetrahedra:
+			self.Tetrahedra.remove(tet)
+		if b.Tetrahedron in self.Tetrahedra:
+			self.Tetrahedra.remove(b.Tetrahedron)
+		if build:
+			self.clear_and_rebuild()
+		return 1
+
+
+
+
+
+
+
+
+	"""
+	This one tries to remove flat tets right away.
+	"""
+	def older_two_to_three(self, two_subsimplex, tet, build = 1):
 		#Third try. Have to be more careful with gluing to external faces when there are symmetries.
 		if tet.Neighbor[two_subsimplex] is None:
 			return 0
@@ -520,8 +698,6 @@ class CuspedOrbifold:
 						b = self.new_arrow()
 						b.Tetrahedron.fill_edge_params(a.Tetrahedron.edge_params[a.Edge])
 						break
-			z = a.Tetrahedron.edge_params[a.simplex_south_head()]
-			w = b.Tetrahedron.edge_params[b.simplex_north_tail()]
 		else:
 			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
 			b = a.glued()
@@ -651,6 +827,7 @@ class CuspedOrbifold:
 		#are glued to themselves in the correct way. If at least the one in tet is glued to itself
 		#properly, the following will go through.
 		if flat_tets:
+			print('doing 2-3 with a flat tet')
 			a = flat_tets[0].copy()
 			a.opposite()
 			if (a.Tetrahedron.face_glued_to_self(a.Face) and 
@@ -669,6 +846,11 @@ class CuspedOrbifold:
 					a.opposite().next().reverse()
 					a.glue(a.copy().next().next())
 				self.Tetrahedra.remove(flat_tets[0].Tetrahedron)
+			else:
+				#Then the face isn't glued to itself properly, so a flat 2-3 move isn't possible. If
+				#check_two_to_three was passed, this shouldn't happen. Note that self has been altered
+				#in the attempt.
+				return 0
 		if tet in self.Tetrahedra:
 			self.Tetrahedra.remove(tet)
 		if b.Tetrahedron in self.Tetrahedra:
@@ -709,7 +891,7 @@ class CuspedOrbifold:
 						face_glued_to_self = True
 					else:
 						return 0
-		elif edge.valence() == 3:
+		elif edge.valence() == 3 and edge.LocusOrder == 1:
 			for corner in edge.Corners:
 				a = Arrow(corner.Subsimplex,LeftFace[corner.Subsimplex],
 					corner.Tetrahedron)
@@ -971,7 +1153,7 @@ class CuspedOrbifold:
 	the 3-6 move.
 	"""
 	
-	def three_to_six(self,two_subsimplex,tet):
+	def older_three_to_six(self,two_subsimplex,tet):
 		One = ComplexSquareRootCombination.One()
 		if tet.Neighbor[two_subsimplex] is None:
 			return 0
@@ -1002,12 +1184,26 @@ class CuspedOrbifold:
 		if ((z*w).imag).evaluate() < 0:
 			return 0
 		if (z*w).imag == SquareRootCombination.Zero():
+			#Then we will try to do a flat 3-6 move. But we must check that a certain face is glued
+			#to itself properly, otherwise the flat 3-6 is impossible.
+			new_a = a.copy().rotate(1)
+			if not tet.face_glued_to_self(new_a.Face):
+				return 0
+			if tet.Gluing[new_a.Face].image(new_a.simplex_north_head()) != new_a.simplex_north_head():
+				return 0
 			flat_u0_u1_v1_w1 = True
 		z = tet.edge_params[a.simplex_north_head()]
 		w = voisin.edge_params[b.simplex_north_tail()]
 		if ((z*w).imag).evaluate() < 0:
 			return 0
 		if (z*w).imag == SquareRootCombination.Zero():
+			#As in the other case, we must check a certain face is glued to itself properly,
+			#or else the 3-6 move is not allowed.
+			new_a = a.copy().rotate(1)
+			if not tet.face_glued_to_self(new_a.Face):
+				return 0
+			if tet.Gluing[new_a.Face].image(a.simplex_south_tail()) != a.simplex_south_tail():
+				return 0
 			flat_u0_u1_v0_w1 = True
 		c = self.new_arrow()
 		c.glue(a)
@@ -1146,9 +1342,14 @@ class CuspedOrbifold:
 		return 1
 
 
+
+	"""
+	Doing a 3-6 move which allows flat tetrahedra, and not trying to get rid of them.
 	"""
 	def three_to_six(self,two_subsimplex,tet):
 		One = ComplexSquareRootCombination.One()
+		if tet.Neighbor[two_subsimplex] is None:
+			return 0
 		if len(tet.Symmetries) != 2:
 			return 0
 		for sym in tet.Symmetries:
@@ -1162,84 +1363,219 @@ class CuspedOrbifold:
 		voisin = tet.Neighbor[two_subsimplex]
 		if voisin == tet or len(voisin.Symmetries) > 1:
 			return 0
-		z = tet.edge_params[one_subsimplex]
-		w = voisin.edge_params[tet.Gluing[two_subsimplex].image(one_subsimplex)]
-		if (z*w*w).imag == 0 or ((z*w*w).imag).evaluate() < 0:
-			return 0
-		for other_edge in OneSubsimplices:
-			if is_subset(other_edge,two_subsimplex) and other_edge != one_subsimplex:
-				z = tet.edge_params[other_edge]
-				w = voisin.edge_params[tet.Gluing[two_subsimplex].image(other_edge)]
-				if (z*w).imag == 0 or ((z*w).imag).evaluate() < 0:
-					return 0
 		a = Arrow(one_subsimplex,two_subsimplex,tet)
 		b = a.glued()
-		x = tet.edge_params[a.simplex_north_tail()]
-		y = voisin.edge_params[b.Edge]
-		z = voisin.edge_params[b.simplex_south_tail()]
-		if (((One - One/(y - x*y + x))/abs(One - One/(y - x*y + x))).real.evaluate() < 
-			((One - One/(x*z))/abs(One - One/(x*z))).real.evaluate()):
-			new = self.new_arrows(4)
-			#In terms of my write-up labeling, new[0] = [u0,u1,v1,w1], new[1] = [u0,u1,w0,w1],
-			#new[2] = [u1,v0,w0,w1], new[3] = [v0,v1,w0,w1].
-			new[0].Tetrahedron.fill_edge_params((x*(One - (One - x)*y + x))/((x - One)*y))
-			new[1].Tetrahedron.fill_edge_params(((y - x*y + x)*(One - x*z))/(y - x*y + x - x*z))
-			new[2].Tetrahedron.fill_edge_params((x*z - One)/(y - x*y + x - One))
-			new[3].Tetrahedron.fill_edge_params((x - x*z)/(y - x*y + x - x*z))
-			new[0].add_sym(new[0].copy())
-			new[1].add_sym(new[1].copy())
-			new[1].add_sym(new[1].copy().opposite())
-			new[2].add_sym(new[2].copy())
-			new[3].add_sym(new[3].copy())
-			new[3].add_sym(new[3].copy().opposite())
-			new[1].rotate(-1).reverse()
-			new[0].glue(new[1])
-			new[0].rotate(1)
-			b.reverse().rotate(-1)
-			if b.Tetrahedron.face_glued_to_self(b.Face):
-				new[0].glue(b.glued())
-				new[0].glue(b.glued())
-			else:
-				new[0].glue(b.glued())
-			new[0].rotate(1)
-			a.rotate(1)
-			if a.glued().Tetrahedron is None:
-				a.opposite().reverse()
-			if a.Tetrahedron.face_glued_to_self(a.Face):
-				new[0].glue(a.glued())
-				new[0].glue(a.glued())
-			else:
-				new[0].glue(a.glued())
-			new[0].reverse()
-			new[2].reverse()
-			new[0].glue(new[2])
-			b.opposite()
-			if b.Tetrahedron.face_glued_to_self(b.Face):
-				new[2].glue(b.glued())
-				new[2].glue(b.glued())
-			else:
-				new[2].glue(b.glued())
-			new[1].reverse().rotate(-1)
-			new[2].reverse().opposite()
-			new[1].glue(new[2])
-			new[3].rotate(1)
-			new[2].glue(new[3])
-			new[3].reverse().rotate(-1)
-			b.opposite().reverse()
-			if b.Tetrahedron.face_glued_to_self(b.Face):
-				new[3].glue(b.glued())
-				new[3].glue(b.glued())
-			else:
-				new[3].glue(b.glued())
-			#I think that's it for this case.
-
-
-		elif (((One - One/(y - x*y + x))/abs(One - One/(y - x*y + x))).real.evaluate() > 
-			((One - One/(x*z))/abs(One - One/(x*z))).real.evaluate()):
-
-		else:
+		z = tet.edge_params[a.Edge]
+		w = voisin.edge_params[b.Edge]
+		if ((z*w*w).imag).evaluate() < 0 or (z*w*w).imag == SquareRootCombination.Zero():
+			#In the latter case maybe a flat 3-6 move is possible, but let's not consider that currently.
 			return 0
+		flat_u0_u1_v1_w1 = False
+		flat_u0_u1_v0_w1 = False
+		z = tet.edge_params[a.simplex_south_head()]
+		w = voisin.edge_params[b.simplex_south_tail()]
+		if ((z*w).imag).evaluate() < 0:
+			return 0
+		if (z*w).imag == SquareRootCombination.Zero():
+			#Then we will try to do a flat 3-6 move. But we must check that a certain face is glued
+			#to itself properly, otherwise the flat 3-6 is impossible.
+			new_a = a.copy().rotate(1)
+			if not tet.face_glued_to_self(new_a.Face):
+				return 0
+			if tet.Gluing[new_a.Face].image(new_a.simplex_north_head()) != new_a.simplex_north_head():
+				return 0
+			flat_u0_u1_v1_w1 = True
+		z = tet.edge_params[a.simplex_north_head()]
+		w = voisin.edge_params[b.simplex_north_tail()]
+		if ((z*w).imag).evaluate() < 0:
+			return 0
+		if (z*w).imag == SquareRootCombination.Zero():
+			#As in the other case, we must check a certain face is glued to itself properly,
+			#or else the 3-6 move is not allowed.
+			new_a = a.copy().rotate(1)
+			if not tet.face_glued_to_self(new_a.Face):
+				return 0
+			if tet.Gluing[new_a.Face].image(a.simplex_south_tail()) != a.simplex_south_tail():
+				return 0
+			flat_u0_u1_v0_w1 = True
+		c = self.new_arrow()
+		c.glue(a)
+		c.Tetrahedron.fill_edge_params(b.Tetrahedron.edge_params[b.Edge])
+		if flat_u0_u1_v0_w1 and flat_u0_u1_v1_w1:
+			#Maybe this is actually a valid case, and it could be a valid case for
+			#the 2-3 move situation too. But for now, let's not allow it.
+			return 0
+		else:
+			x = tet.edge_params[a.simplex_north_tail()]
+			y = voisin.edge_params[b.Edge]
+			z = voisin.edge_params[b.simplex_south_tail()]
+			w0 = One - One/(y - x*y + x)
+			complex_abs_w0 = ComplexSquareRootCombination(abs(w0),SquareRootCombination.Zero())
+			w1 = One - One/(x*z)
+			complex_abs_w1 = ComplexSquareRootCombination(abs(w1),SquareRootCombination.Zero())
+			if (w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate():
+				#This is the case [u_0,w_1] "beneath" [u_1,w_0].
+				self.two_to_three(two_subsimplex,tet,0)
+				c.next()
+				new_c = c.copy().reverse()
+				c.opposite().next().reverse()
+				self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
+				new_c = c.copy()
+				c.reverse().next()
+				self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
+				d = c.copy()
+				c.reverse().next()
+				e = c.copy().opposite().reverse()
+				c.add_sym(e)
+				e.reverse().next()
+				c.next()
+				f = c.copy()
+				c.opposite().reverse().next()
+				c.add_sym(c.copy().opposite().reverse())
+				c.rotate(-1).next()
+				d.glue(e.glued())
+				e.rotate(1)
+				d.rotate(1)
+				if e.glued().Tetrahedron != None:
+					if e.Tetrahedron.face_glued_to_self(e.Face):
+						d.glue(e.glued())
+						d.glue(e.glued())
+					else:
+						d.glue(e.glued())
+				e.Tetrahedron.erase()
+				c.reverse().rotate(-1)
+				c.glue(f.glued())
+				f.Tetrahedron.erase()
+				self.Tetrahedra.remove(e.Tetrahedron)
+				self.Tetrahedra.remove(f.Tetrahedron)
+			elif (w0/complex_abs_w0).real.evaluate() > (w1/complex_abs_w1).real.evaluate():
+				#This is the case [u_0,w_1] "above" [u_1,w_0].
+				self.two_to_three(c.Face,c.Tetrahedron,0)
+				b.reverse()
+				new_b = b.copy()
+				b.next().opposite().next()
+				self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
+				new_b = b.copy().next()
+				self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
+				#Now add symmetries.
+				d = b.copy()
+				b.next()
+				b.add_sym(b.copy().opposite())
+				e = b.copy().opposite().reverse().next()
+				b.next()
+				f = b.copy()
+				b.opposite().next()
+				b.add_sym(b.copy().opposite())
+				b.rotate(1).next()
+				#Now we adjust face gluings and remove two tets.
+				d.rotate(1)
+				e.rotate(1)
+				if d.glued().Tetrahedron != None:
+					if d.Tetrahedron.face_glued_to_self(d.Face):
+						e.glue(d.glued())
+						e.glue(d.glued())
+					else:
+						e.glue(d.glued())
+				d.reverse()
+				e.reverse()
+				e.glue(d.glued())
+				d.Tetrahedron.erase()
+				b.rotate(-1)
+				f.rotate(1)
+				f.glue(b.glued())
+				b.Tetrahedron.erase()
+				self.Tetrahedra.remove(d.Tetrahedron)
+				self.Tetrahedra.remove(b.Tetrahedron)
+			else:
+				#Otherwise the geodesics intersect.
+				return 0
+		self.clear_and_rebuild()
+		return 1
+
+
+
+
+
 	"""
+	We use the following to try to get rid of flat tetrahedra. If two are glued to themselves in a
+	certain way, or one is glued to itself in a certain way, then it will be "cancelled" out by this
+	function. This is the orbifold version of a 2-0 move. See the write-up for more detail.
+
+	The input is an edge with valence 2 and LocusOrder 1. Such an edge must belong to one or two
+	flat tetrahedra. If the cancellation move can't be done, return 0. Otherwise, return 1.
+	"""
+	def cancel_tetrahedra(self,edge):
+		if edge.valence() != 2 or edge.LocusOrder != 1:
+			return 0
+		#If it passes this, then the tet(s) must be flat.
+		corner = edge.Corners[0]
+		a = Arrow(corner.Subsimplex,LeftFace[corner.Subsimplex],corner.Tetrahedron)
+		#We don't want to try the cancellation if there are certain nontrivial symmetries.
+		#They probably shouldn't be there anyway for a geometric triangulation, but we
+		#check for them just in case.
+		for sym in a.Tetrahedron.Symmetries:
+			if sym.image(a.Edge) != a.Edge:
+				return 0
+		#There are two main cases. If the faces adjacent to "edge" are glued to themselves,
+		#or not.
+		if a.Tetrahedron.face_glued_to_self(a.Face):
+			#Check it's glued to itself properly.
+			perm = a.Tetrahedron.Gluing[a.Face]
+			if perm.image(a.Edge) != a.Edge:
+				return 0
+			b = a.copy().opposite()
+			if len(a.Tetrahedron.Symmetries) == 2:
+				if b.glued() is None:
+					b.reverse()
+				b.next().reverse()
+				b.glue(b.copy().reverse())
+			else:
+				#Then the only symmetry is the identity.
+				c = b.copy().reverse()
+				b.next().reverse()
+				b.glue(c.glued())
+			self.Tetrahedra.remove(a.Tetrahedron)
+		else:
+			#In this case there are two flat tetrahedra.
+			if a.glued() is None:
+				a.reverse()
+			b = a.copy().next()
+			#Make sure the other tet doesn't have any illegal symmetries.
+			for sym in b.Tetrahedron.Symmetries:
+				if sym.image(b.Edge) != b.Edge:
+					return 0
+			#Another sanity check.
+			if len(a.Tetrahedron.Symmetries) != len(b.Tetrahedron.Symmetries):
+				return 0
+			#Now there are two cases: they have the nontrivial symmetry or not.
+			a.opposite()
+			b.opposite()
+			if len(a.Tetrahedron.Symmetries) == 1:
+				c = a.copy().next().reverse()
+				c.glue(b.glued())
+				a.reverse()
+				b.reverse()
+				c = a.copy().next().reverse()
+				c.glue(b.glued())
+			else:
+				if a.glued() is None:
+					a.reverse()
+					b.reverse()
+				c = a.copy().next().reverse()
+				if b.glued() is None:
+					c.glue(b.reverse().glued())
+				else:
+					c.glue(b.glued())
+			self.Tetrahedra.remove(a.Tetrahedron)
+			self.Tetrahedra.remove(b.Tetrahedron)
+		self.clear_and_rebuild()
+		return 1
+
+
+
+
+
+
 
 	
 

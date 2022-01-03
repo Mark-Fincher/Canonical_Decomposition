@@ -441,46 +441,31 @@ for dest in newly_canonical_dest_seqs:
         print(dest)
 """
 
-"""
+
 with open("stuck_dest_seqs.json", "r") as read_file:
     stuck_dest_seqs = json.load(read_file)
 
 Dest = stuck_dest_seqs[5]
 orb = dest_to_orb(Dest)
-print(orb.is_canonical)
+print(orb.is_proto_canonical())
 orb.info()
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
+print(tet0.tilt(V3) + tet1.tilt(V2))
+print(orb.check_two_to_three(F3,tet0))
+orb.two_to_three(F3,tet0)
+orb.info()
+print(orb.is_proto_canonical())
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+print(tet0.tilt(V2) + tet1.tilt(V1))
+print(orb.check_two_to_three(F2,tet0))
+orb.two_to_three(F2,tet0)
+orb.info()
 
-orb.arrow_two_to_three(F3,tet0)
-print(orb.is_canonical)
-#show_triangulation(orb.Tetrahedra)
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-#print((tet0.tilt(V2)+tet1.tilt(V1)).evaluate() > 0)
-#print(check_2_to_3_possible(orb.Tetrahedra,tet0,F2))
-#this is where we get stuck, want to do a 2-3 move but there's a flat quad.
-orb.flat_two_to_three(F2,tet0)
-print(orb.Vertices)
-print(orb.is_canonical)
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet0.clear_Class()
-tet1.clear_Class()
-print(' ')
-orb = CuspedOrbifold([tet0,tet1])
-print(orb.Vertices)
-print(orb.is_canonical)
-print((tet0.tilt(V0) + tet1.tilt(V0)).evaluate() > 0)
-print((tet0.tilt(V1) + tet1.tilt(V1)).evaluate() > 0)
-print((tet0.tilt(V2) + tet1.tilt(V3)).evaluate() > 0)
-print((tet0.tilt(V3) + tet1.tilt(V2)).evaluate() > 0)
-print(' ')
-print(check_2_to_3_possible(orb.Tetrahedra,tet0,F1))
-orb.arrow_two_to_three(F1,tet0)
-print(orb.is_canonical)
-"""
+
+
 
 """
 For dest = stuck_dest_seqs[5], we can do one 2-3 move then we get stuck, can't do more 2-3 moves
@@ -665,14 +650,15 @@ orb.three_to_two(tet0.Class[E01])
 show_triangulation(orb.Tetrahedra)
 #Also works for this
 """
-
+"""
 with open("OrbDictionary.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 """
-already_canonical = []
-not_canonical = []
+"""
+num_fail = 0
+num_success = 0
 for key in OrbDictionary.keys():
     dest = OrbDictionary[key]
     orb = dest_to_orb(dest)
@@ -680,15 +666,32 @@ for key in OrbDictionary.keys():
         print('dest at', key, 'is not canonical')
         if proto_canonize(orb):
             print('canonize succeeded')
+            num_success = num_success + 1
         else:
             print('canonize failed')
+            num_fail = num_fail + 1
         print(' ')
-
+print('num_success = ',num_success)
+print('num_fail = ',num_fail)
+"""
 """
 dest = OrbDictionary[(28,7)]
 orb = dest_to_orb(dest)
 orb.info()
-print(orb.is_proto_canonical())
+print(proto_canonize(orb))
+orb.info()
+for tet in orb.Tetrahedra:
+    for face in TwoSubsimplices:
+        if concave_face(face,tet):
+            print('face',FaceIndex[face],'is concave in',tet)
+
+#worked out the previous bug for this. It was trying to do a 3-6 move when it wasn't actually
+#allowed. But apparently proto_canonize gets stuck otherwise. Have to figure out what could be
+#done next. From drawing pictures, maybe there's some kind of 'double' 3-6 move.
+"""
+"""
+#orb.info()
+#print(orb.is_proto_canonical())
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
@@ -697,3 +700,52 @@ tet4 = orb.Tetrahedra[4]
 tet5 = orb.Tetrahedra[5]
 #Something goes wrong with this orbifold in canonize. It looks like there could be a bug
 #in the part of three_to_six which this goes down.
+#proto_canonize(orb)
+#print(tet1.tilt(V1) + tet2.tilt(V2))
+#print(orb.check_two_to_three(F1,tet1))
+print(orb.two_to_three(F1,tet1))
+#orb.info()
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+tet3 = orb.Tetrahedra[3]
+tet4 = orb.Tetrahedra[4]
+#print(tet1.tilt(V3) + tet2.tilt(V2))
+print(orb.check_two_to_three(F3,tet1))
+print(orb.two_to_three(F3,tet1))
+orb.info()
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+tet3 = orb.Tetrahedra[3]
+print(tet0.tilt(V2) + tet2.tilt(V0))
+print(' ')
+print('---------------------------')
+print(' ')
+print(orb.three_to_six(F2,tet0))
+#F2 of tet0 glued to F0 of tet2 with gluing map (2,1,0,3)
+z0 = tet0.edge_params[E13]*tet2.edge_params[E13]
+print(z0.real,'+',z0.imag,'*i')
+z0 = tet0.edge_params[E03]*tet2.edge_params[E23]
+print(z0.real,'+',z0.imag,'*i')
+#the above has zero imaginary part. So flat_u0_u1_v0_w1
+z0 = tet0.edge_params[E01]*tet2.edge_params[E12]*tet2.edge_params[E12]
+print(z0.real,'+',z0.imag,'*i')
+#orb.info()
+"""
+
+
+"""
+dest = OrbDictionary[(30,11)]
+orb = dest_to_orb(dest)
+orb.info()
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+tet2 = orb.Tetrahedra[2]
+for tet in orb.Tetrahedra:
+    for face in TwoSubsimplices:
+        if concave_face(face,tet):
+            print('face',FaceIndex[face],'is concave in',tet)
+#print(proto_canonize(orb))
+print(orb.Vertices)
+"""

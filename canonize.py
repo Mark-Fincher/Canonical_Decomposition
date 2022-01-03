@@ -27,6 +27,8 @@ orb proto-canonical, it returns 1. Otherwise, it returns 0.
 def proto_canonize(orb):
 	MAX_MOVES = 1000
 	for i in range(MAX_MOVES):
+		if attempt_cancellation(orb):
+			continue
 		if attempt_two_to_three(orb):
 			continue
 		if attempt_three_to_two(orb):
@@ -41,11 +43,21 @@ def proto_canonize(orb):
 	else:
 		return 0
 
+def attempt_cancellation(orb):
+	for edge in orb.Edges:
+		#orb.cancel_tetrahedra(edge) will return 0 if "edge" doesn't belong to flat tet(s),
+		#or if there are other reasons tet(s) around "edge" can't be cancelled. If they can
+		#be cancelled, it will do so then return 1.
+		if orb.cancel_tetrahedra(edge):
+			return 1
+	return 0
+
 def attempt_two_to_three(orb):
 	for tet in orb.Tetrahedra:
 		for face in TwoSubsimplices:
 			if concave_face(face,tet) and orb.check_two_to_three(face,tet):
 				if orb.two_to_three(face,tet):
+					#print('doing 2-3')
 					return 1
 				else:
 					#This shouldn't happen
@@ -57,6 +69,7 @@ def attempt_three_to_two(orb):
 	for edge in orb.Edges:
 		if edge.valence() in {1,3} and concave_edge(edge):
 			if orb.three_to_two(edge):
+				#print('doing 3-2')
 				return 1
 	return 0
 
@@ -64,6 +77,7 @@ def attempt_three_to_six(orb):
 	for tet in orb.Tetrahedra:
 		for face in TwoSubsimplices:
 			if concave_face(face,tet) and orb.three_to_six(face,tet):
+				#print('doing 3-6')
 				return 1
 	return 0
 
