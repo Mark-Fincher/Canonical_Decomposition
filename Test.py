@@ -441,30 +441,35 @@ for dest in newly_canonical_dest_seqs:
         print(dest)
 """
 
-
+"""
 with open("stuck_dest_seqs.json", "r") as read_file:
     stuck_dest_seqs = json.load(read_file)
 
 Dest = stuck_dest_seqs[5]
 orb = dest_to_orb(Dest)
-print(orb.is_proto_canonical())
-orb.info()
+print(proto_canonize(orb))
+"""
+"""
+#print(orb.is_proto_canonical())
+#orb.info()
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
-print(tet0.tilt(V3) + tet1.tilt(V2))
-print(orb.check_two_to_three(F3,tet0))
+#print(tet0.tilt(V3) + tet1.tilt(V2))
+#print(orb.check_two_to_three(F3,tet0))
 orb.two_to_three(F3,tet0)
-orb.info()
-print(orb.is_proto_canonical())
+#orb.info()
+#print(orb.is_proto_canonical())
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 print(tet0.tilt(V2) + tet1.tilt(V1))
 print(orb.check_two_to_three(F2,tet0))
 orb.two_to_three(F2,tet0)
 orb.info()
-
-
+print(attempt_cancellation(orb))
+orb.info()
+print(orb.is_proto_canonical())
+"""
 
 
 """
@@ -650,11 +655,17 @@ orb.three_to_two(tet0.Class[E01])
 show_triangulation(orb.Tetrahedra)
 #Also works for this
 """
-"""
+
 with open("OrbDictionary.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
+
+"""
+dest = OrbDictionary[(14,0)]
+orb = dest_to_orb(dest)
+print(proto_canonize(orb))
+orb.info()
 """
 """
 num_fail = 0
@@ -674,6 +685,7 @@ for key in OrbDictionary.keys():
 print('num_success = ',num_success)
 print('num_fail = ',num_fail)
 """
+
 """
 dest = OrbDictionary[(28,7)]
 orb = dest_to_orb(dest)
@@ -735,17 +747,17 @@ print(z0.real,'+',z0.imag,'*i')
 """
 
 
-"""
 dest = OrbDictionary[(30,11)]
 orb = dest_to_orb(dest)
 orb.info()
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 tet2 = orb.Tetrahedra[2]
+print(proto_canonize(orb))
+orb.info()
 for tet in orb.Tetrahedra:
     for face in TwoSubsimplices:
         if concave_face(face,tet):
             print('face',FaceIndex[face],'is concave in',tet)
-#print(proto_canonize(orb))
-print(orb.Vertices)
-"""
+#The convention is not upheld! There's a face which can be glued to itself,
+#but is instead glued to None.

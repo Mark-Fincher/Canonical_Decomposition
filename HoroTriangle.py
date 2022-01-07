@@ -43,14 +43,24 @@ class HoroTriangle:
         self.area = L * L * z_l.imag / SquareRootCombination.Two()
         # Below is the usual formula for circumradius combined with 
         # Heron's formula.
-        self.circumradius = (a * b * c /
-                             (SquareRootCombination.Four() * self.area))
+        
+        # 1/6/2022 Mark. Flat tets will have vertex horotriangles with area 0,
+        # so undefined circumradius. In that case, set circumradius to None.
+        # We don't care about making sense of tilt for flat tets. Canonize will
+        # try to either cancel flat tets, or just ignore them until they can be
+        # cancelled.
+        if self.area != SquareRootCombination.Zero():
+            self.circumradius = (a * b * c /
+                                 (SquareRootCombination.Four() * self.area))
+        else:
+            self.circumradius = None
 
     def rescale(self, t):
         "Rescales the triangle by a Euclidean dilation"
         for face, length in self.lengths.items():
             self.lengths[face] = t*length
-        self.circumradius = t*self.circumradius
+        if self.circumradius is not None:
+            self.circumradius = t*self.circumradius
         self.area = t*t*self.area
 
     @staticmethod

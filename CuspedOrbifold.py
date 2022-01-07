@@ -352,17 +352,22 @@ class CuspedOrbifold:
 			self.Edges[i].Index = i
 
 
-	#Checks if the triangulation is canonical or not. It will return true even if some tilt sums
-	#are 0, so this is really just checking if it's "proto-canonical".
+	#Checks if the triangulation is proto_canonical or not.
 	def is_proto_canonical(self):
+		for tet in self.Tetrahedra:
+			#First check for flat tetrahedra. If there are any, the triangulation
+			#should not be proto-canonical. And trying to compute the tilts of a flat
+			#tet will give an error (see HoroTriangle.py).
+			if tet.is_flat():
+				return False
 		for tet1 in self.Tetrahedra:
 			for face1 in TwoSubsimplices:
-				if tet1.Neighbor[face1] != None:
+				if tet1.Neighbor[face1] is not None:
 					tet2 = tet1.Neighbor[face1]
 					face2 = tet1.Gluing[face1].image(face1)
 					if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
 						return False
-		# if it hasn't already returned, set it to True.
+		#If it hasn't already returned, then return True.
 		return True
 
 
@@ -1367,8 +1372,12 @@ class CuspedOrbifold:
 		b = a.glued()
 		z = tet.edge_params[a.Edge]
 		w = voisin.edge_params[b.Edge]
+		"""
 		if ((z*w*w).imag).evaluate() < 0 or (z*w*w).imag == SquareRootCombination.Zero():
 			#In the latter case maybe a flat 3-6 move is possible, but let's not consider that currently.
+			return 0
+		"""
+		if ((z*w*w).imag).evaluate() < 0:
 			return 0
 		flat_u0_u1_v1_w1 = False
 		flat_u0_u1_v0_w1 = False
@@ -1377,26 +1386,12 @@ class CuspedOrbifold:
 		if ((z*w).imag).evaluate() < 0:
 			return 0
 		if (z*w).imag == SquareRootCombination.Zero():
-			#Then we will try to do a flat 3-6 move. But we must check that a certain face is glued
-			#to itself properly, otherwise the flat 3-6 is impossible.
-			new_a = a.copy().rotate(1)
-			if not tet.face_glued_to_self(new_a.Face):
-				return 0
-			if tet.Gluing[new_a.Face].image(new_a.simplex_north_head()) != new_a.simplex_north_head():
-				return 0
 			flat_u0_u1_v1_w1 = True
 		z = tet.edge_params[a.simplex_north_head()]
 		w = voisin.edge_params[b.simplex_north_tail()]
 		if ((z*w).imag).evaluate() < 0:
 			return 0
 		if (z*w).imag == SquareRootCombination.Zero():
-			#As in the other case, we must check a certain face is glued to itself properly,
-			#or else the 3-6 move is not allowed.
-			new_a = a.copy().rotate(1)
-			if not tet.face_glued_to_self(new_a.Face):
-				return 0
-			if tet.Gluing[new_a.Face].image(a.simplex_south_tail()) != a.simplex_south_tail():
-				return 0
 			flat_u0_u1_v0_w1 = True
 		c = self.new_arrow()
 		c.glue(a)
@@ -1413,8 +1408,11 @@ class CuspedOrbifold:
 			complex_abs_w0 = ComplexSquareRootCombination(abs(w0),SquareRootCombination.Zero())
 			w1 = One - One/(x*z)
 			complex_abs_w1 = ComplexSquareRootCombination(abs(w1),SquareRootCombination.Zero())
-			if (w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate():
-				#This is the case [u_0,w_1] "beneath" [u_1,w_0].
+			if ((w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate() or 
+				(w0/complex_abs_w0).real == (w1/complex_abs_w1).real):
+				#This is the case [u_0,w_1] "beneath" [u_1,w_0]. OR, in that second case,
+				#when they intersect. In that case can also use the below elif code. This
+				#will create a flat tet.
 				self.two_to_three(two_subsimplex,tet,0)
 				c.next()
 				new_c = c.copy().reverse()
@@ -1461,7 +1459,7 @@ class CuspedOrbifold:
 				d = b.copy()
 				b.next()
 				b.add_sym(b.copy().opposite())
-				e = b.copy().opposite().reverse().next()
+				e = b.copy().opposite().reverse().next().reverse()
 				b.next()
 				f = b.copy()
 				b.opposite().next()
@@ -1481,7 +1479,7 @@ class CuspedOrbifold:
 				e.glue(d.glued())
 				d.Tetrahedron.erase()
 				b.rotate(-1)
-				f.rotate(1)
+				f.reverse().rotate(1).reverse()
 				f.glue(b.glued())
 				b.Tetrahedron.erase()
 				self.Tetrahedra.remove(d.Tetrahedron)

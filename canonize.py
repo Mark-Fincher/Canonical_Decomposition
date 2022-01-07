@@ -28,12 +28,16 @@ def proto_canonize(orb):
 	MAX_MOVES = 1000
 	for i in range(MAX_MOVES):
 		if attempt_cancellation(orb):
+			print("cancelled flat tet(s)")
 			continue
 		if attempt_two_to_three(orb):
+			print("did 2-3 move")
 			continue
 		if attempt_three_to_two(orb):
+			print("did 3-2 move")
 			continue
 		if attempt_three_to_six(orb):
+			print("did 3-6 move")
 			continue
 		#If none of the attempts work, then either it's proto-canonical, or the algorithm is stuck.
 		#In either case, we break out of the loop.
@@ -57,7 +61,6 @@ def attempt_two_to_three(orb):
 		for face in TwoSubsimplices:
 			if concave_face(face,tet) and orb.check_two_to_three(face,tet):
 				if orb.two_to_three(face,tet):
-					#print('doing 2-3')
 					return 1
 				else:
 					#This shouldn't happen
@@ -69,7 +72,6 @@ def attempt_three_to_two(orb):
 	for edge in orb.Edges:
 		if edge.valence() in {1,3} and concave_edge(edge):
 			if orb.three_to_two(edge):
-				#print('doing 3-2')
 				return 1
 	return 0
 
@@ -77,7 +79,6 @@ def attempt_three_to_six(orb):
 	for tet in orb.Tetrahedra:
 		for face in TwoSubsimplices:
 			if concave_face(face,tet) and orb.three_to_six(face,tet):
-				#print('doing 3-6')
 				return 1
 	return 0
 
@@ -87,6 +88,14 @@ def concave_edge(edge):
 	#they all do (except those which are glued to None), but it could be that,
 	#for a given corner, both adjacent faces are glued to None. So we need to
 	#loop through all the corners.
+	#Will return 0 if any any tetrahedron adjacent to edge is flat, just because
+	#we don't want to do a 3-2 move in that case.
+	for corner in edge.Corners:
+		tet = corner.Tetrahedron
+		#First we look for flat tets. If any tetrahedron adjacent to edge is flat, 
+		#we can't compute its tilts, so return 0.
+		if tet.is_flat():
+			return 0
 	for corner in edge.Corners:
 		tet = corner.Tetrahedron
 		face = RightFace[corner.Subsimplex]
@@ -100,10 +109,15 @@ def concave_edge(edge):
 	return 0
 
 def concave_face(face,tet):
+	#Check if face of tet is concave. Will return 0 if tet or tet.Neighbor[face]
+	#is flat, just because we don't want to do a 2-3 move then.
 	if tet.Neighbor[face] is None:
 		return 0
 	else:
 		other_tet = tet.Neighbor[face]
+		#If a tetrahedron is flat then we can't compute tilts, so return 0.
+		if tet.is_flat() or other_tet.is_flat():
+			return 0
 		other_face = tet.Gluing[face].image(face)
 		if (tet.tilt(comp(face)) + other_tet.tilt(comp(other_face))).evaluate() > 0:
 			return 1

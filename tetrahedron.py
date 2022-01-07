@@ -149,3 +149,10 @@ class Tetrahedron:
             if sym.image(two_subsimplex) == two_subsimplex and sym.tuple() != (0,1,2,3):
                 return True
         return False
+
+    def is_flat(self):
+        z = self.edge_params[E01]
+        if z.imag == SquareRootCombination.Zero():
+            return True
+        else:
+            return False
