@@ -141,6 +141,35 @@ class Tetrahedron:
         return False
 
     """
+    My convention is that if the equivalence relation induced by the face identifications and
+    symmetries of a tetrahedron imply that a certain face is glued to itself, then that should
+    explicitly be the gluing data of that face. Note that a face could be glued to None but
+    still be glued to itself by the induced equivalence relation. The following function
+    makes sure this convention is followed for self.
+    """
+    def fix_glued_to_self(self):
+        if len(self.Symmetries) == 1:
+            return
+        for face in TwoSubsimplices:
+            if self.Neighbor[face] is not None and self.Neighbor[face] is not self:
+                continue
+            if self.face_glued_to_self(face):
+                continue
+            face_done = False
+            for sym1 in self.Symmetries:
+                if self.Neighbor[sym1.image(face)] is self:
+                    for sym2 in self.Symmetries:
+                        perm = sym2*self.Gluing[sym1.image(face)]*sym1 
+                        if perm.image(face) == face:
+                            self.detach(face)
+                            self.attach(face,self,perm.tuple())
+                            face_done = True
+                            break
+                if face_done:
+                    break
+
+
+    """
     The following returns true if there's a symmetry of the tet which rotates the face, false otherwise.
     Added by Mark 10/1/2021.
     """
@@ -153,6 +182,15 @@ class Tetrahedron:
     def is_flat(self):
         z = self.edge_params[E01]
         if z.imag == SquareRootCombination.Zero():
+            return True
+        else:
+            return False
+
+    def is_regular(self):
+        a = SquareRootCombination([(1,Fraction(1/2))])
+        b = SquareRootCombination([(Fraction(3,1),Fraction(1/2))])
+        z = ComplexSquareRootCombination(a,b)
+        if self.edge_params[E01] == z:
             return True
         else:
             return False

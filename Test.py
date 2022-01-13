@@ -623,50 +623,12 @@ for i in range(len(Dests)):
     print(' ')
     print(' ')
 """
-"""
-Dest = [0,1,1,0,1,0,0,2,3,2,2,1,2,3,3,3]
-orb = dest_to_orb(Dest)
-print(orb.is_canonical)
-show_triangulation(orb.Tetrahedra)
-tet0 = orb.Tetrahedra[0]
-
-orb.arrow_two_to_three(F2,tet0)
-show_triangulation(orb.Tetrahedra)
-print(orb.is_canonical)
-
-tet0 = orb.Tetrahedra[0]
-orb.three_to_two(tet0.Class[E01])
-show_triangulation(orb.Tetrahedra)
-print(orb.is_canonical)
-#passes this test
-"""
-"""
-Dest = [0,1,2,1,2,3,0,0,1,0,4,2,4,5,1,4,3,2,5,3,5,4,3,6,7,6,6,5,6,7,7,7]
-orb = dest_to_orb(Dest)
-show_triangulation(orb.Tetrahedra)
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-
-orb.arrow_two_to_three(F1,tet0)
-show_triangulation(orb.Tetrahedra)
-tet0 = orb.Tetrahedra[0]
-
-orb.three_to_two(tet0.Class[E01])
-show_triangulation(orb.Tetrahedra)
-#Also works for this
-"""
 
 with open("OrbDictionary.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
-"""
-dest = OrbDictionary[(14,0)]
-orb = dest_to_orb(dest)
-print(proto_canonize(orb))
-orb.info()
-"""
 """
 num_fail = 0
 num_success = 0
@@ -700,64 +662,90 @@ for tet in orb.Tetrahedra:
 #worked out the previous bug for this. It was trying to do a 3-6 move when it wasn't actually
 #allowed. But apparently proto_canonize gets stuck otherwise. Have to figure out what could be
 #done next. From drawing pictures, maybe there's some kind of 'double' 3-6 move.
-"""
-"""
-#orb.info()
-#print(orb.is_proto_canonical())
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-tet3 = orb.Tetrahedra[3]
-tet4 = orb.Tetrahedra[4]
-tet5 = orb.Tetrahedra[5]
-#Something goes wrong with this orbifold in canonize. It looks like there could be a bug
-#in the part of three_to_six which this goes down.
-#proto_canonize(orb)
-#print(tet1.tilt(V1) + tet2.tilt(V2))
-#print(orb.check_two_to_three(F1,tet1))
-print(orb.two_to_three(F1,tet1))
-#orb.info()
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-tet3 = orb.Tetrahedra[3]
-tet4 = orb.Tetrahedra[4]
-#print(tet1.tilt(V3) + tet2.tilt(V2))
-print(orb.check_two_to_three(F3,tet1))
-print(orb.two_to_three(F3,tet1))
-orb.info()
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
-tet3 = orb.Tetrahedra[3]
-print(tet0.tilt(V2) + tet2.tilt(V0))
-print(' ')
-print('---------------------------')
-print(' ')
-print(orb.three_to_six(F2,tet0))
-#F2 of tet0 glued to F0 of tet2 with gluing map (2,1,0,3)
-z0 = tet0.edge_params[E13]*tet2.edge_params[E13]
-print(z0.real,'+',z0.imag,'*i')
-z0 = tet0.edge_params[E03]*tet2.edge_params[E23]
-print(z0.real,'+',z0.imag,'*i')
-#the above has zero imaginary part. So flat_u0_u1_v0_w1
-z0 = tet0.edge_params[E01]*tet2.edge_params[E12]*tet2.edge_params[E12]
-print(z0.real,'+',z0.imag,'*i')
-#orb.info()
+
+#Later update: this does work now by allowing flat tets and having them cancel later! Nice.
 """
 
+"""
+Remaining dest seqs are (32,1), (32,0), (31,0), and (30,11). It's interesting
+that they're so near each other, as in they have roughly the same covering degree.
+(30,11) I've investigated above. By fixing cancel_tetrahedra, I was able to make one
+more move on it, but there remains a flat tet which couldn't be cancelled.
+"""
 
+"""
 dest = OrbDictionary[(30,11)]
 orb = dest_to_orb(dest)
-orb.info()
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-tet2 = orb.Tetrahedra[2]
 print(proto_canonize(orb))
 orb.info()
 for tet in orb.Tetrahedra:
     for face in TwoSubsimplices:
         if concave_face(face,tet):
             print('face',FaceIndex[face],'is concave in',tet)
-#The convention is not upheld! There's a face which can be glued to itself,
-#but is instead glued to None.
+#It looks like you should do a 3-6 move, but it's the case where those two
+#geodesics intersect, and I decided a 3-6 move doesn't make sense there.
+#I guess you could think of this as another cube situation, except where
+#the cube only has one nontrivial symmetry, instead of all the ones preserving
+#a particular inner tet as with (31,0). It feels a bit ad hoc to treat it that way.
+#In particular, the fact it's a cube is special because they're all regular tets.
+"""
+
+
+
+dest = OrbDictionary[(31,0)]
+orb = dest_to_orb(dest)
+print(proto_canonize(orb))
+orb.info()
+for tet in orb.Tetrahedra:
+    for face in TwoSubsimplices:
+        if concave_face(face,tet):
+            print('face',FaceIndex[face],'is concave in',tet)
+tet0 = orb.Tetrahedra[0]
+tet1 = orb.Tetrahedra[1]
+print(tet0.tilt(V3) + tet1.tilt(V2))
+#Interesting. tet1 has all possible symmetries, it's glued to tet0. They're both regular,
+#so their union (with copies of tet0) is a regular deal cube with all symmetries which preserve
+#a particular inner cube (tet1) acting on it. Re-triangulate this cube in terms of the other
+#choice of inner cube. That forces you to put a flat tet at the boundary of the cube
+#since you're changing the faces, but that should cancel with another flat tet which is
+#already there.
+
+
+"""
+dest = OrbDictionary[(32,0)]
+orb = dest_to_orb(dest)
+print(proto_canonize(orb))
+print(attempt_six_to_three(orb))
+#orb.info()
+"""
+"""
+for tet in orb.Tetrahedra:
+    for face in TwoSubsimplices:
+        if concave_face(face,tet):
+            print('face',FaceIndex[face],'is concave in',tet)
+"""
+"""
+tet2 = orb.Tetrahedra[2]
+edge = tet2.Class[E23]
+print(edge.valence())
+print(edge.LocusOrder)
+"""
+#Not sure about this one. There are two 3-6 moves that call out to be made, but
+#the angles are wrong. It could be that this needs a 6-3 move. Maybe edge (as
+#defined above) is like [w0,w1] in my usual picture. Note that no 3-6 move was done,
+#so the 6-3 move I'm imagining here wouldn't just be undoing some progress that was
+#already made.
+
+
+"""
+dest = OrbDictionary[(32,1)]
+orb = dest_to_orb(dest)
+print(proto_canonize(orb))
+orb.info()
+for tet in orb.Tetrahedra:
+    for face in TwoSubsimplices:
+        if concave_face(face,tet):
+            print('face',FaceIndex[face],'is concave in',tet)
+#Is this like the same thing as (32,0)? These might even be combinatorially equivalent
+#triangulations.
+"""

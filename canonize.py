@@ -39,6 +39,9 @@ def proto_canonize(orb):
 		if attempt_three_to_six(orb):
 			print("did 3-6 move")
 			continue
+		if attempt_six_to_three(orb):
+			print("did 6-3 move")
+			continue
 		#If none of the attempts work, then either it's proto-canonical, or the algorithm is stuck.
 		#In either case, we break out of the loop.
 		break
@@ -78,8 +81,15 @@ def attempt_three_to_two(orb):
 def attempt_three_to_six(orb):
 	for tet in orb.Tetrahedra:
 		for face in TwoSubsimplices:
-			if concave_face(face,tet) and orb.three_to_six(face,tet):
-				return 1
+			if concave_face(face,tet):
+				if orb.three_to_six(face,tet):
+					return 1
+	return 0
+
+def attempt_six_to_three(orb):
+	for edge in orb.Edges:
+		if concave_edge(edge) and orb.six_to_three(edge):
+			return 1
 	return 0
 
 def concave_edge(edge):
