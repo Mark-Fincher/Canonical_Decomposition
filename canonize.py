@@ -39,6 +39,9 @@ def proto_canonize(orb):
 		if attempt_three_to_six(orb):
 			print("did 3-6 move")
 			continue
+		if attempt_four_to_four(orb):
+			print("did 4-4 move")
+			continue
 		if attempt_six_to_three(orb):
 			print("did 6-3 move")
 			continue
@@ -89,6 +92,12 @@ def attempt_three_to_six(orb):
 def attempt_six_to_three(orb):
 	for edge in orb.Edges:
 		if concave_edge(edge) and orb.six_to_three(edge):
+			return 1
+	return 0
+
+def attempt_four_to_four(orb):
+	for edge in orb.Edges:
+		if concave_edge(edge) and orb.four_to_four(edge):
 			return 1
 	return 0
 

@@ -354,16 +354,16 @@ class CuspedOrbifold:
 
 	#Checks if the triangulation is proto_canonical or not.
 	def is_proto_canonical(self):
-		for tet in self.Tetrahedra:
-			#First check for flat tetrahedra. If there are any, the triangulation
-			#should not be proto-canonical. And trying to compute the tilts of a flat
-			#tet will give an error (see HoroTriangle.py).
-			if tet.is_flat():
-				return False
 		for tet1 in self.Tetrahedra:
+			if tet1.is_flat():
+				#don't try to compute tilts of a flat tetrahedron.
+				continue
 			for face1 in TwoSubsimplices:
 				if tet1.Neighbor[face1] is not None:
 					tet2 = tet1.Neighbor[face1]
+					if tet2.is_flat():
+						#again, don't try to compute tilts of a flat tetrahedron.
+						continue
 					face2 = tet1.Gluing[face1].image(face1)
 					if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
 						return False
@@ -1490,27 +1490,22 @@ class CuspedOrbifold:
 		#Try to do a 6-3 move, viewing edge as [w0,w1]. This gets complicated and requires a lot
 		#of checking before you know you can do the move. See my write-up.
 		if edge.valence() != 4 or edge.LocusOrder != 1:
-			print("wrong edge valence or locus order")
 			return 0
 		for corner in edge.Corners:
 			if len(corner.Tetrahedron.Symmetries) == 1:
 				middle = Arrow(corner.Subsimplex,RightFace[corner.Subsimplex],corner.Tetrahedron)
 				break
 		else:
-			print("all adjacent tets have nontrivial symmetries")
 			return 0
 		a = middle.glued()
 		b = middle.reverse().glued()
 		if a.Tetrahedron is b.Tetrahedron:
-			print("wrong number of tets")
 			return 0
 		for c in [a,b]:
 			if len(c.Tetrahedron.Symmetries) != 2:
-				print("c has wrong number of symmetries")
 				return 0
 			for sym in c.Tetrahedron.Symmetries:
 				if sym.image(c.Edge) != c.Edge:
-					print("incorrect symmetry in",c.Tetrahedron)
 					return 0
 		#This is the end of part 1 of our check.
 		setup_success = False
@@ -1555,7 +1550,6 @@ class CuspedOrbifold:
 				d.Tetrahedron.Neighbor[d.Face] = None
 				d.Tetrahedron.Gluing[d.Face] = None
 		else:
-			print("setup_success failed")
 			return 0
 		#We are finally done with all the checking. If we got to this point, a 6-3 move is possible.
 		#Now we just reverse the 2-3 moves done in the 3-6 move, which depend on the case. But first
@@ -1648,11 +1642,141 @@ class CuspedOrbifold:
 		return 1
 
 
-		
+	"""
+	4-4 move around a valence 4 edge. In the case that there are 4 distinct tetrahedra, none of them
+	having symmetries, this is just the usual manifold 4-4 move. There seems to be one other case:
+	there's an order 2 rotational symmetry swapping the two ends of the bypyramid. In that case
+	2 pairs of the resulting 4 tetrahedra are mapped to each other by the symmetry, so we can take
+	away 2 tetrahedra. Unfortunately we need to also insert a flat tetrahedron in that case.
 
-
-
-
+	The symmetry could be a few things. For now I'm not going to include all cases, will add later.
+	In this version, the symmetry can only be pi rotation swapping x1 with x4 and x2 with x3,
+	where the labels are from my write-up. 
+	"""	
+	def four_to_four(self,edge):
+		if edge.valence() != 4:
+			return 0
+		for corner in edge.Corners:
+			if len(corner.Tetrahedron.Symmetries) == 1:
+				a = Arrow(corner.Subsimplex,RightFace[corner.Subsimplex],corner.Tetrahedron)
+				break
+		else:
+			return 0
+		b = a.glued()
+		c = a.reverse().glued()
+		for d in [b,c]:
+			for sym in d.Tetrahedron.Symmetries:
+				if sym.image(d.Edge) != d.Edge:
+					return 0
+		if len(b.Tetrahedron.Symmetries) == 2 and len(c.Tetrahedron.Symmetries) == 2:
+			symmetry = True
+		elif len(b.Tetrahedron.Symmetries) == 1 and len(c.Tetrahedron.Symmetries) == 1:
+			symmetry = False
+		else:
+			return 0
+		za = a.Tetrahedron.edge_params[a.simplex_north_head()]
+		zb = b.Tetrahedron.edge_params[b.Edge]
+		zc = c.Tetrahedron.edge_params[c.simplex_north_tail()]
+		One = ComplexSquareRootCombination.One()
+		wa = za
+		wb = za*zb/(zb + za - One)
+		wc = za*zc
+		if not symmetry:
+			old = [c.next() for i in range(4)]
+			new = self.new_arrows(4)
+			new[0].Tetrahedron.fill_edge_params(wc*(wb - One)/((wc - One)*wb))
+			new[1].Tetrahedron.fill_edge_params(wc)
+			new[2].Tetrahedron.fill_edge_params((wa - wc)/(One - wc))
+			new[3].Tetrahedron.fill_edge_params((wa - wc)*(wb - One)/((wa - One)*(wb - wc)))
+			new[0].reverse().rotate(1)
+			new[1].opposite().reverse()
+			new[2].rotate(1).reverse()
+			#new[3] is already in the right place.
+			for i in range(4):
+				new[i].glue(new[(i+1)%4])
+			#gluing faces of new[0]
+			old[0].opposite()
+			new[0].reverse().rotate(-1)
+			new[0].glue_as(old[0])
+			old[0].opposite()
+			new[0].rotate(-1)
+			old[1].opposite()
+			new[0].glue_as(old[1])
+			old[1].opposite()
+			#now glue faces of new[1]
+			new[1].rotate(1)
+			old[0].opposite().reverse()
+			new[1].glue_as(old[0])
+			new[1].rotate(1)
+			old[1].opposite().reverse()
+			new[1].glue_as(old[1])
+			#now glue faces of new[2]
+			new[2].reverse().rotate(1)
+			old[2].opposite().reverse()
+			new[2].glue_as(old[2])
+			old[2].opposite().reverse()
+			new[2].rotate(1)
+			old[3].opposite().reverse()
+			new[2].glue_as(old[3])
+			old[3].opposite().reverse()
+			#now faces of new[3]
+			new[3].rotate(-1)
+			old[2].opposite()
+			new[3].glue_as(old[2])
+			new[3].rotate(-1)
+			old[3].opposite()
+			new[3].glue_as(old[3])
+			for i in range(4):
+				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			for a in old:
+				self.Tetrahedra.remove(a.Tetrahedron)
+		else:
+			#Because there is no tet at [x1,x2,y1,y2], have to awkwardly define old
+			#to be consistent with how I chose to write this.
+			old = []
+			old.append(a.copy().reverse())
+			old.append(b.reverse())
+			old.append(a)
+			old.append(c)
+			new = self.new_arrows(3)
+			#new[0] is [x1,x3,x4,y1]
+			new[0].Tetrahedron.fill_edge_params(wc)
+			#new[1] is [x1,x2,x3,y1]
+			new[1].Tetrahedron.fill_edge_params(wc*(wb - One)/((wc - One)*wb))
+			#new[2] is [x1,x2,x3,x4], which is flat.
+			new[2].Tetrahedron.fill_edge_params((wb - wc)/(One - wc))
+			new[0].opposite().reverse()
+			new[1].reverse().rotate(1)
+			new[2].rotate(1).reverse()
+			for i in range(3):
+				new[i].glue(new[(i+1)%3])
+			#make the other face gluings for new[0]
+			new[0].rotate(-1)
+			old[2].opposite()
+			new[0].glue_as(old[2])
+			new[0].rotate(-1)
+			old[3].opposite()
+			if old[3].glued() is None:
+				old[3].reverse()
+			new[0].glue_as(old[3])
+			#now for new[1]
+			new[1].reverse().rotate(-1)
+			old[0].opposite()
+			new[1].glue_as(old[0])
+			new[1].rotate(-1)
+			old[1].opposite()
+			if old[1].glued() is None:
+				old[1].reverse()
+			new[1].glue_as(old[1])
+			#now add the symmetries.
+			for i in range(3):
+				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[2].add_sym(new[2].copy().opposite().reverse())
+			for a in old:
+				if a.Tetrahedron in self.Tetrahedra:
+					self.Tetrahedra.remove(a.Tetrahedron)
+		self.clear_and_rebuild()
+		return 1
 
 
 

@@ -691,7 +691,7 @@ for tet in orb.Tetrahedra:
 """
 
 
-
+"""
 dest = OrbDictionary[(31,0)]
 orb = dest_to_orb(dest)
 print(proto_canonize(orb))
@@ -709,32 +709,23 @@ print(tet0.tilt(V3) + tet1.tilt(V2))
 #choice of inner cube. That forces you to put a flat tet at the boundary of the cube
 #since you're changing the faces, but that should cancel with another flat tet which is
 #already there.
+"""
 
 
 """
 dest = OrbDictionary[(32,0)]
 orb = dest_to_orb(dest)
 print(proto_canonize(orb))
-print(attempt_six_to_three(orb))
-#orb.info()
-"""
-"""
-for tet in orb.Tetrahedra:
-    for face in TwoSubsimplices:
-        if concave_face(face,tet):
-            print('face',FaceIndex[face],'is concave in',tet)
-"""
-"""
+orb.info()
 tet2 = orb.Tetrahedra[2]
-edge = tet2.Class[E23]
-print(edge.valence())
-print(edge.LocusOrder)
+tet3 = orb.Tetrahedra[3]
+print(tet2.tilt(V1) + tet3.tilt(V3))
+#Got it! This one needs a 4-4 move, it turns out, which I had not created until just now.
+#It's a 4-4 move with symmetry actually, so not a normal manifold 4-4 move. The result of
+#that move is a pyramid with three triangular faces and one square face, divided into two
+#tetrahedra. However, can see that the tilt sum for the pair of faces where these two
+#tetrahedra meet is 0, so for the canonical decomp we actually just take that whole pyramid. Cool!
 """
-#Not sure about this one. There are two 3-6 moves that call out to be made, but
-#the angles are wrong. It could be that this needs a 6-3 move. Maybe edge (as
-#defined above) is like [w0,w1] in my usual picture. Note that no 3-6 move was done,
-#so the 6-3 move I'm imagining here wouldn't just be undoing some progress that was
-#already made.
 
 
 """
@@ -742,10 +733,6 @@ dest = OrbDictionary[(32,1)]
 orb = dest_to_orb(dest)
 print(proto_canonize(orb))
 orb.info()
-for tet in orb.Tetrahedra:
-    for face in TwoSubsimplices:
-        if concave_face(face,tet):
-            print('face',FaceIndex[face],'is concave in',tet)
-#Is this like the same thing as (32,0)? These might even be combinatorially equivalent
-#triangulations.
+#Also got this canonical with the 4-4 move! This is very similar to (32,0), they might even be
+#isometric.
 """

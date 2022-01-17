@@ -136,6 +136,19 @@ class Arrow:
                                 { FaceIndex[self.Face]:FaceIndex[flip_face(other.Edge,other.Face)],
                                   FaceIndex[flip_face(self.Edge,self.Face)]:FaceIndex[other.Face] })
 
+
+#Glue self.Face to what other.Face is glued to in the same way as other. This is
+#just like using self.glue(other.glued()), except this can handle the case that
+#other.Face is glued to itself. I made this so I wouldn't have to keep treating that 
+#case separately.
+    def glue_as(self,other):
+        if other.Tetrahedron.face_glued_to_self(other.Face):
+            self.glue(other.glued())
+            self.glue(other.glued())
+        else:
+            self.glue(other.glued())
+
+
 # Returns a COPY of self.next(), or a null arrow in the case of a boundary
 # face.
 # DOES create a new arrow.
