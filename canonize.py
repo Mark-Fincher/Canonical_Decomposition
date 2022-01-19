@@ -45,6 +45,9 @@ def proto_canonize(orb):
 		if attempt_six_to_three(orb):
 			print("did 6-3 move")
 			continue
+		if attempt_retriangulate_cube(orb):
+			print("retriangulated a cube")
+			continue
 		#If none of the attempts work, then either it's proto-canonical, or the algorithm is stuck.
 		#In either case, we break out of the loop.
 		break
@@ -100,6 +103,14 @@ def attempt_four_to_four(orb):
 		if concave_edge(edge) and orb.four_to_four(edge):
 			return 1
 	return 0
+
+def attempt_retriangulate_cube(orb):
+	for tet in orb.Tetrahedra:
+		for face in TwoSubsimplices:
+			if concave_face(face,tet) and orb.retriangulate_cube(face,tet):
+				return 1
+	return 0
+
 
 def concave_edge(edge):
 	#Checks if there is any face adjacent to edge with positive tilt sum.

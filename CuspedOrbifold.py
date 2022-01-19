@@ -1407,7 +1407,8 @@ class CuspedOrbifold:
 			c = self.new_arrow()
 			c.glue(a)
 			c.Tetrahedron.fill_edge_params(b.Tetrahedron.edge_params[b.Edge])
-			if (w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate():
+			if ((w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate() or
+				(w0/complex_abs_w0) == (w1/complex_abs_w1).real):
 				#This is the case [u_0,w_1] "beneath" [u_1,w_0].
 				self.two_to_three(two_subsimplex,tet,0)
 				c.next()
@@ -1883,6 +1884,75 @@ class CuspedOrbifold:
 			return 0
 		self.clear_and_rebuild()
 		return 1
+
+
+
+	def retriangulate_cube(self,two_subsimplex,tet):
+		neighbor = tet.Neighbor[two_subsimplex]
+		if neighbor is None or neighbor is tet:
+			return 0
+		if not neighbor.is_regular():
+			return 0
+		if len(tet.Symmetries) == 2:
+			for sym in tet.Symmetries:
+				if sym.tuple() != (0,1,2,3):
+					break
+			for other_face in TwoSubsimplices:
+				if other_face != two_subsimplex and other_face != sym.image(two_subsimplex):
+					other_neighbor = tet.Neighbor[other_face]
+					if other_neighbor is not None:
+						break
+			if not other_neighbor.is_regular():
+				return 0
+			if len(neighbor.Symmetries) != 1 or len(other_neighbor.Symmetries) != 1:
+				return 0
+			case = 2
+		elif len(tet.Symmetries) == 12:
+			case = 1
+		else:
+			return 0
+		#For now I'll just program case 1.
+		if case == 1:
+			for one_subsimplex in OneSubsimplices:
+				if is_subset(one_subsimplex,two_subsimplex):
+					a = Arrow(one_subsimplex,two_subsimplex,tet)
+					b = a.glued()
+					if b.glued() is not None:
+						break
+			#Now a and b are is in the picture in the write-up.
+			new = self.new_arrows(3)
+			#Tets of new[0] and new[1] are regular, new[2] is flat.
+			u = SquareRootCombination([(1,Fraction(1/2))])
+			v = SquareRootCombination([(Fraction(3,1),Fraction(1/2))])
+			z = ComplexSquareRootCombination(u,v)
+			One = ComplexSquareRootCombination.One()
+			Two = ComplexSquareRootCombination(SquareRootCombination.Two(),SquareRootCombination.Zero())
+			new[0].Tetrahedron.fill_edge_params(z)
+			new[1].Tetrahedron.fill_edge_params(z)
+			new[2].Tetrahedron.fill_edge_params(One/Two)
+			new[2].reverse().rotate(1)
+			new[0].glue(new[1])
+			new[1].glue(new[2])
+			#Now the arrows are as in the picture.
+			new[0].Tetrahedron.Symmetries = [Perm4((perm)) for perm in Perm4._rawA4]
+			new[1].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[1].add_sym(new[1].copy().rotate(1))
+			new[1].add_sym(new[1].copy().rotate(-1))
+			new[2].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[2].add_sym(new[2].copy().reverse())
+			new[2].opposite().reverse()
+			new[2].glue_as(b)
+			self.Tetrahedra.remove(a.Tetrahedron)
+			self.Tetrahedra.remove(b.Tetrahedron)
+		elif case == 2:
+			return 0
+			#might add this later.
+		else:
+			return 0
+		self.clear_and_rebuild()
+		return 1
+
+
 
 
 

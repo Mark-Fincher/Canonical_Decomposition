@@ -691,11 +691,12 @@ for tet in orb.Tetrahedra:
 """
 
 
-"""
+
 dest = OrbDictionary[(31,0)]
 orb = dest_to_orb(dest)
 print(proto_canonize(orb))
 orb.info()
+"""
 for tet in orb.Tetrahedra:
     for face in TwoSubsimplices:
         if concave_face(face,tet):
@@ -703,13 +704,14 @@ for tet in orb.Tetrahedra:
 tet0 = orb.Tetrahedra[0]
 tet1 = orb.Tetrahedra[1]
 print(tet0.tilt(V3) + tet1.tilt(V2))
+"""
 #Interesting. tet1 has all possible symmetries, it's glued to tet0. They're both regular,
 #so their union (with copies of tet0) is a regular deal cube with all symmetries which preserve
 #a particular inner cube (tet1) acting on it. Re-triangulate this cube in terms of the other
 #choice of inner cube. That forces you to put a flat tet at the boundary of the cube
 #since you're changing the faces, but that should cancel with another flat tet which is
 #already there.
-"""
+
 
 
 """
