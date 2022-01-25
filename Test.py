@@ -629,7 +629,7 @@ with open("OrbDictionary.json", "r") as read_file:
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
-"""
+
 num_fail = 0
 num_success = 0
 for key in OrbDictionary.keys():
@@ -646,7 +646,7 @@ for key in OrbDictionary.keys():
         print(' ')
 print('num_success = ',num_success)
 print('num_fail = ',num_fail)
-"""
+
 
 """
 dest = OrbDictionary[(28,7)]
@@ -671,6 +671,11 @@ Remaining dest seqs are (32,1), (32,0), (31,0), and (30,11). It's interesting
 that they're so near each other, as in they have roughly the same covering degree.
 (30,11) I've investigated above. By fixing cancel_tetrahedra, I was able to make one
 more move on it, but there remains a flat tet which couldn't be cancelled.
+
+Update 1/19/22. I can now make these all canonical, see below. Required a 4-4 move,
+the ability to retriangulate a cube, and the realization that a proto-canonical triangulation
+could have a flat tet which can't be cancelled, because that flat tet could encode how some
+square face of a non-tetrahedral cell in the canonical decomposition is glued to itself.
 """
 
 """
@@ -680,38 +685,24 @@ print(proto_canonize(orb))
 orb.info()
 for tet in orb.Tetrahedra:
     for face in TwoSubsimplices:
-        if concave_face(face,tet):
-            print('face',FaceIndex[face],'is concave in',tet)
-#It looks like you should do a 3-6 move, but it's the case where those two
-#geodesics intersect, and I decided a 3-6 move doesn't make sense there.
-#I guess you could think of this as another cube situation, except where
-#the cube only has one nontrivial symmetry, instead of all the ones preserving
-#a particular inner tet as with (31,0). It feels a bit ad hoc to treat it that way.
-#In particular, the fact it's a cube is special because they're all regular tets.
+        if transparent_face(face,tet):
+            print('face',FaceIndex[face],'in',tet,'is transparent')
+#It is proto-canonical, although there is a flat tet. I think it's like the (32,0), where the
+#flat tet is just encoding how the square face of a pyramid should be glued to itself.
 """
 
-
-
+"""
 dest = OrbDictionary[(31,0)]
 orb = dest_to_orb(dest)
 print(proto_canonize(orb))
 orb.info()
-"""
+
 for tet in orb.Tetrahedra:
     for face in TwoSubsimplices:
-        if concave_face(face,tet):
-            print('face',FaceIndex[face],'is concave in',tet)
-tet0 = orb.Tetrahedra[0]
-tet1 = orb.Tetrahedra[1]
-print(tet0.tilt(V3) + tet1.tilt(V2))
+        if transparent_face(face,tet):
+            print('face',FaceIndex[face],'in',tet,"is transparent")
+#Got it proto-canonical, seems very similar to (30,11), with a flat tet.
 """
-#Interesting. tet1 has all possible symmetries, it's glued to tet0. They're both regular,
-#so their union (with copies of tet0) is a regular deal cube with all symmetries which preserve
-#a particular inner cube (tet1) acting on it. Re-triangulate this cube in terms of the other
-#choice of inner cube. That forces you to put a flat tet at the boundary of the cube
-#since you're changing the faces, but that should cancel with another flat tet which is
-#already there.
-
 
 
 """

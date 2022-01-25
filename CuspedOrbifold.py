@@ -1403,12 +1403,13 @@ class CuspedOrbifold:
 				#them later. But I think it really doesn't make sense here for a different reason.
 				#When you create the flat tet, its nontrivial symmetry is incompatible with the
 				#way it's flat, i.e. where the edges with angle pi are. So we don't allow this case.
-				return 0
+				print("[u0,w1] and [u1,w0] intersect")
+				#return 0
 			c = self.new_arrow()
 			c.glue(a)
 			c.Tetrahedron.fill_edge_params(b.Tetrahedron.edge_params[b.Edge])
 			if ((w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate() or
-				(w0/complex_abs_w0) == (w1/complex_abs_w1).real):
+				(w0/complex_abs_w0).real == (w1/complex_abs_w1).real):
 				#This is the case [u_0,w_1] "beneath" [u_1,w_0].
 				self.two_to_three(two_subsimplex,tet,0)
 				c.next()
@@ -1797,6 +1798,8 @@ class CuspedOrbifold:
 			#3. Two tets both with the symmetry.
 			corner = edge.Corners[0]
 			a = Arrow(corner.Subsimplex,LeftFace[corner.Subsimplex],corner.Tetrahedron)
+			if a.copy().next() is None:
+				a.reverse()
 			#We don't want to try the cancellation if there are certain nontrivial symmetries.
 			#They probably shouldn't be there anyway for a geometric triangulation, but we
 			#check for them just in case.
@@ -1812,7 +1815,7 @@ class CuspedOrbifold:
 					return 0
 				b = a.copy().opposite()
 				if len(a.Tetrahedron.Symmetries) == 2:
-					if b.glued() is None:
+					if b.copy().next() is None:
 						b.reverse()
 					b.next().reverse()
 					b.glue(b.copy().reverse())
@@ -1824,9 +1827,9 @@ class CuspedOrbifold:
 				self.Tetrahedra.remove(a.Tetrahedron)
 			else:
 				#In this case there are two flat tetrahedra.
-				if a.glued() is None:
+				if a.copy().next() is None:
 					a.reverse()
-				b = a.copy().next()
+				b = a.glued()
 				#Make sure the other tet doesn't have any illegal symmetries.
 				for sym in b.Tetrahedron.Symmetries:
 					if sym.image(b.Edge) != b.Edge:
@@ -1845,11 +1848,11 @@ class CuspedOrbifold:
 					c = a.copy().next().reverse()
 					c.glue(b.glued())
 				else:
-					if a.glued() is None:
+					if a.copy().next() is None:
 						a.reverse()
 						b.reverse()
 					c = a.copy().next().reverse()
-					if b.glued() is None:
+					if b.copy().next() is None:
 						c.glue(b.reverse().glued())
 					else:
 						c.glue(b.glued())
@@ -1860,6 +1863,8 @@ class CuspedOrbifold:
 			#It could have the symmetry or not.
 			corner = edge.Corners[0]
 			a = Arrow(corner.Subsimplex,LeftFace[corner.Subsimplex],corner.Tetrahedron)
+			if a.copy().next() is None:
+				a.reverse()
 			#We don't want to try the cancellation if there are certain nontrivial symmetries.
 			#They probably shouldn't be there anyway for a geometric triangulation, but we
 			#check for them just in case.
@@ -1868,7 +1873,7 @@ class CuspedOrbifold:
 					return 0
 			b = a.copy().opposite()
 			if len(a.Tetrahedron.Symmetries) == 2:
-				if b.glued() is None:
+				if b.copy().next() is None:
 					b.reverse()
 				b.next().reverse()
 				b.glue(b.copy().reverse())
@@ -1917,7 +1922,7 @@ class CuspedOrbifold:
 				if is_subset(one_subsimplex,two_subsimplex):
 					a = Arrow(one_subsimplex,two_subsimplex,tet)
 					b = a.glued()
-					if b.glued() is not None:
+					if b.copy().next() is not None:
 						break
 			#Now a and b are is in the picture in the write-up.
 			new = self.new_arrows(3)

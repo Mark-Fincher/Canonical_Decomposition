@@ -154,6 +154,20 @@ def concave_face(face,tet):
 		else:
 			return 0
 
+def transparent_face(face,tet):
+	#Check if the face is transparent, i.e. the tilt sum is zero. Again, we can't
+	#compute tilts for flat tets, so return 0 if tet or its neighbor along face is flat.
+	if tet.Neighbor[face] is None:
+		return 0
+	else:
+		other_tet = tet.Neighbor[face]
+		if tet.is_flat() or other_tet.is_flat():
+			return 0
+		other_face = tet.Gluing[face].image(face)
+		if tet.tilt(comp(face)) + other_tet.tilt(comp(other_face)) == SquareRootCombination.Zero():
+			return 1
+		else:
+			return 0
 
 
 # function that tries to find the canonical decomposition of the input_orb, for now only using 2-3 moves.
