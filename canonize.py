@@ -169,6 +169,18 @@ def transparent_face(face,tet):
 		else:
 			return 0
 
+def transparent_faces_or_flat_tets(orb):
+		#A proto-canonical triangulation is canonical iff it has no transparent faces
+		#nor flat tets (probably it can only have flat tets if it has transparent faces). 
+		#This function checks if either of those is true.
+		for tet in orb.Tetrahedra:
+			if tet.is_flat():
+				return True
+			for face in TwoSubsimplices:
+				if transparent_face(face,tet):
+					return True
+		return False
+
 
 # function that tries to find the canonical decomposition of the input_orb, for now only using 2-3 moves.
 def old_canonize(input_orb):

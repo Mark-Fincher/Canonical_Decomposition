@@ -1,5 +1,8 @@
 # sage stuff
-from sage.all import*
+#from sage.all import*
+import sage.all
+from sage.rings.complex_interval_field import ComplexIntervalField
+from sage.rings.real_mpfi import RealIntervalField
 from Exact_Arithmetic import*
 
 RIF = RealIntervalField()

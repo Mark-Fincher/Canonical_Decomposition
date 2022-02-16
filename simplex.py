@@ -161,6 +161,8 @@ VerticesOfFaceCounterclockwise = {
     F3: (V1, V2, V0)
 }
 
+OrderedEdges = (E01,E02,E03,E12,E13,E23)
+
 # Decide if the bitmap x represents a subset of the bitmap y
 def is_subset(x, y):
     if (x & y == x):

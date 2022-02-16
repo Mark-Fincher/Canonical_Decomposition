@@ -32,6 +32,21 @@ class CuspedOrbifold:
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
 
+	"""
+	Check if self has a hyperbolic structure, i.e. the edge_params of each
+	tetrahedron in self.Tetrahedron are assigned something other than None. We just check
+	if the edge_param of E01 of self.Tetrahedra[0] is not None. Do not try to make an
+	orbifold where some edge_params are None and some are not None; something will break.
+
+	Related: currently nothing in this file checks that the hyperbolic structure is consistent
+	or complete. You must already know the structure is consistent and complete
+	before using any of this software.
+	"""
+	def has_hyperbolic_structure(self):
+		if self.Tetrahedra[0].edge_params[E01] is None:
+			return False
+		return True
+
 	def info(self):
 		tets = self.Tetrahedra
 		print('number of tetrahedra is',len(tets))
@@ -234,7 +249,6 @@ class CuspedOrbifold:
 					"Could not certify proto-canonical triangulation")
                 
 		return result
-
     
 
     # Construct the vertices.
@@ -270,6 +284,68 @@ class CuspedOrbifold:
 
 	
 	"""
+	Here's my attempt at a new build_edge_classes function. Will delete the old one, which is below,
+	after enough testing. I'm re-doing it because it can be much simpler, and because I want to 
+	allow for self to not be geometric (?). In that case we don't have edge_params and the edge locus
+	order should already be given; it doesn't need to be figured out by this function. 
+	"""
+	def build_edge_classes(self):
+		for tet in self.Tetrahedra:
+			for one_subsimplex in OneSubsimplices:
+				if tet.Class[one_subsimplex] is None:
+					newEdge = Edge()
+					self.Edges.append(newEdge)
+					a = Arrow(one_subsimplex,RightFace[one_subsimplex],tet)
+					first_arrow = a.copy()
+					sanity_check = 0
+					unfinished_walk = True
+					while unfinished_walk:
+						if sanity_check > 6*len(self.Tetrahedra):
+							print('Bad gluing data: could not construct edge link.')
+						newEdge.Corners.append(Corner(a.Tetrahedron, a.Edge))
+						if a.true_next() is None:
+							print('Hit boundary. Did not construct edge link.')
+							break
+						else:
+							#Check if a is now first_arrow, or the image of a under 
+							#a symmetry is first_arrow.
+							if a.Tetrahedron is first_arrow.Tetrahedron:
+								for sym in a.Tetrahedron.Symmetries:
+									if ( sym.image(a.Edge) == first_arrow.Edge 
+										and 
+										sym.image(a.Face) == first_arrow.Face):
+										#Then we've finished walking around the edge,
+										#and we want to stop the while loop.
+										unfinished_walk = False
+										break
+							sanity_check = sanity_check + 1
+					#We've finished walking around the edge, and now we want to assign newEdge to all
+					#edges in this class. This might not just be the edges in newEdge.Corners; have
+					#to apply symmetries to get other edges in the class.
+					#We also take the product of all the edge_params in this walk.
+					z = ComplexSquareRootCombination.One()
+					for corner in newEdge.Corners:
+						z = z*corner.Tetrahedron.edge_params[corner.Subsimplex]
+						for sym in corner.Tetrahedron:
+							corner.Tetrahedron.Class[sym.image(corner.Subsimplex)] = newEdge
+					#Now we figure out the order of the local group fixing newEdge. This is
+					#the smallest n such that z^n == 1.
+					n = 0
+					w = ComplexSquareRootCombination.One()
+					while n < 1000:
+						w = w*z
+						n = n + 1
+						# So w = z^n
+						if w == ComplexSquareRootCombination.One():
+							newEdge.LocusOrder = n
+							break
+					else:
+						print('Error getting edge locus order.')
+		for i in range(len(self.Edges)):
+			self.Edges[i].Index = i
+
+
+	"""
 	Two edges are in the same edge class if they're identified by a face pairing or symmetry.
 	We want to determine all the edge classes. We also want to determine if an edge is part of the
 	singular locus or not. And if it is, what is the order of that local group? This function figures
@@ -286,7 +362,7 @@ class CuspedOrbifold:
 	which quotients to that edge will be in the corners list. You can see which Edge object
 	a one-simplex is assigned as Tet.Class[one_simplex].
 	"""
-	def build_edge_classes(self):
+	def old_build_edge_classes(self):
 		for tet in self.Tetrahedra:
 			for one_subsimplex in OneSubsimplices:
 				if tet.Class[one_subsimplex] is None:
@@ -1396,6 +1472,7 @@ class CuspedOrbifold:
 			complex_abs_w0 = ComplexSquareRootCombination(abs(w0),SquareRootCombination.Zero())
 			w1 = One - One/(x*z)
 			complex_abs_w1 = ComplexSquareRootCombination(abs(w1),SquareRootCombination.Zero())
+			"""
 			if (w0/complex_abs_w0).real == (w1/complex_abs_w1).real:
 				#In this case the geodesics [u0,w1] and [u1,w0] intersect. You might think that 
 				#this could be allowed.
@@ -1405,6 +1482,7 @@ class CuspedOrbifold:
 				#way it's flat, i.e. where the edges with angle pi are. So we don't allow this case.
 				print("[u0,w1] and [u1,w0] intersect")
 				#return 0
+			"""
 			c = self.new_arrow()
 			c.glue(a)
 			c.Tetrahedron.fill_edge_params(b.Tetrahedron.edge_params[b.Edge])

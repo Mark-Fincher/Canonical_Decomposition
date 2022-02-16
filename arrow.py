@@ -34,6 +34,9 @@ from tetrahedron import *
 # I have not tried to figure out how they will break if you try to
 # use them in a non-orientable manifold.
 
+# CREDITS: Most of this file is taken from t3mlite (including all the documentation above). 
+# The stuff I've added has ORBIFOLDS commented before it. -Mark F.
+
 class Arrow:
 
     def __init__(self, edge, face, tet):
@@ -71,6 +74,7 @@ class Arrow:
     def south_tail(self):
         return self.Tetrahedron.Class[self.tail() | OppTail[self.tail(),self.head()]]
 
+# ORBIFOLDS
 # We might also want the actual edge one-simplices rather than the classes. Added by Mark 10/5/2021.
     
     def simplex_equator(self):
@@ -120,6 +124,28 @@ class Arrow:
         self.Tetrahedron = tet
         return self
 
+# ORBIFOLDS
+# If self.Face is glued to None, it might implicitly be glued to something
+# due to a symmetry. Instead of self.next() returning None, we might like it
+# to return the arrow you get from the implicit gluing, i.e. apply a symmetry
+# to self then do self.next(). By successive applications of self.true_next(),
+# you can walk around an edge in a simplicial orbifold. Although you might not
+# know it when you're back where you started, unless you apply a symmetry. 
+    def true_next(self):
+        if self.glued().Tetrahedron is not None:
+            return self.next()
+        else:
+            for sym in self.Tetrahedron.Symmetries:
+                a = Arrow(sym.image(self.Edge),sym.image(self.Face),self.Tetrahedron)
+                if a.glued() is not None:
+                    self.Edge = a.Edge
+                    self.Face = a.Face
+                    return self.next()
+        # If we haven't returned by now, then there is no symmetry we can apply to self
+        # so that the resulting arrow is glued to something. So we return None,
+        # without changing self.
+        return None
+
 # Glues two faces together so that other becomes self.next().
 # Returns None
     def glue(self,other):
@@ -137,10 +163,11 @@ class Arrow:
                                   FaceIndex[flip_face(self.Edge,self.Face)]:FaceIndex[other.Face] })
 
 
-#Glue self.Face to what other.Face is glued to in the same way as other. This is
-#just like using self.glue(other.glued()), except this can handle the case that
-#other.Face is glued to itself. I made this so I wouldn't have to keep treating that 
-#case separately.
+# ORBIFOLDS
+# Glue self.Face to what other.Face is glued to in the same way as other. This is
+# just like using self.glue(other.glued()), except this can handle the case that
+# other.Face is glued to itself. I made this so I wouldn't have to keep treating that 
+# case separately.
     def glue_as(self,other):
         if other.Tetrahedron.face_glued_to_self(other.Face):
             self.glue(other.glued())
@@ -222,7 +249,8 @@ class Arrow:
                 break
         return radius_list
 
-# Added by Mark Fincher 10/5/2021. This function adds to self.Tetrahedron's symmetry group
+# ORBIFOLDS
+# This function adds to self.Tetrahedron's symmetry group
 # the permutation taking self to other.
     def add_sym(self,other):
         self.Tetrahedron.Symmetries.append(Perm4({ZeroSubsimplices.index(self.tail()):ZeroSubsimplices.index(other.tail()),

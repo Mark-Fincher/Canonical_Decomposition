@@ -22,6 +22,7 @@ class Tetrahedron:
         self.Symmetries = []
         # Added as in Goerner et al
         self.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
+        self.edge_group_labels = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
         self.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 
     def tilt(self, v):
@@ -194,3 +195,19 @@ class Tetrahedron:
             return True
         else:
             return False
+
+    def true_glued(self,two_subsimplex):
+        #return (neighbor,gluing map), and if two_subsimplex is glued to None
+        #but there's a symmetry taking it to another face which is not glued to
+        #None, use that data.
+        if self.Neighbor[two_subsimplex] is not None:
+            return (self.Neighbor[two_subsimplex],self.Gluing[two_subsimplex])
+        for sym in self.Symmetries:
+            if self.Neighbor[sym.image(two_subsimplex)] is not None:
+                Neighbor = self.Neighbor[sym.image(two_subsimplex)]
+                perm = self.Gluing[sym.image(two_subsimplex)]
+                if self.face_glued_to_self(sym.image(two_subsimplex)):
+                    return(Neighbor,sym.inverse()*perm*sym)
+                else:
+                    return(Neighbor,perm*sym)
+        return (None,None)
