@@ -553,7 +553,7 @@ We get canonical decomp data for covers of different Q pi tildes. The Q pi tilde
 O14_0, and O14_1. From this we get the isometry groups of the covers, which is the main point of this. 
 Because we know we can quotient some of these out by isometries to get some orbifolds not in C_main.
 """
-
+"""
 O4 = [0, 1, 1, 0, 1, 0, 0, 2, 3, 2, 2, 1, 2, 3, 3, 3]
 
 covers_of_O4 = [[1, 2, 2, 1, 0, 3, 3, 0, 3, 0, 0, 4, 2, 1, 1, 5, 6, 5, 5, 2, 7, 4, 4, 3, 4, 7, 7, 7, 5, 6, 6, 6],[0, 1, 1, 2, 1, 0, 0, 3, 4, 5, 5, 0, 6, 7, 7, 1, 2, 8, 8, 4, 8, 2, 2, 7, 3, 9, 9, 6, 9, 3, 3, 5, 5, 4, 4, 10, 7, 6, 6, 11, 11, 10, 10, 8, 10, 11, 11, 9]
@@ -643,26 +643,20 @@ covers_of_O14_1 = [[0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 
 [1, 1, 2, 3, 0, 4, 0, 4, 4, 0, 5, 6, 6, 7, 8, 0, 2, 9, 1, 1, 9, 2, 9, 10, 3, 11, 12, 2, 12, 13, 3, 12, 11, 3, 14, 9, 5, 5, 4, 8, 15, 16, 15, 5, 8, 17, 6, 15, 7, 6, 18, 7, 18, 19, 7, 20, 17, 8, 19, 16, 10, 10, 21, 11, 21, 22, 10, 14, 14, 23, 11, 22, 13, 12, 23, 24, 23, 14, 13, 23, 25, 24, 24, 13, 16, 15, 26, 26, 26, 26, 16, 17, 19, 18, 17, 19, 27, 20, 20, 18, 20, 27, 27, 27, 22, 21, 22, 21, 24, 25, 25, 25],
 [1, 2, 2, 2, 0, 3, 3, 4, 3, 0, 0, 0, 2, 1, 1, 5, 5, 6, 7, 1, 4, 8, 9, 3, 9, 10, 4, 9, 8, 4, 11, 8, 7, 12, 5, 7, 6, 5, 13, 6, 13, 14, 6, 15, 12, 7, 14, 16, 11, 17, 8, 18, 10, 9, 17, 19, 17, 11, 10, 20, 21, 19, 22, 10, 23, 24, 18, 11, 14, 13, 12, 25, 26, 16, 27, 12, 24, 23, 15, 13, 22, 27, 21, 14, 15, 20, 24, 24, 20, 15, 25, 27, 16, 26, 19, 26, 19, 21, 16, 21, 27, 22, 26, 17, 18, 25, 23, 23, 25, 18, 20, 22],]
 
-
-"""
-orb = dest_to_orb(O14_1)
-proto_canonize(orb)
-print(transparent_faces_or_flat_tets(orb))
-"""
-
 print("This file has info about covers of Q pi tilde for pi = 1 +- 2*sqrt(-3). This is O14_1, with dest seq")
 print(' ')
 dest = O14_1
 Dests = covers_of_O14_1
 print(dest)
 orb = dest_to_orb(dest)
-"""
+
+#Comment this out depending on the properties of this Q pi tilde.
 print(' ')
 print("Its original regular tet triangulation is proto-canonical, but not canonical. Remove a face to get a regular cube.")
 print(' ')
 orb.info()
 print(' ')
-"""
+
 print(' ')
 print("Its original regular tet triangulation is not canonical.")
 print("The number of OP isometries preserving this triangulation is",len(orb.isometriesOP()))
@@ -739,7 +733,7 @@ for i in range(len(Dests)):
     print("------------------------------------------------------")
     print(' ')
     print(' ')
-
+"""
 
 """
 with open("OrbDictionary.json", "r") as read_file:
@@ -873,3 +867,14 @@ orb.info()
 #Also got this canonical with the 4-4 move! This is very similar to (32,0), they might even be
 #isometric.
 """
+
+O14_0 = [0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 4, 2, 7, 9, 3, 6, 6, 6, 7, 5, 4, 10, 
+    11, 9, 11, 4, 12, 13, 8, 5, 13, 12, 13, 7, 8, 8, 12, 12, 9, 11, 10, 11, 10, 10, 9, 13]
+orb = dest_to_orb(O14_0)
+#orb.info()
+for edge in orb.Edges:
+    print(edge)
+    print(edge.LocusOrder)
+    print(edge.Corners)
+    print(' ')
+

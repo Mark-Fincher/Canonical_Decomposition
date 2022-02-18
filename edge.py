@@ -16,6 +16,9 @@ import sys
 # An edge has an initial and terminal vertex, but these are determined
 # arbitrarily when the 1-skeleton is constructed.
 
+# CREDITS. Most of this file is taken from edge.py in t3mlite. My own contributions
+# I've commented with ORBIFOLDS. -Mark F.
+
 class Edge:
 
     def __init__(self):
@@ -27,7 +30,8 @@ class Edge:
         self.LeftBdryArrow = None   # Arrows representing the two boundary faces,
         self.RightBdryArrow = None  # if this is a boundary edge. 
         self._edge_orient_cache = dict()
-        self.LocusOrder = None      # Added by MF, 9/8/2021, order of rotation around the edge
+        #ORBIFOLDS. Order of rotation group around the edge.
+        self.LocusOrder = None 
 
     def __repr__(self):
         if self.Index > -1:

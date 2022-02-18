@@ -130,14 +130,14 @@ class Arrow:
 # to return the arrow you get from the implicit gluing, i.e. apply a symmetry
 # to self then do self.next(). By successive applications of self.true_next(),
 # you can walk around an edge in a simplicial orbifold. Although you might not
-# know it when you're back where you started, unless you apply a symmetry. 
+# know when you're back to where you started, unless you apply the right symmetry. 
     def true_next(self):
         if self.glued().Tetrahedron is not None:
             return self.next()
         else:
             for sym in self.Tetrahedron.Symmetries:
                 a = Arrow(sym.image(self.Edge),sym.image(self.Face),self.Tetrahedron)
-                if a.glued() is not None:
+                if a.glued().Tetrahedron is not None:
                     self.Edge = a.Edge
                     self.Face = a.Face
                     return self.next()

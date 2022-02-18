@@ -21,7 +21,9 @@ class SimplicialOrbifold:
 
 	"""
 	We create edge classes just like we do for a CuspedOrbifold. The only difference is
-	that we don't have to figure out the LocusOrder at the end using the geometry.
+	that we don't have to figure out the LocusOrder at the end using the geometry. Also,
+	we should allow for boundary faces now. It currently doesn't do that, but I'll change
+	it.
 	"""
 	def build_edge_classes(self):
 		for tet in self.Tetrahedra:
@@ -64,6 +66,8 @@ class SimplicialOrbifold:
 
 
 	"""
+	MOVED.
+
 	Isomorphism signature.
 
 	Briefly: we want to find all canonical relabelings, then encode those relabelings as strings, then
@@ -90,9 +94,9 @@ class SimplicialOrbifold:
 
 	We say a labeling is CANONICAL if the following are satisfied.
 
-	1. For 0 < i < j < n, the first instance of i in A appears before the first instance of j.
+	1. For 0 < i < j < n, the first instance of i in D appears before the first instance of j.
 	2. For each face f of each tetrahedron t, if T_{t,f} = 1 then face f of tetrahedron t is glued
-	to tetrahedron A_{t,f} via the identity permutation.
+	to tetrahedron D_{t,f} via the identity permutation.
 	3. For each face f of each tetrahedron t, if T_{t,f} = 1 and tetrahedron t has a symmetry taking face f to 
 	a different face f', then f < f'.
 	4. For each face f of each tetrahedron t, if T_{t,f} = 2 and face f of tetrahedron t is not glued to a
@@ -129,124 +133,4 @@ class SimplicialOrbifold:
 	being explicit, until we fix the dest seq, type seq, and gluing seq. To that end we use the 
 	tetrahedron method true_glued. 	
 	"""
-
-	def get_relabeling(self,tet0,perm0):
-		#Assuming tet0 should be given label 0 and perm0 should be the relabeling permutation
-		#of tet0, find the corresponding canonical labeling in terms of the sequences
-		#D,T,G,S,E. Lists which determine the relabeling are tets and perms. Meaning the tet
-		#with label i after relabeling is tets[i], and vertex j of tets[i] becomes perms[i][j]
-		#in the new labeling of vertices of tets[i].
-		tets = [tet0]
-		perms = [perm0]
-		D = 4*len(tets)*[None]
-		T = 4*len(tets)*[None]
-		G = 4*len(tets)*[None]
-		for i in range(len(self.Tetrahedra)):
-			for j in range(4):
-				#We are interested in face j of tet i, w.r.t. the new labeling.
-				k = perms[i].inverse().image(j)
-				#In the original labeling, face j is face k.
-				Neighbor, Gluing = tets[i].true_glued(TwoSubsimplices[k])
-				if Neighbor in tets:
-					if T[4*i + j] == 2:
-						#Then, since the type was already assigned, this face must be glued to a
-						#face of type 1. In which case we don't adjust any gluings even though
-						#there might be symmetries.
-						D[4*i + j] = tets.index(Neighbor)
-						G[4*i + j] = Gluing*perms[i].inverse()
-					else:
-						#In this case the face is not type 1, nor is it glued to a type 1 face.
-						for sym in tets[i].Symmetries:
-							if (perms[i]*sym*perms[i].inverse())[j] < j:
-								#Then face j is taken to some other face of lesser index by a symmetry.
-								#So the gluing of face j should be implicit. 
-								D[4*i + j] = None
-								T[4*i + j] = 0
-								G[4*i + j] = None
-								break
-						else:
-							#There is no symmetry taking face j to a face of lesser index. It could be there
-							#is no symmetry taking face j to a different face at all. In either case, we
-							#have an explicit face gluing.
-							D[4*i + j] = tets.index(Neighbor)
-							T[4*i + j] = 2
-							G[4*i + j] = Gluing*perms[i].inverse()
-				elif Neighbor is not None and Neighbor is not in tets:
-					#Then face j of tet i is type 1.
-					tets.append(Neighbor)
-					perms.append(Gluing*perms[i].inverse())
-					D[4*i + j] = tets.index(Neighbor)
-					G[4*i + j] = Gluing*perms[i].inverse() 
-					T[4*i + j] = 1
-					#Set the type of the face f glued to face j of tet i to 2. This helps
-					#us know later that the gluing of f should remain explicit, even if
-					#there's a symmetry taking it to a face with lesser index. 
-					T[4*tets.index(Neighbor) + j] = 2
-				else:
-					#In this case it really is a boundary face.
-					D[4*i + j] = None
-					T[4*i + j] = 0
-					G[4*i + j] = None
-		#Now let's get the set of symmetries, S, and edge labels, E.
-		S = []
-		E = []
-		for i in range(len(tets)):
-			S.append([])
-			for sym in tets[i].Symmetries:
-				S[i].append(perms[i]*sym*perms[i].inverse())
-			for edge in OrderedEdges:
-				E.append(tets[i].edge_group_labels[perms[i].inverse().image(edge)])
-		return (D,T,G,S,E)
-
-
-	def encode_as_string(self, D,T,G,S,E):
-		#The lists D,T,G,S,E as they are returned from get_relabeling determine
-		#a relabeled simplicial orbifold. We can encode this data more compactly
-		#as a string in the following way. First we clean them up somewhat.
-		#Remove redundant information. If face f of tet t is glued to face f' of tet t'
-		#and (t,f) < (t',f') lexicographically, we don't need to include face gluing
-		#data of (t',f') because we will already see it in the gluing data of (t,f).
-		#So we remove D[t',f'] from the destination sequence, then we remove the
-		#corresponding term from the type sequence and the gluing sequence.
-		#There is also redundant information in the edge label sequence E. If edge e of tetrahedron
-		#t is mapped to edge e' of tetrahedron t' via a symmetry or face gluing map, we only need
-		#to label the lexicographically smallest of the two edges, since the labeling of the other
-		#can be inferred. 
-		
-		#There is redundant information in the edge label sequence E. If edge e of tetrahedron
-		#t is mapped to edge e' of tetrahedron t' via a symmetry or face gluing map, we only need
-		#to label the lexicographically smallest of the two edges, since the labeling of the other
-		#can be inferred. 
-		to_remove = []
-		for i in range(len(tets)):
-			for j in range(6):
-				edge = OrderedEdges[j]
-				k = TwoSubsimplices.index(RightFace[edge])
-				if D[4*i + k] is not None:
-					if D[4*i + k] < i:
-						to_remove.append(4*i + j)
-					elif D[4*i + k] == i:
-						
-
-
-		to_remove = []
-		for i in range(len(tets)):
-			for j in range(4):
-				k = D[4*i + j]
-				if k is not None:
-					l = G[4*i + j].image(j)
-					if 4*k + l < 4*i + j:
-						to_remove.append(4*i + j)
-		for k in to_remove:
-			D.remove(D[k])
-			T.remove(T[k])
-			G.remove(G[k])
-		#Now we change G and S so that each permutation is represented by an integer, its index
-		#in the lexicographically ordered list of all elements of S4. In perm4.py this list
-		#is called _rawS4.
-		G = [_rawS4.index(perm.tuple()) for perm in G]
-		for i in len(S):
-			int_S_i = [_rawS4.index(perm_tuple()) for perm in S[i]]
-			S[i] = sorted(int_S_i)
-
 

@@ -161,6 +161,7 @@ VerticesOfFaceCounterclockwise = {
     F3: (V1, V2, V0)
 }
 
+# Used for the orbifold isomorphism signature in IsomorphismSignature.py.
 OrderedEdges = (E01,E02,E03,E12,E13,E23)
 
 # Decide if the bitmap x represents a subset of the bitmap y

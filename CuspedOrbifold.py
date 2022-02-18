@@ -1,5 +1,8 @@
 """
-Cusped orbifold class. Similar to the SnapPy t3m mcomplex class.
+Cusped orbifold class. Similar to the SnapPy t3m mcomplex class. Some things are taken, perhaps
+with modification, from ancillary files of the paper "A census of tetrahedral hyperbolic 
+manifolds" by Evgeny Fominykh, Stavros Garoufalidis, Matthias Goerner, Vladimir Tarkaev, 
+and Andrei Vesnin. I comment FGGTV before those things.
 """
 
 from HoroTriangle import*
@@ -31,21 +34,6 @@ class CuspedOrbifold:
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
-
-	"""
-	Check if self has a hyperbolic structure, i.e. the edge_params of each
-	tetrahedron in self.Tetrahedron are assigned something other than None. We just check
-	if the edge_param of E01 of self.Tetrahedra[0] is not None. Do not try to make an
-	orbifold where some edge_params are None and some are not None; something will break.
-
-	Related: currently nothing in this file checks that the hyperbolic structure is consistent
-	or complete. You must already know the structure is consistent and complete
-	before using any of this software.
-	"""
-	def has_hyperbolic_structure(self):
-		if self.Tetrahedra[0].edge_params[E01] is None:
-			return False
-		return True
 
 	def info(self):
 		tets = self.Tetrahedra
@@ -119,10 +107,12 @@ class CuspedOrbifold:
 	def new_arrows(self,n):
 		return [self.new_arrow() for i in range(n)]
 
+	# FGGTV
 	def add_cusp_cross_sections(self):
 		for cusp in self.Vertices:
 			self.add_one_cusp_cross_section(cusp)
 
+	# FGGTV
 	def add_one_cusp_cross_section(self, cusp):
 		"Build a cusp cross section as described in Section 3.6 of the paper"
 		tet0, vert0 = tets_and_vertices_of_cusp(cusp)[0]
@@ -134,7 +124,7 @@ class CuspedOrbifold:
 		while active:
 			tet0, vert0 = active.pop()
 			for face0 in FacesAnticlockwiseAroundVertices[vert0]:
-				# Mark added the following line (and only that line) 8/2/2021. Because some faces might be unglued for us.
+				# We need the following for orbifolds becuse some faces might be unglued.
 				if tet0.Neighbor[face0] != None:
 					tet1, face1 = glued_to(tet0, face0)
 					vert1 = tet0.Gluing[face0].image(vert0)
@@ -142,7 +132,7 @@ class CuspedOrbifold:
 						tet1.horotriangles[vert1] = HoroTriangle(tet1, vert1, face1,
 								tet0.horotriangles[vert0].lengths[face0])
 						active.append( (tet1, vert1) )
-			# Following added by Mark 8/9/2021 to acommodate symmetries in building horotriangles
+			# With orbifolds, need to acommodate symmetries in building horotriangles.
 			for perm in tet0.Symmetries:
 				if perm.image(vert0) != vert0:
 					vert1 = perm.image(vert0)
@@ -154,6 +144,7 @@ class CuspedOrbifold:
 
 
 
+	# FGGTV
 	def _get_cusp(self, cusp):
 		"""
 		Helper method so the user can specify a cusp by its index as well
@@ -165,10 +156,11 @@ class CuspedOrbifold:
 
 
 	"""
-	Following changed by Mark, 7/12/2021. In the orbifold case, the cusp area computation is a little different.
-	If a horotriangle is at a vertex which is fixed by a nontrivial symmetry, then the area of the triangle is
-	divided by 3. And if a vertex is mapped to another vertex of the same tetrahedron by a symmetry, then only
-	one of the corresponding horotriangles contributes area to the cusp.
+	FGGTV. In the orbifold case, the cusp area computation is a little different.
+	If a horotriangle is at a vertex which is fixed by a nontrivial symmetry, then 
+	the area of the triangle is divided by 3. And if a vertex is mapped to another 
+	vertex of the same tetrahedron by a symmetry, then only one of the corresponding 
+	horotriangles contributes area to the cusp.
 	"""
 	def cusp_area(self, cusp):
 		cusp = self._get_cusp(cusp)
@@ -190,12 +182,14 @@ class CuspedOrbifold:
 					area += T.horotriangles[V].area
 		return area
 
+	# FGGTV
 	def rescale_cusp(self, cusp, scale):
 		cusp = self._get_cusp(cusp)
 		for T, V in tets_and_vertices_of_cusp(cusp):
 			T.horotriangles[V].rescale(scale)
 
 
+	# FGGTV
 	def normalize_cusp(self, cusp):
 		"""
 		Rescale cusp to have area sqrt(3). This choice ensures that
@@ -210,6 +204,7 @@ class CuspedOrbifold:
 		ratio = (target_area/area).sqrt()
 		self.rescale_cusp(cusp, ratio)
 
+	# FGGTV
 	def LHS_of_convexity_equations(self):
 		"""
 		For each face in the triangulation, return a quantity which is < 0
@@ -223,6 +218,7 @@ class CuspedOrbifold:
 				ans.append(tet0.tilt(vert0) + tet1.tilt(comp(face1)))
 		return ans
 
+	# FGGTV
 	def find_opaque_faces(self):
 		"""
 		Returns a list of bools indicating whether a face of a tetrahedron
@@ -284,10 +280,23 @@ class CuspedOrbifold:
 
 	
 	"""
-	Here's my attempt at a new build_edge_classes function. Will delete the old one, which is below,
+	Here's my attempt at a new build_edge_classes function. Will delete the old one, which is below it,
 	after enough testing. I'm re-doing it because it can be much simpler, and because I want to 
 	allow for self to not be geometric (?). In that case we don't have edge_params and the edge locus
-	order should already be given; it doesn't need to be figured out by this function. 
+	order should already be given; it doesn't need to be figured out by this function.
+
+	Two edges are in the same class if they're identified by a sequence of face gluings and
+	symmetries. In that case, the two edges are assigned the same edge object (defined in edge.py).
+	For example, if edge E01 of tet0 has the edge object EDGE, then tet0.Class[E01] == EDGE.
+	One attribute of the edge class is "Corners". A Corner is an object with attributes Tetrahedron
+	and Subsimplex. It might make sense for EDGE.Corners to be the list of all Corners such that
+	Corner.Tetrahedron.Class[Corner.Subsimplex] == EDGE. But in fact we do things slightly
+	differently. We walk around EDGE using arrows, and only the (one)Subsimplex-Tetrahedron pairs we
+	encounter there get recorded into EDGE.Corners. Because of symmetries, this might not be all of them.
+	Additionally, there could be repeats in this list, if an arrow and its reverse both apppear
+	in the walk. We do it this way because we need to know the total dihedral angle traversed in a
+	walk, theta. Then the integer n satisfying n*theta = 2*pi is the order of the local group fixing the
+	edge, recorded as EDGE.LocusOrder == n.  
 	"""
 	def build_edge_classes(self):
 		for tet in self.Tetrahedra:
@@ -300,7 +309,7 @@ class CuspedOrbifold:
 					sanity_check = 0
 					unfinished_walk = True
 					while unfinished_walk:
-						if sanity_check > 6*len(self.Tetrahedra):
+						if sanity_check > 12*len(self.Tetrahedra):
 							print('Bad gluing data: could not construct edge link.')
 						newEdge.Corners.append(Corner(a.Tetrahedron, a.Edge))
 						if a.true_next() is None:
@@ -326,7 +335,7 @@ class CuspedOrbifold:
 					z = ComplexSquareRootCombination.One()
 					for corner in newEdge.Corners:
 						z = z*corner.Tetrahedron.edge_params[corner.Subsimplex]
-						for sym in corner.Tetrahedron:
+						for sym in corner.Tetrahedron.Symmetries:
 							corner.Tetrahedron.Class[sym.image(corner.Subsimplex)] = newEdge
 					#Now we figure out the order of the local group fixing newEdge. This is
 					#the smallest n such that z^n == 1.
@@ -428,7 +437,7 @@ class CuspedOrbifold:
 			self.Edges[i].Index = i
 
 
-	#Checks if the triangulation is proto_canonical or not.
+	# Checks if the triangulation is proto_canonical or not.
 	def is_proto_canonical(self):
 		for tet1 in self.Tetrahedra:
 			if tet1.is_flat():

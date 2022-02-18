@@ -6,6 +6,14 @@
 #   GNU General Public License, version 2 or later, as published by
 #   the Free Software Foundation.  See the file GPL.txt for details.
 
+# CREDITS. Most of this file is taken from tetrahedron.py of t3mlite (including the above).
+# But I've added some orbifold things. For my own contributions, I comment
+# ORBIFOLDS before it. I've also added some things from the ancillary files
+# of the paper "A census of tetrahedral hyperbolic manifolds" by Evgeny Fominykh, 
+# Stavros Garoufalidis, Matthias Goerner, Vladimir Tarkaev, and Andrei Vesnin. I comment
+# FGGTV before those things.
+# - Mark F. 
+
 from simplex import *
 import sys
 from Exact_Arithmetic import*
@@ -18,13 +26,16 @@ class Tetrahedron:
         self.Gluing   = {F0:None,F1:None,F2:None,F3:None}  # Permutations
         self.Class    = [None]*16             # list of equivalence classes
         self.Checked  = 0                     # flag
-        # Below added 7/8/2021 by Mark Fincher
+        
+        # ORBIFOLDS
         self.Symmetries = []
-        # Added as in Goerner et al
-        self.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
         self.edge_group_labels = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
+
+        # FGGTV
+        self.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
         self.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 
+    # FGGTV
     def tilt(self, v):
         "The tilt of the face of the tetrahedron opposite the vertex v."
         ans = SquareRootCombination.Zero()
@@ -134,7 +145,8 @@ class Tetrahedron:
         self.edge_params = {E01:z, E23:z, E02:zp, E13:zp, E03:zpp, E12:zpp}
 
     """
-    The folllowing returns true if the face is glued to itself, false otherwise. Added by Mark 10/1/2021.
+    ORBIFOLDS.
+    The folllowing returns true if the face is glued to itself, false otherwise.
     """
     def face_glued_to_self(self,two_subsimplex):
         if self.Neighbor[two_subsimplex] == self and self.Gluing[two_subsimplex].image(two_subsimplex) == two_subsimplex:
@@ -142,6 +154,7 @@ class Tetrahedron:
         return False
 
     """
+    ORBIFOLDS.
     My convention is that if the equivalence relation induced by the face identifications and
     symmetries of a tetrahedron imply that a certain face is glued to itself, then that should
     explicitly be the gluing data of that face. Note that a face could be glued to None but
@@ -171,8 +184,8 @@ class Tetrahedron:
 
 
     """
+    ORBIFOLDS.
     The following returns true if there's a symmetry of the tet which rotates the face, false otherwise.
-    Added by Mark 10/1/2021.
     """
     def face_rotation(self,two_subsimplex):
         for sym in self.Symmetries:
@@ -180,6 +193,9 @@ class Tetrahedron:
                 return True
         return False
 
+    """
+    ORBIFOLDS.
+    """
     def is_flat(self):
         z = self.edge_params[E01]
         if z.imag == SquareRootCombination.Zero():
@@ -187,6 +203,9 @@ class Tetrahedron:
         else:
             return False
 
+    """
+    ORBIFOLDS
+    """
     def is_regular(self):
         a = SquareRootCombination([(1,Fraction(1/2))])
         b = SquareRootCombination([(Fraction(3,1),Fraction(1/2))])
@@ -196,6 +215,9 @@ class Tetrahedron:
         else:
             return False
 
+    """
+    ORBIFOLDS
+    """
     def true_glued(self,two_subsimplex):
         #return (neighbor,gluing map), and if two_subsimplex is glued to None
         #but there's a symmetry taking it to another face which is not glued to
