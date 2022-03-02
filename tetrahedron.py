@@ -11,7 +11,7 @@
 # ORBIFOLDS before it. I've also added some things from the ancillary files
 # of the paper "A census of tetrahedral hyperbolic manifolds" by Evgeny Fominykh, 
 # Stavros Garoufalidis, Matthias Goerner, Vladimir Tarkaev, and Andrei Vesnin. I comment
-# FGGTV before those things.
+# FGGTV before them.
 # - Mark F. 
 
 from simplex import *
@@ -146,10 +146,12 @@ class Tetrahedron:
 
     """
     ORBIFOLDS.
-    The folllowing returns true if the face is glued to itself, false otherwise.
+    The following returns True if the face is glued to itself, False otherwise.
+    If the face is glued to None, it will return False.
     """
     def face_glued_to_self(self,two_subsimplex):
-        if self.Neighbor[two_subsimplex] == self and self.Gluing[two_subsimplex].image(two_subsimplex) == two_subsimplex:
+        if (self.Neighbor[two_subsimplex] == self and 
+            self.Gluing[two_subsimplex].image(two_subsimplex) == two_subsimplex):
             return True
         return False
 
@@ -160,6 +162,14 @@ class Tetrahedron:
     explicitly be the gluing data of that face. Note that a face could be glued to None but
     still be glued to itself by the induced equivalence relation. The following function
     makes sure this convention is followed for self.
+
+    UPDATE. This was my old convention. My new convention is that, in a face orbit, exactly
+    one face should be glued to something, all others should be glued to None. It doesn't
+    matter which of them is glued to something. This is different from the convention dealt
+    with in the function fix_glued_to_self. That convention implied that if a tet has all
+    possible symmetries and a face is glued to itself, then we should have all the faces
+    explicitly glued to themselves. To match with my current convention, I define the
+    function remove_extra_glued_to_self.
     """
     def fix_glued_to_self(self):
         if len(self.Symmetries) == 1:
@@ -181,6 +191,17 @@ class Tetrahedron:
                             break
                 if face_done:
                     break
+
+    def remove_extra_glued_to_self(self):
+        for face in TwoSubsimplices:
+            if self.face_glued_to_self(face) is False:
+                continue
+            for sym in self.Symmetries:
+                if sym.image(face) != face:
+                    image_face = sym.image(face)
+                    self.Neighbor[image_face] = None
+                    self.Gluing[image_face] = None
+
 
 
     """

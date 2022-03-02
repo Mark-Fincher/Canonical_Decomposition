@@ -9,18 +9,34 @@ from vertex import*
 from simplex import*
 from corner import*
 from perm4 import*
+from tetrahedron import*
 
 """
-Briefly: we want to find all canonical relabelings of a SimplicialOrbifold object orb, then encode 
+Change a CuspedOrbifold object into a SimplicialOrbifold object. On a high level, this just means
+forget about the geometry. We take the isomorphism signature of SimplicialOrbifold objects,
+not CuspedOrbifold objects, which is why we might want to make this change. 
+"""
+def hyp_to_simplicial(cusped_orb):
+	tets_list = cusped_orb.Tetrahedra
+	for tet in tets_list:
+		tet.remove_extra_glued_to_self()
+		tet.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
+		tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+		for one_subsimplex in OneSubsimplices:
+			tet.edge_group_labels[one_subsimplex] = tet.Class[one_subsimplex].LocusOrder
+	return SimplicialOrbifold(tets_list)
+
+"""
+We want to find all canonical relabelings of a SimplicialOrbifold object orb, then encode 
 those relabelings as strings, then get the lexicographically smallest of those strings, which 
 we'll call the isomorphism signature. This is Burton's isomorphism signature, but for simplicial
 orbifolds instead of manifolds.
 
 A SimplicialOrbifold object automatically has a labeling of tetrahedra and vertices, and the face
 gluing maps are described in terms of the vertex labeling. If we change the labeling, it's clearly
-the same simplicial orbifold. We can even change so face gluings using symmetries, and we still
+the same simplicial orbifold. We can even change some face gluings using symmetries, and we still
 have the same orbifold. To describe the kinds of labelings we're looking for, we must define
-the destination sequence and the type sequencce.
+the destination sequence and the type sequence.
 
 The DESTINATION SEQUENCE corresponding to a labeling of a simplicial orbifold (having n tetrahedra)
 is the sequence
@@ -53,7 +69,7 @@ in this way.
 To keep track of relabelings, we do not create new SimplicialOrbifold objects. Instead, we create
 two lists, tets and perms, where tets[i] is the element of self.Tetrahedra which is now labeld i, and
 perms[i] represents  the relabeling of tets[i], i.e. the vertex j becomes perms[i][j]. Note that
-in general tets[i].Index != i.
+in general tets[i].Index != i, i.e. the Index attribute is not updated.
 
 We use three other lists to describe simpicial orbifold data, G gluing sequence, S symmetry sequence,
 and E edge label sequence.
@@ -74,7 +90,7 @@ E = E_{0,0}, E_{0,1}, ... E_{0,5}, E_{1,0}, ... , E_{n-1,0}, E_{n-1,1}, ... E_{n
 where E_{t,e} is the edge label of edge e in tetrahedron t. We consider e an integer 0 <= e <= 5
 corrseponding to the ordering E01, E02, E03, E12, E13, E23. This is listed in simplex.py.
 
-In the below, it's often best to think of all implicit face gluings (due to symmetries) as actually
+In the following, it's often best to think of all implicit face gluings (due to symmetries) as actually
 being explicit, until we fix the dest seq, type seq, and gluing seq. To that end we use the 
 tetrahedron method true_glued. 	
 """
@@ -92,6 +108,23 @@ ordered_subgrps_S4 = (	[(0,1,2,3)],
 						[(0,1,2,3),(1,3,2,0),(3,0,2,1)],
 						[(0,1,2,3),(1,0,3,2),(2,3,0,1),(3,2,1,0)],
 						_rawA4)
+
+"""
+Encode integers as printable characters. This is exactly as in the appendix to Burton's
+"The Pachner graph and the simplification of 3-sphere triangulations".
+"""
+pi = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 
+	'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 
+	'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-')
+
+def enc(i):
+	# input: integer i.
+	# output: string encoding i, using pi above.
+	# First see what i is in base 64.
+	
+
 
 """
 Create labeled data for a canonical labeling.
