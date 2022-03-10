@@ -10,13 +10,14 @@ from simplex import*
 from corner import*
 from perm4 import*
 from tetrahedron import*
+from SimplicialOrbifold import*
 
 """
 Change a CuspedOrbifold object into a SimplicialOrbifold object. On a high level, this just means
 forget about the geometry. We take the isomorphism signature of SimplicialOrbifold objects,
 not CuspedOrbifold objects, which is why we might want to make this change. 
 """
-def hyp_to_simplicial(cusped_orb):
+def hyperbolic_to_simplicial(cusped_orb):
 	tets_list = cusped_orb.Tetrahedra
 	for tet in tets_list:
 		tet.remove_extra_glued_to_self()
@@ -99,6 +100,20 @@ tetrahedron method true_glued.
 For ordered lists of permutations, we will use _rawS4 and _rawA4 from perm.py.
 The ordered list of subgroups of even permutations is as follows.
 """
+
+_rawA4 = [ (0,1,2,3),
+               (0,2,3,1),
+               (0,3,1,2),
+               (1,0,3,2),
+               (1,2,0,3),
+               (1,3,2,0),
+               (2,0,1,3),
+               (2,1,3,0),
+               (2,3,0,1),
+               (3,0,2,1),
+               (3,1,0,2),
+               (3,2,1,0)]
+
 ordered_subgrps_S4 = (	[(0,1,2,3)],
 						[(0,1,2,3),(1,0,3,2)],
 						[(0,1,2,3),(2,3,0,1)],
@@ -119,11 +134,12 @@ pi = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
 	'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-')
 
+"""
 def enc(i):
 	# input: integer i.
 	# output: string encoding i, using pi above.
 	# First see what i is in base 64.
-	
+"""	
 
 
 """
@@ -182,7 +198,7 @@ def get_tets_perms_D_T_G(orb,tet0,perm0):
 						D[4*i + j] = m
 						T[4*i + j] = 2
 						G[4*i + j] = _rawS4.index((perms[m]*Gluing*perms[i].inverse()).tuple())
-			elif Neighbor is not None and Neighbor is not in tets:
+			elif Neighbor is not None and Neighbor not in tets:
 				# Then face j of tet i is type 1.
 				tets.append(Neighbor)
 				# The new permutation, which describe the relabeling of Neighbor, must satisfy

@@ -31,6 +31,9 @@ class Tetrahedron:
         self.Symmetries = []
         self.edge_group_labels = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
 
+        
+        self.canonize_info = None
+
         # FGGTV
         self.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
         self.horotriangles = {V0:None, V1:None, V2:None, V3:None}
@@ -254,3 +257,14 @@ class Tetrahedron:
                 else:
                     return(Neighbor,perm*sym)
         return (None,None)
+
+    """
+    ORBIFOLDS.
+
+    If self has a nontrivial symmetry, return it. If it has more than one, it
+    just returns the first one it encounters in self.Symmetries.
+    """
+    def nontrivial_sym(self):
+        for sym in self.Symmetries:
+            if sym.tuple() != (0,1,2,3):
+                return sym

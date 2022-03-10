@@ -7,6 +7,8 @@ from simplex import*
 from Dest_to_Triang import*
 """
 from canonize import*
+#from SimplicialOrbifold import*
+#from IsomorphismSignature import*
 import json
 
 
@@ -553,7 +555,7 @@ We get canonical decomp data for covers of different Q pi tildes. The Q pi tilde
 O14_0, and O14_1. From this we get the isometry groups of the covers, which is the main point of this. 
 Because we know we can quotient some of these out by isometries to get some orbifolds not in C_main.
 """
-
+"""
 O4 = [0, 1, 1, 0, 1, 0, 0, 2, 3, 2, 2, 1, 2, 3, 3, 3]
 
 covers_of_O4 = [[1, 2, 2, 1, 0, 3, 3, 0, 3, 0, 0, 4, 2, 1, 1, 5, 6, 5, 5, 2, 7, 4, 4, 3, 4, 7, 7, 7, 5, 6, 6, 6],[0, 1, 1, 2, 1, 0, 0, 3, 4, 5, 5, 0, 6, 7, 7, 1, 2, 8, 8, 4, 8, 2, 2, 7, 3, 9, 9, 6, 9, 3, 3, 5, 5, 4, 4, 10, 7, 6, 6, 11, 11, 10, 10, 8, 10, 11, 11, 9]
@@ -662,7 +664,7 @@ for tet in orb.Tetrahedra:
             print('Face',FaceIndex[two_subsimplex],'of tet',tet,'is transparent.')
 print(' ')
 
-"""
+
 print(' ')
 print("Its original regular tet triangulation is not canonical.")
 print("The number of OP isometries preserving this triangulation is",len(orb.isometriesOP()))
@@ -682,7 +684,7 @@ print(' ')
 print("and they are")
 print(orb.isometriesOP())
 print(' ')
-"""
+
 print("Now we check canonical decomp data for covers of O5.")
 print(' ')
 print("------------------------------------------------------------------------")
@@ -750,13 +752,14 @@ for i in range(len(Dests)):
     print("------------------------------------------------------")
     print(' ')
     print(' ')
-
+"""
 
 """
 with open("OrbDictionary.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
+
 """
 
 

@@ -1596,9 +1596,6 @@ class CuspedOrbifold:
 	We use the following to try to get rid of flat tetrahedra. If two are glued to themselves in a
 	certain way, or one is glued to itself in a certain way, then it will be "cancelled" out by this
 	function. This is the orbifold version of a 2-0 move. See the write-up for more detail.
-
-	The input is an edge with valence 2 and LocusOrder 1. Such an edge must belong to one or two
-	flat tetrahedra. If the cancellation move can't be done, return 0. Otherwise, return 1.
 	"""
 	def cancel_tetrahedra(self,edge):
 		if edge.valence() == 2 and edge.LocusOrder == 1:

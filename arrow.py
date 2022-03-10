@@ -179,16 +179,16 @@ class Arrow:
 # Glue self.Face to what other.Face is glued to in the same way as other. Except,
 # if other is not glued to anything, try to apply a symmetry to other to make it
 # glued to something, then glue self as it.
- def true_glue_as(self,other):
-    if other.glued().Tetrahedron is None:
-        for sym in other.Tetrahedron.Symmetries:
-            a = Arrow(sym.image(other.Edge),sym.image(other.Face),other.Tetrahedron)
-            if a.glued().Tetrahedron is not None:
-                self.glue_as(a)
-                return
-    # If other is already glued to something, or no image of other under a symmetry
-    # is glued to something, then we do:
-    self.glue_as(other)
+    def true_glue_as(self,other):
+        if other.glued().Tetrahedron is None:
+            for sym in other.Tetrahedron.Symmetries:
+                a = Arrow(sym.image(other.Edge),sym.image(other.Face),other.Tetrahedron)
+                if a.glued().Tetrahedron is not None:
+                    self.glue_as(a)
+                    return
+        # If other is already glued to something, or no image of other under a symmetry
+        # is glued to something, then we do:
+        self.glue_as(other)
 
 # Returns a COPY of self.next(), or a null arrow in the case of a boundary
 # face.
