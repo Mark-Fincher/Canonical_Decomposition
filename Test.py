@@ -6,10 +6,20 @@ from Exact_Arithmetic import*
 from simplex import*
 from Dest_to_Triang import*
 """
-from canonize import*
+#from canonize import*
 #from SimplicialOrbifold import*
 #from IsomorphismSignature import*
-import json
+#import json
+
+dict = {
+    'a': 1, 
+    'b': 2, 
+    'c': 3, 
+    'd': 4,
+    'e': 5, 
+    'f': 6
+    }
+print(dict)
 
 
 """

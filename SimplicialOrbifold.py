@@ -179,44 +179,41 @@ class SimplicialOrbifold:
 			new.true_glue_as(a)
 			# That takes care of face gluings and symmetries. Now we need to
 			# give the new tet the correct edge labels.
-			new.add_edge_label(3)
-			new.opposite().add_edge_label(a.opposite().edge_label())
-			new.opposite()
-			a.opposite()
-			for i in range(2):
-				new.rotate(1).add_edge_label(a.rotate(1).edge_label())
-			new.opposite().rotate(1)
-			a.rotate(1)
-			for i in range(2):
-				new.rotate(1).add_edge_label(a.rotate(1).edge_label())
+			new.Tetrahedron.edge_labels = {
+				new.equator(): 3, 
+				new.axis(): tet.edge_labels[a.axis()],
+				new.north_head(): tet.edge_labels[a.north_head()], 
+				new.north_tail(): tet.edge_labels[a.south_head()],
+				new.south_head(): tet.edge_labels[a.south_head()],
+				new.south_tail(): tet.edge_labels[a.north_head()]
+				}
 		elif tet.face_rotation(two_subsimplex):
 			new = self.new_arrow()
 			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			new.glue(new.copy())
 			a.reverse()
-			new.opposite()
-			new.true_glue_as(a)
-			new.reverse()
-			new.true_glue_as(b)
+			new.opposite().true_glue_as(a)
+			new.reverse().true_glue_as(b)
 			# Now we set the edge labels.
-			new.add_edge_label(3)
-			new.opposite().add_edge_label(b.opposite().edge_label())
-			new.opposite()
-			b.opposite()
-			for i in range(2):
-				new.rotate(1).add_edge_label(b.rotate(1).edge_label())
-			new.rotate(1).reverse()
-			for i in range(2):
-				new.rotate(1).add_edge_label(a.rotate(1).edge_label())
+			new.Tetrahedron.edge_labels = {
+				new.equator(): 3,
+				new.axis(): tet.edge_labels[a.axis()],
+				new.north_head(): b.Tetrahedron.edge_labels[b.north_head()],
+				new.north_tail(): tet.edge_labels[a.south_head()],
+				new.south_head(): b.Tetrahedron.edge_labels[b.south_head()],
+				new.south_tail(): tet.edge_labels[a.north_head()] 
+				}
 			# Update canonize info.
 			if tet.canonize_info is not None:
 				new.Tetrahedron.canonize_info = CanonizeInfo()
 				new.Tetrahedron.canonize_info.part_of_coned_cell = True
 				new.Tetrahedron.canonize_info.is_flat = False
-				new.Tetrahedron.canonize_info.face_status[new.Face] = 2
-				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).Face] = tet.canonize_info.face_status[a.copy().rotate(1).Face]
-				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).Face] = 2
-				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).reverse().Face] = b.Tetrahedron.canonize_info.face_status[b.copy().rotate(1).Face]
+				new.Tetrahedron.canonize_info.face_status = {
+					new.north_face(): 2,
+					new.south_face(): 2,
+					new.east_face(): b.Tetrahedron.canonize_info.face_status[b.east_face()],
+					new.west_face(): a.Tetrahedron.canonize_info.face_status[a.east_face()]
+					}
 		elif tet.face_glued_to_self(two_subsimplex):
 			new = self.new_arrows(2)
 			for c in new:
@@ -226,26 +223,28 @@ class SimplicialOrbifold:
 			new[1].glue(new[1].copy().reverse())
 			# Now we glue the external faces.
 			a.reverse()
-			new[0].opposite()
-			new[0].glue_as(a)
+			new[0].opposite().glue_as(a)
 			a.rotate(-1)
-			new[1].opposite()
-			new[1].glue_as(a)
+			new[1].opposite().glue_as(a)
 			a.rotate(-1)
-			new[1].reverse()
-			new[1].glue_as(a)
+			new[1].reverse().glue_as(a)
 			# Now the edge labels.
-			a.rotate(-1)
-			new[0].add_edge_label(1)
-			new[0].opposite().add_edge_label(a.opposite().edge_label())
-			new[0].opposite()
-			a.opposite()
-			for i in range(2):
-				new[0].rotate(1).add_edge_label(a.rotate(1).edge_label())
-			new[0].opposite().rotate(1)
-			a.rotate(1)
-			for i in range(2):
-				new[0].rotate(1).add_edge_label(a.rotate(1).edge_label())
+			new[0].Tetrahedron.edge_labels = {
+				new[0].equator(): 1,
+				new[0].axis(): tet.edge_labels[a.north_tail()],
+				new[0].north_head(): tet.edge_labels[a.equator()],
+				new[0].north_tail(): tet.edge_labels[a.north_head()],
+				new[0].south_head(): tet.edge_labels[a.north_head()],
+				new[0].south_tail(): tet.edge_labels[a.equator()]
+				}
+			new[1].Tetrahedron.edge_labels = {
+				new[1].equator(): 1,
+				new[1].axis(): tet.edge_labels[a.south_tail()],
+				new[1].north_head(): tet.edge_labels[a.north_head()],
+				new[1].north_tail(): tet.edge_labels[a.equator()],
+				new[1].south_head(): tet.edge_labels[a.south_head()],
+				new[1].south_tail(): tet.edge_labels[a.south_head()]
+				}
 		else:
 			# Assuming there is no face rotation nor is the face glued to itself.
 			# Then this is just a normal 2-3 move.
@@ -263,13 +262,30 @@ class SimplicialOrbifold:
 				b.rotate(1)
 			# Now the edge labels.
 			for c in new:
-				c.copy().opposite().add_edge_label(b.copy().opposite().edge_label())
-				c.add_edge_label(1)
-				c.rotate(-1).add_edge_label(b.rotate(-1).edge_label())
-				c.rotate(-1).add_edge_label(b.rotate(-1).edge_label())
-				c.rotate(1).reverse()
-				c.rotate(1).add_edge_label(a.rotate(1).edge_label())
-				c.rotate(1).add_edge_label(a.rotate(1).edge_label())
+				c.Tetrahedron.edge_labels = {
+					c.equator(): 1,
+					c.axis(): tet.edge_labels[a.axis()],
+					c.north_head(): b.Tetrahedron.edge_labels[b.north_head()],
+					c.north_tail(): tet.edge_labels[a.south_head()],
+					c.south_head(): b.Tetrahedron.edge_labels[b.south_head()],
+					c.south_tail(): tet.edge_labels[a.north_head()]
+					}
+				a.rotate(-1)
+				b.rotate(1)
+			# Update the canonize_info.
+			if tet.canonize_info is not None:	
+				for c in new:
+					c.Tetrahedron.canonize_info = CanonizeInfo()
+					c.Tetrahedron.canonize_info.part_of_coned_cell = True
+					c.Tetrahedron.canonize_info.is_flat = False
+					c.Tetrahedron.canonize_info.face_status = {
+						c.north_face(): 2,
+						c.south_face(): 2,
+						c.east_face(): b.Tetrahedron.canonize_info.face_status[b.east_face()],
+						c.west_face(): a.Tetrahedron.canonize_info.face_status[a.east_face()]
+						}
+					a.rotate(-1)
+					b.rotate(1)
 		self.Tetrahedra.remove(tet)
 		if not tet.face_glued_to_self(two_subsimplex):
 			# Then we need to remove b.Tetrahedron as well. If the face was glued to itself,
@@ -284,6 +300,10 @@ class SimplicialOrbifold:
 	1-4 move. There's a different case for each kind of symmetry group (up to iso).
 
 	The tetrahedron to be subdvided is tet. We modify self accordingly then return None.
+
+	Currently in this function I'm updating canonize_info and assigning the new edge_labels
+	in an old way that I don't like, just doesn't look good. I'd like to re-do it similarly
+	to how it's done in the 2-3 function above. I'll do that when I have time.
 	"""
 	def one_to_four(self,tet):
 		if len(tet.Symmetries) == 1:
