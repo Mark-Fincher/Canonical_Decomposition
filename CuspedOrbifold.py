@@ -640,8 +640,8 @@ class CuspedOrbifold:
 		else:
 			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
 			b = a.glued()
-		z = a.Tetrahedron.edge_params[a.simplex_south_head()]
-		w = b.Tetrahedron.edge_params[b.simplex_north_tail()]
+		z = a.Tetrahedron.edge_params[a.south_head()]
+		w = b.Tetrahedron.edge_params[b.north_tail()]
 		#Now we make the new tets. We consider each case separately. That means some redundant
 		#lines are written, but I think it's easier to understand this way. 
 		if tet.face_glued_to_self(two_subsimplex) and tet.face_rotation(two_subsimplex):
@@ -791,8 +791,8 @@ class CuspedOrbifold:
 		else:
 			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
 			b = a.glued()
-		z = a.Tetrahedron.edge_params[a.simplex_south_head()]
-		w = b.Tetrahedron.edge_params[b.simplex_north_tail()]
+		z = a.Tetrahedron.edge_params[a.south_head()]
+		w = b.Tetrahedron.edge_params[b.north_tail()]
 		#Now we make the new tets. We consider each case separately. That means some redundant
 		#lines are written, but I think it's easier to understand this way. 
 		if tet.face_glued_to_self(two_subsimplex) and tet.face_rotation(two_subsimplex):
@@ -1180,14 +1180,14 @@ class CuspedOrbifold:
 			return 0
 		flat_u0_u1_v1_w1 = False
 		flat_u0_u1_v0_w1 = False
-		z = tet.edge_params[a.simplex_south_head()]
-		w = voisin.edge_params[b.simplex_south_tail()]
+		z = tet.edge_params[a.south_head()]
+		w = voisin.edge_params[b.south_tail()]
 		if ((z*w).imag).evaluate() < 0:
 			return 0
 		if (z*w).imag == SquareRootCombination.Zero():
 			flat_u0_u1_v1_w1 = True
-		z = tet.edge_params[a.simplex_north_head()]
-		w = voisin.edge_params[b.simplex_north_tail()]
+		z = tet.edge_params[a.north_head()]
+		w = voisin.edge_params[b.north_tail()]
 		if ((z*w).imag).evaluate() < 0:
 			return 0
 		if (z*w).imag == SquareRootCombination.Zero():
@@ -1197,9 +1197,9 @@ class CuspedOrbifold:
 			#the 2-3 move situation too. But for now, let's not allow it.
 			return 0
 		else:
-			x = tet.edge_params[a.simplex_north_tail()]
+			x = tet.edge_params[a.north_tail()]
 			y = voisin.edge_params[b.Edge]
-			z = voisin.edge_params[b.simplex_south_tail()]
+			z = voisin.edge_params[b.south_tail()]
 			w0 = One - One/(y - x*y + x)
 			complex_abs_w0 = ComplexSquareRootCombination(abs(w0),SquareRootCombination.Zero())
 			w1 = One - One/(x*z)
@@ -1486,9 +1486,9 @@ class CuspedOrbifold:
 			symmetry = False
 		else:
 			return 0
-		za = a.Tetrahedron.edge_params[a.simplex_north_head()]
+		za = a.Tetrahedron.edge_params[a.north_head()]
 		zb = b.Tetrahedron.edge_params[b.Edge]
-		zc = c.Tetrahedron.edge_params[c.simplex_north_tail()]
+		zc = c.Tetrahedron.edge_params[c.north_tail()]
 		One = ComplexSquareRootCombination.One()
 		wa = za
 		wb = za*zb/(zb + za - One)

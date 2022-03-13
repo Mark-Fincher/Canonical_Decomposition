@@ -54,46 +54,44 @@ class Arrow:
     def tail(self):
         return comp(self.Face)
 
-# Here are the six edges of the tetrahedron, as seen from the
-# point of view of the arrow.
-    def equator(self):
-        return self.Tetrahedron.Class[comp(self.Edge)]
-
-    def axis(self):
-        return self.Tetrahedron.Class[self.Edge]
-
-    def north_head(self):
-        return self.Tetrahedron.Class[self.head() | OppTail[self.head(),self.tail()]]
-
-    def south_head(self):
-        return self.Tetrahedron.Class[self.head() | OppTail[self.tail(),self.head()]]
-
-    def north_tail(self):
-        return self.Tetrahedron.Class[self.tail() | OppTail[self.head(),self.tail()]]
-
-    def south_tail(self):
-        return self.Tetrahedron.Class[self.tail() | OppTail[self.tail(),self.head()]]
 
 # ORBIFOLDS
-# We might also want the actual edge one-simplices rather than the classes. Added by Mark 10/5/2021.
+# The six edges of the tetrahedron, as seen from the point of view of the arrow.
+# We return the actual one-simplex, rather than the edge class.
     
-    def simplex_equator(self):
+    def equator(self):
         return comp(self.Edge)
 
-    def simplex_axis(self):
+    def axis(self):
         return self.Edge
 
-    def simplex_north_head(self):
+    def north_head(self):
         return self.head() | OppTail[self.head(),self.tail()]
 
-    def simplex_south_head(self):
+    def south_head(self):
         return self.head() | OppTail[self.tail(),self.head()]
 
-    def simplex_north_tail(self):
+    def north_tail(self):
         return self.tail() | OppTail[self.head(),self.tail()]
 
-    def simplex_south_tail(self):
+    def south_tail(self):
         return self.tail() | OppTail[self.tail(),self.head()]
+
+# ORBIFOLDS
+# The four faces of the tetrahedron, as seen from the point of view of the arrow.
+
+    def north_face(self):
+        return comp(OppTail[self.tail(),self.head()])
+
+    def south_face(self):
+        return comp(OppTail[self.head(),self.tail()])
+    
+    def east_face(self):
+        return self.Face
+
+    def west_face(self):
+        return comp(self.head())
+
 
     def is_null(self):
         if self.Tetrahedron is None:
@@ -273,12 +271,12 @@ class Arrow:
 # ORBIFOLDS
 # Return the edge label of self.simplex_axis().
     def edge_label(self):
-        return self.Tetrahedron.edge_group_labels[self.simplex_axis()]
+        return self.Tetrahedron.edge_labels[self.simplex_axis()]
 
 # ORBIFOLDS
 # Make the edge label of self.simplex_axis() equal to label.
     def add_edge_label(self,label):
-        new.Tetrahedron.edge_group_labels[new.simplex_axis()] = label
+        new.Tetrahedron.edge_labels[new.simplex_axis()] = label
 
 # This class allows one to initialize an arrow by specifying the head and
 # tail vertices of the directed edge.

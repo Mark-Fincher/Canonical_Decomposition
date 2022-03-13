@@ -29,7 +29,7 @@ class Tetrahedron:
         
         # ORBIFOLDS
         self.Symmetries = []
-        self.edge_group_labels = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
+        self.edge_labels = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
 
         
         self.canonize_info = None

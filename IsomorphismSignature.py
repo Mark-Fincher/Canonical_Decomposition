@@ -24,7 +24,7 @@ def hyperbolic_to_simplicial(cusped_orb):
 		tet.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
 		tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		for one_subsimplex in OneSubsimplices:
-			tet.edge_group_labels[one_subsimplex] = tet.Class[one_subsimplex].LocusOrder
+			tet.edge_labels[one_subsimplex] = tet.Class[one_subsimplex].LocusOrder
 	return SimplicialOrbifold(tets_list)
 
 """
@@ -235,7 +235,7 @@ def get_S_E(tets,perms):
 			edge_class = tets[i].Class[perms[i].inverse().image(edge)]
 			if edge_class not in seen_edge_classes:
 				seen_edge_classes.append(edge_class)
-				E.append(tets[i].edge_group_labels[perms[i].inverse().image(edge)])
+				E.append(tets[i].edge_labels[perms[i].inverse().image(edge)])
 	return (S,E)
 
 

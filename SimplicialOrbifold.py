@@ -30,12 +30,12 @@ class SimplicialOrbifold:
 			for sym in tets[i].Symmetries:
 				print(sym)
 			print('edge labels of',tets[i],'are')
-			print('edge 01: ',tets[i].edge_group_labels[E01])
-			print('edge 02: ',tets[i].edge_group_labels[E02])
-			print('edge 03: ',tets[i].edge_group_labels[E03])
-			print('edge 12: ',tets[i].edge_group_labels[E12])
-			print('edge 13: ',tets[i].edge_group_labels[E13])
-			print('edge 23: ',tets[i].edge_group_labels[E23])
+			print('edge 01: ',tets[i].edge_labels[E01])
+			print('edge 02: ',tets[i].edge_labels[E02])
+			print('edge 03: ',tets[i].edge_labels[E03])
+			print('edge 12: ',tets[i].edge_labels[E12])
+			print('edge 13: ',tets[i].edge_labels[E13])
+			print('edge 23: ',tets[i].edge_labels[E23])
 
 	def add_tet(self, tet):
 		self.Tetrahedra.append(tet)
@@ -137,7 +137,7 @@ class SimplicialOrbifold:
 						for sym in corner.Tetrahedron:
 							corner.Tetrahedron.Class[sym.image(corner.Subsimplex)] = newEdge
 					#Now let's assign the LocusOrder of newEdge.
-					newEdge.LocusOrder = corner.Tetrahedron.edge_group_labels[corner.Subsimplex]
+					newEdge.LocusOrder = corner.Tetrahedron.edge_labels[corner.Subsimplex]
 		for i in range(len(self.Edges)):
 			self.Edges[i].Index = i
 
@@ -167,8 +167,8 @@ class SimplicialOrbifold:
 		else:
 			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
 			b = a.glued()
-		# Now we make the new tets. We consider each case separately. That means some redundant
-		# lines are written, but I think it's easier to understand this way. 
+		# Now we make the new tets. We consider each case separately. It could be done more
+		# concisely, but I think it's easier to understand this way. 
 		if tet.face_glued_to_self(two_subsimplex) and tet.face_rotation(two_subsimplex):
 			new = self.new_arrow()
 			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
@@ -208,6 +208,15 @@ class SimplicialOrbifold:
 			new.rotate(1).reverse()
 			for i in range(2):
 				new.rotate(1).add_edge_label(a.rotate(1).edge_label())
+			# Update canonize info.
+			if tet.canonize_info is not None:
+				new.Tetrahedron.canonize_info = CanonizeInfo()
+				new.Tetrahedron.canonize_info.part_of_coned_cell = True
+				new.Tetrahedron.canonize_info.is_flat = False
+				new.Tetrahedron.canonize_info.face_status[new.Face] = 2
+				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).Face] = tet.canonize_info.face_status[a.copy().rotate(1).Face]
+				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).Face] = 2
+				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).reverse().Face] = b.Tetrahedron.canonize_info.face_status[b.copy().rotate(1).Face]
 		elif tet.face_glued_to_self(two_subsimplex):
 			new = self.new_arrows(2)
 			for c in new:
