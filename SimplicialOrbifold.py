@@ -151,10 +151,26 @@ class SimplicialOrbifold:
 	"""
 
 	"""
-	2-3 move. For now it does not check if a 2-3 move is valid to do. For instance, doesn't check if
-	tet has the wrong kinds of symmetries or the face is glued to a different face of the same
-	tet.
+	2-3 move.
 	"""
+	def check_two_to_three(self,two_subsimplex,tet):
+		# Check if tet or its neighbor have symmetries making it impossible to do a 2-3 move.
+		if len(tet.Symmetries) != 1 and len(tet.Symmetries) != 3:
+			return False
+		nbr = tet.Neighbor[two_subsimplex]
+		if len(tet.Symmetries) != len(nbr.Symmetries):
+			return False
+		perm = tet.Gluing[face]
+		nbr_face = perm.image(two_subsimplex)
+		if len(tet.Symmetries) == 3:
+			for sym in tet.Symmetries:
+				if sym.image(two_subsimplex) != two_subsimplex:
+					return False
+			for sym in nbr.Symmetries:
+				if sym.image(nbr_face) != nbr_face:
+					return False
+		return True
+
 	def two_to_three(self, two_subsimplex, tet, build = 1):
 		if tet.Neighbor[two_subsimplex] is None:
 			return 0
@@ -667,4 +683,57 @@ class SimplicialOrbifold:
 		return 1
 
 
+	"""
+	Sometimes we can collapse a tetrahedron onto one of its faces. We need this
+	move in canonize_part2 when a face internal to the polyhedron is glued to itself.
+	This can arise after a 1-4 move when one of the faces of the original tetrahedron
+	is glued to itself.
 
+	I don't currently have plans to use this anywhere other than canonize_part2. 
+	"""
+	def one_to_zero(self, two_subsimplex, tet):
+		# Check that two_subsimplex is glued to itself.
+		if tet.face_glued_to_self(two_subsimplex) is False:
+			return 0
+		# Now check that the "internal" edges have label 1. These are the edges of
+		# tet which contain the vertex opposite two_subsimplex.
+		inner_vertex = comp(two_subsimplex)
+		for one_subsimplex in OneSubsimplices:
+			if is_subset(inner_vertex,one_subsimplex) and tet.edge_labels[one_subsimplex] != 1:
+				return 0
+		# Find the edge which is mapped to itself by the face gluing map.
+		perm = tet.Gluing[two_subsimplex]
+		for one_subsimplex in OneSubsimplices:
+			if (is_subset(one_subsimplex,two_subsimplex) and 
+				perm.image(one_subsimplex) == one_subsimplex):
+				break
+		# We have two cases. When the symmetry group of tet has 3 elements,
+		# the rotations of two_subsimplex, or when the symmetry group is trivial.
+		# In either case, we start with this arrow.
+		a = Arrow(one_subsimplex,two_subsimplex,tet)
+		if len(tet.Symmetries) == 1:
+			b = a.copy().opposite().reverse().next().reverse()
+			c = a.copy().opposite().next()
+			d = a.copy().reverse().next().reverse()
+			# One final check: let's make sure that the tetrahedra these arrows belong
+			# to are distinct.
+			tets_list = [e.Tetrahedron for e in (a,b,c,d)]
+			if len(tets_list) != len(set(tets_list)):
+				return 0
+			b.glue(c)
+			d.glue(d.copy().reverse())
+			# Now we adjust the edge labels.
+			b.Tetrahedron.edge_labels[b.axis()] = 2
+			c.Tetrahedron.edge_labels[c.axis()] = 2
+		elif len(tet.Symmetries) == 3 and tet.face_rotation(two_subsimplex):
+			b = a.copy().reverse().true_next().reverse()
+			if a.Tetrahedron is b.Tetrahedron:
+				return 0
+			b.glue(b.copy().reverse())
+			b.Tetrahedron.edge_labels[b.north_head()] = 2
+			b.Tetrahedron.edge_labels[b.south_head()] = 2
+		else:
+			return 0
+		self.Tetrahedra.remove(tet)
+		self.clear_and_rebuild()
+		return 1
