@@ -25,6 +25,7 @@ def hyperbolic_to_simplicial(cusped_orb):
 		tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		for one_subsimplex in OneSubsimplices:
 			tet.edge_labels[one_subsimplex] = tet.Class[one_subsimplex].LocusOrder
+		tet.clear_Class()
 	return SimplicialOrbifold(tets_list)
 
 """

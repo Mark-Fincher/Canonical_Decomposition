@@ -6,10 +6,56 @@ from Exact_Arithmetic import*
 from simplex import*
 from Dest_to_Triang import*
 """
-#from canonize import*
-#from SimplicialOrbifold import*
-#from IsomorphismSignature import*
-#import json
+from canonize import*
+from SimplicialOrbifold import*
+from IsomorphismSignature import*
+import json
+from canonize_part2 import*
+from CanonizeInfo import*
+
+def print_face_statuses(orb):
+    for tet in orb.Tetrahedra:
+        if tet.canonize_info is not None:
+            print('face status of',tet,'is')
+            print(tet.canonize_info.face_status)
+        else:
+            print(tet,'has no canonize info')
+
+dest = [1, 1, 2, 1, 0, 3, 0, 0, 3, 0, 4, 5, 2, 6, 1, 7, 6, 2, 6, 6, 8, 7, 7, 2, 4, 4, 3, 4, 9, 5, 5, 3, 5, 9, 9, 9, 7, 8, 8, 8]
+orb = dest_to_orb(dest)
+"""
+orb.info()
+initialize_tet_status(orb)
+new_orb = hyperbolic_to_simplicial(orb)
+tet1 = new_orb.Tetrahedra[1]
+new_orb.one_to_four(tet1)
+print(' ')
+new_orb.info()
+print_face_statuses(new_orb)
+tet0 = new_orb.Tetrahedra[0]
+tet1 = new_orb.Tetrahedra[1]
+print(' ')
+print(tet0.canonize_info.face_status[F3])
+print(' ')
+new_orb.two_to_three(F3,tet0)
+print(' ')
+new_orb.info()
+print_face_statuses(new_orb)
+tet0 = new_orb.Tetrahedra[0]
+new_orb.two_to_three(F0,tet0)
+print(' ')
+new_orb.info()
+print_face_statuses(new_orb)
+tet0 = new_orb.Tetrahedra[0]
+tet1 = new_orb.Tetrahedra[1]
+edge = tet0.Class[E23]
+print(new_orb.cancel_tetrahedra(edge))
+print(' ')
+new_orb.info()
+print_face_statuses(new_orb)
+"""
+orb = canonical_retriangulation(orb)
+orb.info()
 
 
 

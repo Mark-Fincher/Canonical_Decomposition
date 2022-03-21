@@ -18,32 +18,25 @@ Output: a SimplicialOrbifold object, the canonical retriangulation or the polyhe
 decomposition of orb. It will have finite vertices, hence no longer geometric.
 """
 def canonical_retriangulation(orb):
-	
 	# First, check if orb is already a canonical triangulation.
 	if orb.is_proto_canonical() and not transparent_faces_or_flat_tets(orb):
 		print("inputted orb is already a canonical triangulation")
 		return orb
-	
 	# Check that it's proto-canonical.
 	if not orb.is_proto_canonical():
 		print("inputted orb is not proto-canonical")
 		return
-	
 	# Set the canonize info.
 	initialize_tet_status(orb)
-	
 	# Turn orb into a SimplicialOrbifold, i.e. remove the hyperbolic structure.
-	orb = hyperbolic_to_simplicial(orb)
-	
-	step_one(orb)
-	step_two(orb)
-	
+	simplicial_orb = hyperbolic_to_simplicial(orb)
+	step_one(simplicial_orb)
+	step_two(simplicial_orb)
 	# Assuming those two steps went okay, we now have the canonical retriangulation. Let's
 	# remove the canonize_info data from the tetrahedra.
-	for tet in orb.Tetrahedra:
+	for tet in simplicial_orb.Tetrahedra:
 		tet.canonize_info = None
-	
-	return 1
+	return simplicial_orb
 
 # Initializes the canonize info of each tet in the CuspedOrbifold orb. In particular,
 # all the part_of_coned_cell flags are set to False.
@@ -61,29 +54,28 @@ def initialize_tet_status(orb):
 				new_canonize_info.face_status[face] = 0
 
 def step_one(orb):
-	num_finite_vertices = 0
-	while cone_3_cell(orb,num_finite_vertices) is True:
+	while cone_3_cell(orb) is True:
+		print('cone 3 cell was true')
 		pass
 
-def cone_3_cell(orb,num_finite_vertices):
-	
+def cone_3_cell(orb):
 	tet = find_unconed_tet(orb)
 	if tet is None:
 		return False
-	
 	orb.one_to_four(tet)
-
-	#Check for 1-0 move here. Will add later.
-	
+	# Of the four (possibly fewer if there are symmetries) tets just created,
+	# check if one has a transparent face glued to itself and do a 1-0 move on it.
+	attempt_one_to_zero(orb)
+	# Now expand the coned region.	
 	while expand_coned_region(orb) == True:
+		print('expanded cone region')
 		pass
-
+	# attempt_cancellation is defined in canonize.py.
 	while attempt_cancellation(orb) == True:
+		print('cancelled tet(s)')
 		pass
-
 	if verify_coned_region(orb) == False:
 		raise Exception("in cone_3_cell, verify_coned_region returned False")
-
 	return True
 
 # Find an unconed tet. Prioritize tets with transparent faces which are glued to themselves or with
@@ -103,6 +95,17 @@ def find_unconed_tet(orb):
 		if len(tet_most_syms.Symmetries) < len(tet.Symmetries):
 			tet_most_syms = tet
 	return tet_most_syms
+
+def attempt_one_to_zero(orb):
+	for tet in orb.Tetrahedra:
+		if tet.canonize_info.part_of_coned_cell:
+			for face in TwoSubsimplices:
+				if tet.canonize_info.face_status[face] == 1:
+					if tet.face_glued_to_self(face):
+						if orb.one_to_zero(face,tet):
+							return
+						else:
+							raise Exception("error in attempt_one_to_zero")
 
 def expand_coned_region(orb):
 	for tet in orb.Tetrahedra:
@@ -133,29 +136,46 @@ def verify_coned_region(orb):
 						return False
 	return True
 
-
 def step_two(orb):
-	# more stuff
-
+	while eliminate_opaque_face(orb) == True:
+		pass
+	while attempt_cancellation(orb) == True:
+		pass
 
 def eliminate_opaque_face(orb):
 	for tet in orb.Tetrahedra:
-		if tet.canonize_info.is_flat == False:
+		# We only want to do a 2-3 or a 4-4 move to a tetrahedron which
+		# is part of a coned cell. We don't want to do a move to one of the
+		# diamonds this function has previously created which is not part of
+		# a particular coned cell. However, a diamond will either not have
+		# any canonize info, or all its faces will NOT have face_status opaque.
+		# And in either case the tet will be skipped by this function.
+		# We also want to skip flat tets, which exist just to express how
+		# the face of a polyhedron is glued to itself.
+		if tet.canonize_info is not None and tet.canonize_info.is_flat == False:
 			for face in TwoSubsimplices:
 				if tet.canonize_info.face_status[face] == 0:
-					if tet.Neighbor[face].canonize_info.is_flat:
+					if tet.Neighbor[face].canonize_info.is_flat == False:
 						if orb.check_two_to_three(face,tet) == False:
 							raise Exception("error in eliminate_opaque_face")
 						else:
 							orb.two_to_three(face,tet)
+							return True
 					else:
 						if opaque_four_to_four(face,tet) is False:
 							raise Exception("error doing 4-4 through flat tet")
+						return True
+	return False
 
-"""
 def opaque_four_to_four(face,tet):
 	nbr = tet.Neighbor[face]
 	if len(nbr.Symmetries) != 2:
 		return False
 	for one_subsimplex in OneSubsimplices:
-"""
+		if is_subset(one_subsimplex,face):
+			edge = tet.Class[one_subsimplex]
+			if orb.four_to_four(edge):
+				return True
+	return False
+				
+

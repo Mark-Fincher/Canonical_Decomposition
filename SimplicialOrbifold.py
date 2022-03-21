@@ -5,6 +5,7 @@ from vertex import*
 from simplex import*
 from corner import*
 from perm4 import*
+from CanonizeInfo import*
 
 
 class SimplicialOrbifold:
@@ -134,12 +135,21 @@ class SimplicialOrbifold:
 					#edges in this class. This might not just be the edges in newEdge.Corners; have
 					#to apply symmetries to get other edges in the class.
 					for corner in newEdge.Corners:
-						for sym in corner.Tetrahedron:
+						for sym in corner.Tetrahedron.Symmetries:
 							corner.Tetrahedron.Class[sym.image(corner.Subsimplex)] = newEdge
 					#Now let's assign the LocusOrder of newEdge.
 					newEdge.LocusOrder = corner.Tetrahedron.edge_labels[corner.Subsimplex]
 		for i in range(len(self.Edges)):
 			self.Edges[i].Index = i
+
+	def change_edge_labels(self,edge,new_label):
+		for corner in edge.Corners:
+			tet = corner.Tetrahedron
+			one_subsimplex = corner.Subsimplex
+			for sym in tet.Symmetries:
+				tet.edge_labels[sym.image(one_subsimplex)] = new_label
+		edge.LocusOrder = new_label
+
 
 	"""
 	PACHNER MOVES.
@@ -160,7 +170,7 @@ class SimplicialOrbifold:
 		nbr = tet.Neighbor[two_subsimplex]
 		if len(tet.Symmetries) != len(nbr.Symmetries):
 			return False
-		perm = tet.Gluing[face]
+		perm = tet.Gluing[two_subsimplex]
 		nbr_face = perm.image(two_subsimplex)
 		if len(tet.Symmetries) == 3:
 			for sym in tet.Symmetries:
@@ -184,7 +194,7 @@ class SimplicialOrbifold:
 			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
 			b = a.glued()
 		# Now we make the new tets. We consider each case separately. It could be done more
-		# concisely, but I think it's easier to understand this way. 
+		# quickly, but I think it's easier to understand this way. 
 		if tet.face_glued_to_self(two_subsimplex) and tet.face_rotation(two_subsimplex):
 			new = self.new_arrow()
 			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
@@ -227,8 +237,8 @@ class SimplicialOrbifold:
 				new.Tetrahedron.canonize_info.face_status = {
 					new.north_face(): 2,
 					new.south_face(): 2,
-					new.east_face(): b.Tetrahedron.canonize_info.face_status[b.east_face()],
-					new.west_face(): a.Tetrahedron.canonize_info.face_status[a.east_face()]
+					new.east_face(): b.Tetrahedron.true_face_status(b.east_face()),
+					new.west_face(): a.Tetrahedron.true_face_status(a.east_face())
 					}
 		elif tet.face_glued_to_self(two_subsimplex):
 			new = self.new_arrows(2)
@@ -316,203 +326,223 @@ class SimplicialOrbifold:
 	1-4 move. There's a different case for each kind of symmetry group (up to iso).
 
 	The tetrahedron to be subdvided is tet. We modify self accordingly then return None.
-
-	Currently in this function I'm updating canonize_info and assigning the new edge_labels
-	in an old way that I don't like, just doesn't look good. I'd like to re-do it similarly
-	to how it's done in the 2-3 function above. I'll do that when I have time.
 	"""
 	def one_to_four(self,tet):
 		if len(tet.Symmetries) == 1:
 			# Then there is only the trivial symmetry.
-			# See the diagram in the notes to make sense of the following.
+			# See the diagram in the notes to understand where the arrows are.
 			new = self.new_arrows(4)
 			for i in range(4):
 				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			# First we make all the gluings.
+			old = Arrow(E02,F3,tet)
 			for i in range(3):
 				new[i].glue(new[(i+1)%3])
-			new[3].glue(new[0].copy().opposite().rotate(-1))
-			new[3].copy().rotate(-1).glue(new[2].copy().opposite().rotate(1))
-			# Put an arrow in tet.
-			a = Arrow(E12,F3,tet)
-			new[0].copy().opposite().glue_as(a)
-			new[3].copy().reverse().rotate(-1).glue_as(a.copy().reverse())
-			new[1].copy().rotate(-1).glue_as(a.copy().reverse().rotate(1))
-			new[2].copy().reverse().rotate(1).glue_as(a.copy().reverse().rotate(-1))
-			# We're done with face gluings. Now edge labels. First deal with the central
-			# edges, connected to the new vertex, which will all get labeled 1.
-			central_arrows = [new[i].copy().opposite().reverse() for i in range(3)] + [new[3].copy().opposite()]
-			for b in central_arrows:
-				for i in range(3):
-					b.rotate(1).add_edge_label(1)
-			# Now the outer edges, with labels determined by the labels of tet.
-			outer_new_arrows = [new[i].copy() for i in range(3)] + [new[3].copy().reverse()]
-			outer_old_arrows = [a.copy().opposite(), a.copy().reverse().rotate(-1),
-				a.copy().rotate(1).opposite(), a.copy().reverse().rotate(1)]
-			# Now we just need to walk counter-clockwise around each face.
-			for i in range(4):
-				outer_new_arrows[i].add_edge_label(outer_old_arrows[i].edge_label())
-				outer_old_arrows[i].rotate(1)
-				outer_new_arrows[i].rotate(1)
-				outer_new_arrows[i].add_edge_label(outer_old_arrows[i].edge_label())
-				outer_old_arrows[i].reverse().rotate(1)
-				outer_new_arrows[i].reverse().rotate(1)
-				outer_new_arrows[i].add_edge_label(outer_old_arrows[i].edge_label())
+				new[3].glue(new[i].copy().opposite())
+				new[3].rotate(-1)
+				new[i].copy().opposite().glue_as(old)
+				old.rotate(-1)
+			new[3].copy().reverse().glue_as(old.copy().reverse())
+			# Now we set the edge labels.
+			for i in range(3):
+				new[i].Tetrahedron.edge_labels = {
+					new[i].equator(): tet.edge_labels[old.axis()],
+					new[i].axis(): 1,
+					new[i].north_head(): tet.edge_labels[old.north_head()],
+					new[i].north_tail(): tet.edge_labels[old.south_head()],
+					new[i].south_head(): 1,
+					new[i].south_tail(): 1 
+					} 
+				old.rotate(-1)
+			new[3].Tetrahedron.edge_labels = {
+				new[3].equator(): 1,
+				new[3].axis(): tet.edge_labels[old.axis()],
+				new[3].north_head(): 1,
+				new[3].north_tail(): tet.edge_labels[old.north_tail()],
+				new[3].south_head(): 1,
+				new[3].south_tail(): tet.edge_labels[old.south_tail()] 
+				}
 			# Now update the canonize info.
 			if tet.canonize_info is not None:
-				old_arrows = [a.copy(),a.copy().rotate(-1),a.copy().rotate(1),a.copy().reverse()]
-				new_out = [central.copy().reverse() for central in central_arrows]
 				for i in range(4):
 					new[i].Tetrahedron.canonize_info = CanonizeInfo()
 					new[i].Tetrahedron.canonize_info.part_of_coned_cell = True
 					new[i].Tetrahedron.canonize_info.is_flat = False
-					for j in range(3):
-						new[i].Tetrahedron.canonize_info.face_status[central_arrows[i].rotate(1).Face] = 2
-					new[i].Tetrahedron.canonize_info.face_status[new_out[i].Face] = tet.canonize_info.face_status[old_arrows[i].Face] 
+				for i in range(3):
+					new[i].Tetrahedron.canonize_info.face_status = {
+						new[i].north_face(): tet.canonize_info.face_status[old.east_face()],
+						new[i].south_face(): 2,
+						new[i].east_face(): 2,
+						new[i].west_face(): 2
+						}
+					old.rotate(-1)
+				new[3].Tetrahedron.canonize_info.face_status = {
+					new[3].north_face(): 2,
+					new[3].south_face(): 2,
+					new[3].east_face(): 2,
+					new[3].west_face(): tet.canonize_info.face_status[old.west_face()]
+				}
 		if len(tet.Symmetries) == 2:
 			new = self.new_arrows(2)
 			for i in range(2):
 				new[i].Symmetries.append(Perm4((0,1,2,3)))
-			for sym in tet.Symmetries:
-				if sym.tuple() != (0,1,2,3):
-					break
+			sym = tet.nontrivial_sym()
 			for one_subsimplex in OneSubsimplices:
 				if sym.image(one_subsimplex) == one_subsimplex:
-					a = Arrow(one_subsimplex,RightFace[one_subsimplex],tet)
+					old = Arrow(one_subsimplex,RightFace[one_subsimplex],tet)
 					break
-			a.opposite().rotate(-1)
+			# Face gluings.
 			new[0].glue(new[1])
-			new[0].copy().rotate(-1).glue(new[1].copy().reverse())
-			b = new[0].copy().rotate(1).reverse()
-			b.glue(b.copy().reverse())
-			new[0].copy().opposite().reverse().true_glue_as(a)
-			b = new[1].copy().opposite()
-			b.glue(b.copy().reverse())
-			b.reverse().true_glue_as(a.copy().rotate(1))
-			b = new[0].copy().opposite()
-			c = new[1].copy().opposite()
-			for i in range(3):
-				b.rotate(1).add_edge_label(1)
-				c.rotate(1).add_edge_label(1)
-			new[0].add_edge_label(a.copy().opposite())
-			new[0].copy().rotate(-1).add_edge_label(a.copy().rotate(-1).edge_label())
-			new[0].copy().reverse().rotate(1).add_edge_label(a.copy().rotate(1).edge_label())
-			new[1].add_edge_label(a.copy().reverse().rotate(1).edge_label())
-			new[1].copy().rotate(-1).add_edge_label(a.edge_label())
-			new[1].copy().reverse().rotate(1).add_edge_label(a.copy().rotate(-1).edge_label())
+			new[0].copy().opposite().reverse().glue(new[0].copy().opposite())
+			new[0].copy().reverse().glue(new[1].copy().opposite().rotate(-1))
+			new[0].copy().opposite().true_glue_as(old)
+			new[1].glue(new[1].copy().reverse().rotate(-1))
+			new[1].copy().opposite().true_glue_as(old.copy().rotate(-1))
+			# Edge labels.
+			for i in range(2):
+				new[i].Tetrahedron.edge_labels = {
+					new[i].equator(): tet.edge_labels[old.axis()],
+					new[i].axis(): 1,
+					new[i].north_head(): tet.edge_labels[old.north_head()],
+					new[i].north_tail(): tet.edge_labels[old.south_head()],
+					new[i].south_head(): 1,
+					new[i].south_tail(): 1 
+					} 
+				old.rotate(-1)
+			# Restore old to its position in the diagram.
+			old.rotate(-1)
+			# Update the canonize info.
 			if tet.canonize_info is not None:
 				for i in range(2):
 					new[i].Tetrahedron.canonize_info = CanonizeInfo()
 					new[i].Tetrahedron.canonize_info.part_of_coned_cell = True
 					new[i].Tetrahedron.canonize_info.is_flat = False
-				for i in range(3):
-					new[0].Tetrahedron.canonize_info.face_status[b.rotate(1).Face] = 2
-					new[1].Tetrahedron.canonize_info.face_status[c.rotate(1).Face] = 2
-				new[0].Tetrahedron.canonize_info.face_status[new[0].copy().rotate(1).Face] = tet.canonize_info.face_status[a.Face]
-				new[1].Tetrahedron.canonize_info.face_status[new[1].copy().rotate(1).Face] = tet.canonize_info.face_status[a.copy().rotate(1).Face]
+				for i in range(2):
+					new[i].Tetrahedron.canonize_info.face_status = {
+						new[i].north_face(): tet.true_face_status(old.east_face()),
+						new[i].south_face(): 2,
+						new[i].east_face(): 2,
+						new[i].west_face(): 2
+						}
+					old.rotate(-1)
 		if len(tet.Symmetries) == 3:
 			new = self.new_arrows(2)
 			for i in range(2):
 				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
-			# Let Face be the face fixed by the rotations. Want to first get an
-			# arrow with initial vertex the vertex fixed by rotations.
-			for sym in tet.Symmetries:
-				if sym.tuple() != (0,1,2,3):
+			new[0].add_sym(new[0].copy().rotate(1).reverse())
+			new[0].add_sym(new[0].copy().reverse().rotate(-1))
+			sym = tet.nontrivial_sym()
+			for face in TwoSubsimplices:
+				if sym.image(face) == face:
 					break
-			for Face in TwoSubsimplices:
-				if sym.image(Face) == Face:
+			for edge in OneSubsimplices:
+				if is_subset(edge,face):
+					old = Arrow(edge,face,tet)
 					break
-			for Edge in OneSubsimplices:
-				if not is_subset(Edge,Face):
-					a = Arrow(Edge,Face,tet)
-					break
+			# Face gluings.
 			new[0].glue(new[1])
-			b = new[1].copy().reverse().rotate(1)
-			b.glue(b)
-			new[0].copy().opposite().reverse().glue_as(a)
-			new[1].copy().reverse().rotate(-1).true_glue_as(a.copy().opposite().reverse())
-			new[0].add_sym(new[0].copy().rotate(-1).reverse())
-			new[0].add_sym(new[0].copy().reverse().rotate(1))
-			# Now the edge labels.
-			new[0].add_edge_label(a.copy().opposite().edge_label())
-			new[0].copy().rotate(-1).add_edge_label(a.copy().rotate(-1).edge_label())
-			new[0].copy().reverse().rotate(1).add_edge_label(a.copy().rotate(1).edge_label())
-			b = new[0].copy().opposite()
-			for i in range(3):
-				b.rotate(1).add_edge_label(1)
-			new[1].add_edge_label(a.copy().reverse().rotate(1))
-			new[1].copy().rotate(-1).add_edge_label(a)
-			new[1].copy().rotate(1).add_edge_label(a.copy().reverse().rotate(-1))
-			b = new[1].copy().opposite()
-			b.add_edge_label(1)
-			b.rotate(1).add_edge_label(3)
-			b.rotate(1).add_edge_label(1)
+			new[0].copy().opposite().glue_as(old)
+			new[1].copy().reverse().rotate(-1).glue(new[1].copy().reverse().rotate(-1))
+			new[1].copy().opposite().true_glue_as(old.copy().rotate(-1))
+			# Edge labels.
+			for i in range(2):
+				new[i].Tetrahedron.edge_labels = {
+					new[i].equator(): tet.edge_labels[old.axis()],
+					new[i].axis(): 1,
+					new[i].north_head(): tet.edge_labels[old.north_head()],
+					new[i].north_tail(): tet.edge_labels[old.south_head()],
+					new[i].south_head(): 1,
+					new[i].south_tail(): 1 
+					} 
+				old.rotate(-1)
+			# Actually, one of the edges of new[1].Tetrahedron gets labeled 3 because of the symmetry.
+			new[1].Tetrahedron.edge_labels[new[1].south_head()] = 3
+			# Return old to its diagram position.
+			old.rotate(-1)
+			# Canonize info.
 			if tet.canonize_info is not None:
 				for i in range(2):
 					new[i].Tetrahedron.canonize_info = CanonizeInfo()
 					new[i].Tetrahedron.canonize_info.part_of_coned_cell = True
 					new[i].Tetrahedron.canonize_info.is_flat = False
-				b = new[0].copy().opposite()
-				c = new[1].copy().opposite()
-				for i in range(3):
-					new[0].Tetrahedron.canonize_info.face_status[b.rotate(1).Face] = 2
-					new[1].Tetrahedron.canonize_info.face_status[c.rotate(1).Face] = 2
-				new[0].Tetrahedron.canonize_info.face_status[new[0].copy().rotate(1).Face] = tet.canonize_info.face_status[a.Face]
-				new[1].Tetrahedron.canonize_info.face_status[new[1].copy().rotate(1).Face] = tet.canonize_info.face_status[a.copy().rotate(1).Face]
+				for i in range(2):
+					new[i].Tetrahedron.canonize_info.face_status = {
+						new[i].north_face(): tet.true_face_status(old.east_face()),
+						new[i].south_face(): 2,
+						new[i].east_face(): 2,
+						new[i].west_face(): 2
+						}
+					old.rotate(-1)
 		if len(tet.Symmetries) == 4:
 			new = self.new_arrow()
 			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
-			# Because of all the symmetries, we can take a to be any arrow in tet
-			# and it will match our picture.
-			a = Arrow(E12,F3,tet)
-			b = new.copy().opposite().rotate(-1)
-			b.glue(b.copy().reverse())
-			b = new.copy().opposite()
-			b.glue(b.copy().reverse())
-			b = new.copy().rotate(1).reverse()
-			b.glue(b.copy().reverse())
-			new.copy().opposite().reverse().true_glue_as(a)
-			b = new.copy().opposite()
+			old = Arrow(E02,F3,tet)
+			# Face gluings.
 			for i in range(3):
-				b.rotate(1).add_edge_label(1)
-			new.add_edge_label(a.copy().opposite())
-			new.copy().rotate(-1).add_edge_label(a.copy().rotate(-1))
-			new.copy().reverse().rotate(1).add_edge_label(a.copy().rotate(1))
+				new.glue(new.copy().reverse())
+				new.rotate(1)
+			new.reverse().true_glue_as(old)
+			# Edge labels.
+			# Move new to a different position so we can assign edge labels in the
+			# same way as the other cases.
+			new.opposite()
+			new.Tetrahedron.edge_labels = {
+				new.equator(): tet.edge_labels[old.axis()],
+				new.axis(): 1,
+				new.north_head(): tet.edge_labels[old.north_head()],
+				new.north_tail(): tet.edge_labels[old.south_head()],
+				new.south_head(): 1,
+				new.south_tail(): 1 
+				}
+			# Canonize info.
 			if tet.canonize_info is not None:
 				new.Tetrahedron.canonize_info = CanonizeInfo()
 				new.Tetrahedron.canonize_info.part_of_coned_cell = True
 				new.Tetrahedron.canonize_info.is_flat = False
-				for i in range(3):
-					new.Tetrahedron.canonize_info.face_status[b.rotate(1).Face] = 2
-				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).Face] = tet.canonize_info.face_status[a.Face]
+				new.Tetrahedron.canonize_info.face_status = {
+					new.north_face(): tet.true_face_status(old.east_face()),
+					new.south_face(): 2,
+					new.east_face(): 2,
+					new.west_face(): 2
+					}
 		if len(tet.Symmetries) == 12:
 			new = self.new_arrow()
-			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
-			a = Arrow(E12,F3,tet)
-			b = new.copy().opposite().rotate(-1)
-			b.glue(b.copy().reverse())
-			new.copy().opposite().reverse().true_glue_as(a)
-			b = new.copy().opposite()
+			old = Arrow(E02,F3,tet)
+			new_copy = new.copy()
 			for i in range(3):
-				b.rotate(1).add_edge_label(3)
-			new.add_edge_label(a.copy().opposite())
-			new.copy().rotate(-1).add_edge_label(a.copy().rotate(-1))
-			new.copy().reverse().rotate(1).add_edge_label(a.copy().rotate(1))
-			new.add_sym(new.copy().rotate(-1).reverse())
-			new.add_sym(new.copy().reverse().rotate(1))
+				new.add_sym(new_copy)
+				new_copy.rotate(1)
+			# Face gluings.
+			new.glue(new_copy.reverse())
+			new.reverse().true_glue_as(old)
+			# Edge labels.
+			new.opposite()
+			new.Tetrahedron.edge_labels = {
+				new.equator(): tet.edge_labels[old.axis()],
+				new.axis(): 3,
+				new.north_head(): tet.edge_labels[old.north_head()],
+				new.north_tail(): tet.edge_labels[old.south_head()],
+				new.south_head(): 3,
+				new.south_tail(): 3 
+				}
+			# Canonize info.
 			if tet.canonize_info is not None:
 				new.Tetrahedron.canonize_info = CanonizeInfo()
 				new.Tetrahedron.canonize_info.part_of_coned_cell = True
 				new.Tetrahedron.canonize_info.is_flat = False
-				for i in range(3):
-					new.Tetrahedron.canonize_info.face_status[b.rotate(1).Face] = 2
-				new.Tetrahedron.canonize_info.face_status[new.copy().rotate(1).Face] = tet.canonize_info.face_status[a.Face]
+				new.Tetrahedron.canonize_info.face_status = {
+					new.north_face(): tet.true_face_status(old.east_face()),
+					new.south_face(): 2,
+					new.east_face(): 2,
+					new.west_face(): 2
+					}
 		self.Tetrahedra.remove(tet)
 		self.clear_and_rebuild()
 		return
 
 
 	def cancel_tetrahedra(self,edge):
-		#First check valence and locus order.
+		# First check valence and locus order.
 		if edge.valence() == 2 and edge.LocusOrder == 1:
 			case = 1
 		elif edge.valence() == 1 and edge.LocusOrder == 2:
@@ -522,11 +552,10 @@ class SimplicialOrbifold:
 		a = edge.get_arrow()
 		if a.copy().next() is None:
 			a.reverse()
-		#After the cancellation, two edges will be collapsed on each other. We should
-		#check that they have the same group label. They could actually be the same edge,
-		#in which case they will of course have the same group label.
-		if a.edge_label() != a.copy().next().edge_label():
-			return 0
+		# In this non-geometric setting, we need to make sure the one simplex opposite
+		# edge has label 1 (ish). In the geometric setting, it actually might not be labelled
+		# 1 and we can still do a cancellation. Need to be careful about this difference.
+		# We will do this check within the two cases.
 		#We don't want to try the cancellation if there are certain nontrivial symmetries.
 		#They probably shouldn't be there anyway for a geometric triangulation, but we
 		#check for them just in case.
@@ -534,33 +563,32 @@ class SimplicialOrbifold:
 			if sym.image(a.Edge) != a.Edge:
 				return 0
 		if case == 1:
+			# valence 2, locus order 1.
 			#Then the possible sub-cases are:
 			#1. A single tet with faces properly glued to themselves, and without the symmetry.
 			#2. Two tets without the symmetry.
 			#3. Two tets both with the symmetry.
-			#Split into two cases. If the faces adjacent to "edge" are glued to themselves,
-			#or not.
 			if a.Tetrahedron.face_glued_to_self(a.Face):
+				# Check the one-simplex opposite edge has label 1.
+				if a.Tetrahedron.edge_labels[a.equator()] != 1:
+					return 0
 				#Check it's glued to itself properly.
 				perm = a.Tetrahedron.Gluing[a.Face]
 				if perm.image(a.Edge) != a.Edge:
 					return 0
 				b = a.copy().opposite()
-				if len(a.Tetrahedron.Symmetries) == 2:
-					if b.copy().next() is None:
-						b.reverse()
-					b.next().reverse()
-					b.glue(b.copy().reverse())
-				else:
-					#Then the only symmetry is the identity.
-					c = b.copy().reverse()
-					b.next().reverse()
-					b.glue(c.glued())
+				if len(a.Tetrahedron.Symmetries) != 1:
+					# Don't think this can happen.
+					return 0	
+				c = b.copy().reverse()
+				b.next().reverse()
+				b.glue(c.glued())
 				self.Tetrahedra.remove(a.Tetrahedron)
+				self.clear_and_rebuild()
+				new_edge = b.Tetrahedron.Class[b.Edge]	
+				self.change_edge_labels(new_edge, 2)
 			else:
 				#In this case there are two distinct tetrahedra.
-				if a.copy().next() is None:
-					a.reverse()
 				b = a.glued()
 				#Make sure the other tet doesn't have any illegal symmetries.
 				for sym in b.Tetrahedron.Symmetries:
@@ -569,6 +597,13 @@ class SimplicialOrbifold:
 				#Another sanity check.
 				if len(a.Tetrahedron.Symmetries) != len(b.Tetrahedron.Symmetries):
 					return 0
+				# Check that at least one of the two one-simplices opposite edge is labelled 1.
+				if a.Tetrahedron.edge_labels[a.equator()] == 1: 
+					new_label = b.Tetrahedron.edge_labels[b.equator()]
+				elif b.Tetrahedron.edge_labels[b.equator()] == 1:
+					new_label = a.Tetrahedron.edge_labels[a.equator()]
+				else:
+					return 0 
 				#Now there are two cases: they have the nontrivial symmetry or not.
 				a.opposite()
 				b.opposite()
@@ -590,28 +625,43 @@ class SimplicialOrbifold:
 						c.glue(b.glued())
 				self.Tetrahedra.remove(a.Tetrahedron)
 				self.Tetrahedra.remove(b.Tetrahedron)
+				self.clear_and_rebuild()
+				new_edge = c.Tetrahedron.Class[c.Edge]	
+				self.change_edge_labels(new_edge, new_label)
 		if case == 2:
-			#Then there's a single tet, with faces adjacent to the edge glued to each other. 
-			#It could have the symmetry or not.
+			# valence 1, locus order 2.
+			# Then there are two sub-cases. 
+			# 1. A single tet with faces adjacent to the edge glued to each other, with
+			# a nontrivial symmetry taking the edge to itself. 
+			# 2. A single tet with no non-trivial symmetries, the faces adjacent to the edge
+			# glued to each other via a map which fixes the edge.
+			if a.Tetrahedron.edge_labels[a.equator()] != 1:
+				return 0
 			b = a.copy().opposite()
 			if len(a.Tetrahedron.Symmetries) == 2:
+				# Sub-case 1.
 				if b.copy().next() is None:
 					b.reverse()
 				b.next().reverse()
 				b.glue(b.copy().reverse())
+				self.Tetrahedra.remove(a.Tetrahedron)
+				self.clear_and_rebuild()
+				new_edge = b.Tetrahedron.Class[b.Edge]
+				self.change_edge_labels(new_edge, 2)
 			else:
+				# Sub-case 2.
 				b.next().reverse()
 				b.glue(b.copy().reverse())
 				b = a.copy().opposite().reverse()
 				b.next().reverse()
 				b.glue(b.copy().reverse())
-			self.Tetrahedra.remove(a.Tetrahedron)
-		self.clear_and_rebuild()
+				self.Tetrahedra.remove(a.Tetrahedron)
+				self.clear_and_rebuild()
 		return 1
 
 	"""
 	There are a few different cases of a 4-4 move. For now we just make the only one I think
-	we need for canonize_part2.
+	we need for canonize_part2. Need to make the adding edge labels part nicer.
 	"""
 	def four_to_four(self, edge):
 		# This is the case where we have half of an octahedron, with the square face glued to 

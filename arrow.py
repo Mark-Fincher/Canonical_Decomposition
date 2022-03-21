@@ -271,12 +271,12 @@ class Arrow:
 # ORBIFOLDS
 # Return the edge label of self.simplex_axis().
     def edge_label(self):
-        return self.Tetrahedron.edge_labels[self.simplex_axis()]
+        return self.Tetrahedron.edge_labels[self.axis()]
 
 # ORBIFOLDS
 # Make the edge label of self.simplex_axis() equal to label.
     def add_edge_label(self,label):
-        new.Tetrahedron.edge_labels[new.simplex_axis()] = label
+        self.Tetrahedron.edge_labels[self.axis()] = label
 
 # This class allows one to initialize an arrow by specifying the head and
 # tail vertices of the directed edge.

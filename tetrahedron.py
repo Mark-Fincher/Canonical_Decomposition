@@ -268,3 +268,22 @@ class Tetrahedron:
         for sym in self.Symmetries:
             if sym.tuple() != (0,1,2,3):
                 return sym
+
+    """
+    ORBIFOLDS. 
+
+    The following method pertains to canonize_info, which is used in
+    canonize_part2. The CanonizeInfo class is defined in CanonizeInfo.py.
+
+    If a face F is not glued to anything, it will be thought of as opaque. If the image
+    of it under some symmetry is not glued to None and is actually transparent or inside
+    a coned cell, the following function returns that status.
+    """
+    def true_face_status(self,face):
+        if self.canonize_info is None:
+            return
+        for sym in self.Symmetries:
+            face_image = sym.image(face)
+            if self.Neighbor[face_image] is not None:
+                status = self.canonize_info.face_status[face_image]
+                return status
