@@ -552,7 +552,7 @@ class SimplicialOrbifold:
 		a = edge.get_arrow()
 		if a.copy().next() is None:
 			a.reverse()
-		# In this non-geometric setting, we need to make sure the one simplex opposite
+		# In this non-geometric setting, we need to make sure the one-simplex opposite
 		# edge has label 1 (ish). In the geometric setting, it actually might not be labelled
 		# 1 and we can still do a cancellation. Need to be careful about this difference.
 		# We will do this check within the two cases.
@@ -787,3 +787,158 @@ class SimplicialOrbifold:
 		self.Tetrahedra.remove(tet)
 		self.clear_and_rebuild()
 		return 1
+
+	"""
+	The folowing method does the stellar move on a given edge. In other words, it introduces a
+	finite vertex in the edge and cones the boundary of the star of the edge to that vertex.
+
+	The tetrahedra around the edge are allowed to have the non-trivial order 2 symmetry which maps
+	that edge to itself, but no other symmetries are allowed. We also require that any tet belonging
+	to the star of the edge only has a single 1-simplex belonging to that edge's class (this actually
+	implies the previous requirement about symmetries).
+	"""
+	def stellar_edge_move(self,edge):
+		# Check if the move is possible.
+		for corner in edge.Corners:
+			tet = corner.Tetrahedron
+			one_subsimplex = corner.Subsimplex
+			for other_one_subsimplex in OneSubsimplices:
+				if (other_one_subsimplex != one_subsimplex and 
+					tet.Class[other_one_subsimplex] == tet.Class[one_subsimplex]):
+					return 0
+		# Now we know the move is possible.
+		# Our next step it to find a tet with the symmetry or with a face
+		# adjacent to edge which is glued to itself.
+		a = edge.get_arrow()
+		for i in range(len(edge.Corners)):
+			if len(a.Tetrahedron.Symmetries) == 2:
+				if a.glued().Tetrahedron is None:
+					a.reverse()
+				break
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				a.reverse()
+				break
+			a.reverse()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				a.reverse()
+				break
+			a.reverse().next()
+		# If a tet had the symmetry or a face glued to itself, then 'a' is now
+		# in that tet. Otherwise, 'a' is just in some arbitrary tet containing
+		# the edge.
+		# Now we want to divide up a.Tetrahedron into two tets if it doesn't
+		# have the symmetry, or one tet if it does.
+		first_arrow = a.copy()
+		if len(a.Tetrahedron.Symmetries) == 2:
+			first_new = self.new_arrows(1)
+			first_new[0].glue(first_new[0].copy().reverse())
+			first_new[0].copy().reverse().true_glue_as(a.copy().opposite().reverse())
+		else:
+			first_new = self.new_arrows(2)
+			first_new[0].glue(first_new[1].copy().reverse())
+			first_new[0].copy().reverse().glue(a.copy().opposite().reverse())
+			first_new[1].copy().reverse().glue(a.copy().opposite())
+		extend_stellar_subdivision(a, first_new)
+		
+
+	"""
+	Helper function for the stellar_edge_move function above.
+
+	The arrow a is in an old tet around the edge. new is a list with one or two elements,
+	which are arrows for the new tets which are in a.Tetrahedron. We check if we've
+	seen all tetrahedra already. If not, we continue it one more step into a.next(),
+	and recurse.
+	"""
+	def extend_stellar_subdivision(self, a, new):
+		tet = a.Tetrahedron
+		# Assign the edge labels and canonize info for the new tets.
+		b = a.copy()
+		for c in new:
+			c.Tetrahedron.edge_labels = {
+				c.equator(): tet.edge_labels[b.axis()],
+				c.axis(): tet.edge_labels[b.equator()],
+				c.north_head(): 1,
+				c.north_tail(): tet.edge_labels[b.south_head()],
+				c.south_head(): 1,
+				c.south_tail(): tet.edge_labels[b.south_tail()] 
+				}
+			if tet.canonize_info is not None:
+				c.Tetrahedron.canonize_info = CanonizeInfo()
+				c.Tetrahedron.canonize_info.part_of_coned_cell = True
+				c.Tetrahedron.canonize_info.is_flat = False
+				c.Tetrahedron.canonize_info.face_status = {
+					c.north_face(): 2,
+					c.south_face(): 2,
+					c.east_face(): 2,
+					c.west_face(): tet.canonize_info.face_status[b.south_face()]
+					}
+			b.reverse()
+		# If either of the faces of tet adjacent to the edge are glued to themselves,
+		# then we'll actually change some of the labels from 1 to 2. We do this later.
+		# Now check if we've run through every tet in the star of the edge.
+		# This will be true exactly when one of the following occurs.
+		# 1. a.glued() == first_arrow.
+		# 2. a.glued() == a.copy().reverse()
+		# 3. a.glued().Tetrahedron is None
+		# In (2), the face is glued to itself.
+		# In (3), a.Tetrahedron has the symmetry and it is not the first tet.
+		# If (2) occurs and a.Tetrahedron has the symmetry, then it must be
+		# the first tet.
+		if a.glued().Tetrahedron is None:
+			self.Tetrahedra.remove(tet)
+			self.clear_and_rebuild()
+			return
+		elif a.glued() == first_arrow:
+			# In this case, it must be that there was no symmetry nor face glued to self.
+			new[0].copy().opposite().glue(first_new[0].copy().opposite())
+			new[1].copy().opposite().reverse().glue(first_new[1].copy().opposite().reverse())
+			self.Tetrahedra.remove(tet)
+			self.clear_and_rebuild()
+			return
+		elif a.glued() == a.copy().reverse():
+			# Correct the edge labels.
+			if len(tet.Symmetries) == 2:
+				# Note this can only happen if a == first_arrow.
+				# So the next case below is the other thing that can happen
+				# if a == first_arrow.
+				new[0].edge_labels[new[0].north_head()] = 2
+				new[0].edge_labels[new[0].south_head()] = 2
+				new[0].copy().opposite().glue(new[0].copy().opposite())
+			elif a == first_arrow:
+				# Then there is no sym, and both adjacent faces are glued to themselves.
+				for c in new:
+					c.edge_labels[c.north_head()] = 2
+					c.edge_labels[c.south_head()] = 2
+				new[0].copy().reverse().rotate(1).glue(new[1].copy().opposite().rotate(-1))
+				new[1].copy().reverse().rotate(1).glue(new[0].copy().opposite().rotate(-1))
+			else:
+				new[0].edge_labels[north_head()] = 2
+				new[1].edge_labels[south_head()] = 2
+				new[0].copy().reverse().rotate(1).glue(new[1].copy().opposite().rotate(-1))
+			self.Tetrahedra.remove(tet)
+			self.clear_and_rebuild()
+			return
+		# If we've gotten to this point, then we know a.glued() lies in a new tet we must
+		# extend to.
+		b = a.glued()
+		next_tet = b.Tetrahedron
+		if len(next_tet.Symmetries) == 2:
+			next_arrows = self.new_arrows(1)
+			next_arrows[0].glue(next_arrows[0].copy().reverse())
+			new[0].copy().opposite().glue(next_arrows[0].copy().opposite())
+			next_arrows[0].copy().reverse().true_glue_as(b.copy().opposite().reverse())
+			if len(tet.Symmetries) == 2:
+				new[0].copy().opposite().reverse().glue(next_arrows[0].copy().opposite().reverse())
+			else:
+				new[1].copy().opposite().reverse().glue(next_arrows[0].copy().opposite().reverse())
+		else:
+			next_arrows = self.new_arrows(2)
+			next_arrows[0].glue(next_arrows[1].copy().reverse())
+			new[0].copy().opposite().glue(next_arrows[0].copy().opposite())
+			if len(tet.Symmetries) == 2:
+				new[0].copy().opposite().reverse().glue(next_arrows[1].copy().opposite().reverse())
+			else:
+				new[1].copy().opposite().reverse().glue(next_arrows[1].copy().opposite().reverse())
+				next_arrows[0].copy().reverse().glue_as(b.copy().opposite().reverse())
+				next_arrows[1].copy().reverse().glue_as(b.copy().opposite())
+		self.extend_stellar_subdivision(b, next_arrows)

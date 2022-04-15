@@ -62,10 +62,14 @@ def cone_3_cell(orb):
 	tet = find_unconed_tet(orb)
 	if tet is None:
 		return False
+	"""
 	orb.one_to_four(tet)
-	# Of the four (possibly fewer if there are symmetries) tets just created,
-	# check if one has a transparent face glued to itself and do a 1-0 move on it.
-	attempt_one_to_zero(orb)
+	# Now we've introduced a finite vertex. Want it to be the barycenter of the polyhedron.
+	# We might need to collapse some of the newly created tetrahedra so that this finite
+	# vertex really is at the barycenter.
+	move_to_barycenter(orb)
+	"""
+	# Instead of the above, maybe I do some kind of insert_finite_vertex(tet).
 	# Now expand the coned region.	
 	while expand_coned_region(orb) == True:
 		print('expanded cone region')
@@ -96,6 +100,8 @@ def find_unconed_tet(orb):
 			tet_most_syms = tet
 	return tet_most_syms
 
+
+# Probably replacing this with insert_finite_vertex somehow
 def attempt_one_to_zero(orb):
 	for tet in orb.Tetrahedra:
 		if tet.canonize_info.part_of_coned_cell:
