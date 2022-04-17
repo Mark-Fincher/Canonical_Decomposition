@@ -311,6 +311,7 @@ class CuspedOrbifold:
 					while unfinished_walk:
 						if sanity_check > 12*len(self.Tetrahedra):
 							print('Bad gluing data: could not construct edge link.')
+							break
 						newEdge.Corners.append(Corner(a.Tetrahedron, a.Edge))
 						if a.true_next() is None:
 							print('Hit boundary. Did not construct edge link.')
@@ -969,8 +970,7 @@ class CuspedOrbifold:
 	"""
 	def three_to_two(self,edge,build = 1):
 		One = ComplexSquareRootCombination.One()
-		a = Arrow(edge.Corners[0].Subsimplex,LeftFace[edge.Corners[0].Subsimplex],
-				edge.Corners[0].Tetrahedron)
+		a = edge.get_arrow()
 		face_glued_to_self = False
 		face_rotation = False
 		if edge.valence() == 1 and edge.LocusOrder == 3:
@@ -985,15 +985,14 @@ class CuspedOrbifold:
 						return 0
 		elif edge.valence() == 3 and edge.LocusOrder == 1:
 			for corner in edge.Corners:
-				a = Arrow(corner.Subsimplex,LeftFace[corner.Subsimplex],
-					corner.Tetrahedron)
 				for sym in a.Tetrahedron.Symmetries:
 					if sym.image(a.Edge) != a.Edge:
 						return 0
-					elif sym.tuple() != (0,1,2,3):
+					if sym.tuple() != (0,1,2,3):
 						face_glued_to_self = True
 				if face_glued_to_self:
 					break
+				a.true_next()
 			#Now, if face_glued_to_self, a is in the tet with the symmetry.
 			if face_glued_to_self:
 				if a.glued().Tetrahedron is None:
@@ -1018,13 +1017,7 @@ class CuspedOrbifold:
 			v1 = a.Tetrahedron.edge_params[a.Edge]
 			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
 			a.opposite()
-			if a.glued().Tetrahedron is None:
-				a.reverse()
-			if a.Tetrahedron.face_glued_to_self(a.Face):
-				b.glue(a.glued())
-				b.glue(a.glued())
-			else:
-				b.glue(a.glued())
+			b.true_glue_as(a)
 			#Because b.Tetrahedron has rotations, we are done specifying its face pairings.
 			#Except if the face we just glued is glued to itself. Then the other faces will
 			#also be glued to themselves, and my convention is that I should do those gluings,
@@ -1052,17 +1045,9 @@ class CuspedOrbifold:
 			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
 			c.Tetrahedron.fill_edge_params(One - v1*(v0 - One)/(One - v1))
 			a.opposite()
-			if a.Tetrahedron.face_glued_to_self(a.Face):
-				b.glue(a.glued())
-				b.glue(a.glued())
-			else:
-				b.glue(a.glued())
+			b.true_glue_as(a)
 			a.reverse()
-			if a.Tetrahedron.face_glued_to_self(a.Face):
-				c.glue(a.glued())
-				c.glue(a.glued())
-			else:
-				c.glue(a.glued())
+			c.true_glue_as(a)
 			#Now if either of these faces was glued to itself, we do that for the others determined
 			#by the symmetries.
 			if b.Tetrahedron.face_glued_to_self(b.Face):
@@ -1084,21 +1069,15 @@ class CuspedOrbifold:
 			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
 			b.reverse()
 			a.opposite()
-			if a.glued().Tetrahedron is None:
-				a.reverse()
-			if a.Tetrahedron.face_glued_to_self(a.Face):
-				b.glue(a.glued())
-				b.glue(a.glued())
-			else:
-				b.glue(a.glued())
+			b.true_glue_as(a)
 			a.opposite()
 			if a.glued().Tetrahedron is None:
 				a.reverse()
 			a.next()
 			b.rotate(-1)
-			b.glue(a.opposite().glued())
+			b.glue_as(a.opposite())
 			b.rotate(-1)
-			b.glue(a.reverse().glued())
+			b.glue_as(a.reverse())
 		else:
 			b = self.new_arrow()
 			c = self.new_arrow()
@@ -1112,17 +1091,9 @@ class CuspedOrbifold:
 			b.reverse()
 			for i in range(3):
 				a.opposite()
-				if a.Tetrahedron.face_glued_to_self(a.Face):
-					b.glue(a.glued())
-					b.glue(a.glued())
-				else:
-					b.glue(a.glued())
+				b.glue_as(a)
 				a.reverse()
-				if a.Tetrahedron.face_glued_to_self(a.Face):
-					c.glue(a.glued())
-					c.glue(a.glued())
-				else:
-					c.glue(a.glued())
+				c.glue_as(a)
 				b.rotate(-1)
 				c.rotate(1)
 				a.reverse().opposite().next()
@@ -1456,13 +1427,15 @@ class CuspedOrbifold:
 
 	"""
 	4-4 move around a valence 4 edge. In the case that there are 4 distinct tetrahedra, none of them
-	having symmetries, this is just the usual manifold 4-4 move. There seems to be one other case:
-	there's an order 2 rotational symmetry swapping the two ends of the bypyramid. In that case
+	having symmetries, this is just the usual manifold 4-4 move. There could be
+	an order 2 rotational symmetry swapping the two ends of the bypyramid. In that case
 	2 pairs of the resulting 4 tetrahedra are mapped to each other by the symmetry, so we can take
 	away 2 tetrahedra. Unfortunately we need to also insert a flat tetrahedron in that case.
 
-	The symmetry could be a few things. For now I'm not going to include all cases, will add later.
-	In this version, the symmetry can only be pi rotation swapping x1 with x4 and x2 with x3,
+	Of course there are other symmetries of an octahedron. For now I just include the case where
+	there are no symmetries, or exactly this one non-trivial symmetry.
+	
+	So the symmetry can only be pi rotation swapping x1 with x4 and x2 with x3,
 	where the labels are from my write-up. 
 	"""	
 	def four_to_four(self,edge):
@@ -1568,18 +1541,14 @@ class CuspedOrbifold:
 			new[0].glue_as(old[2])
 			new[0].rotate(-1)
 			old[3].opposite()
-			if old[3].glued() is None:
-				old[3].reverse()
-			new[0].glue_as(old[3])
+			new[0].true_glue_as(old[3])
 			#now for new[1]
 			new[1].reverse().rotate(-1)
 			old[0].opposite()
 			new[1].glue_as(old[0])
 			new[1].rotate(-1)
 			old[1].opposite()
-			if old[1].glued() is None:
-				old[1].reverse()
-			new[1].glue_as(old[1])
+			new[1].true_glue_as(old[1])
 			#now add the symmetries.
 			for i in range(3):
 				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))

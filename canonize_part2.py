@@ -14,7 +14,7 @@ from IsomorphismSignature import hyperbolic_to_simplicial
 Input: orb, a CuspedOrbifold object which is proto-canonical, canonical decomp having cells
 which are not tetrahedra.
 
-Output: a SimplicialOrbifold object, the canonical retriangulation or the polyhedral canonical
+Output: a SimplicialOrbifold object, the canonical retriangulation of the polyhedral canonical
 decomposition of orb. It will have finite vertices, hence no longer geometric.
 """
 def canonical_retriangulation(orb):
@@ -29,6 +29,7 @@ def canonical_retriangulation(orb):
 	# Set the canonize info.
 	initialize_tet_status(orb)
 	# Turn orb into a SimplicialOrbifold, i.e. remove the hyperbolic structure.
+	# This function is in IsomorphismSignature.py.
 	simplicial_orb = hyperbolic_to_simplicial(orb)
 	step_one(simplicial_orb)
 	step_two(simplicial_orb)
@@ -55,7 +56,6 @@ def initialize_tet_status(orb):
 
 def step_one(orb):
 	while cone_3_cell(orb) is True:
-		print('cone 3 cell was true')
 		pass
 
 def cone_3_cell(orb):
@@ -82,6 +82,32 @@ def cone_3_cell(orb):
 		raise Exception("in cone_3_cell, verify_coned_region returned False")
 	return True
 
+# NEW. To replace find_unconed_tet.
+def insert_finite_vertex(orb):
+	# First look for unconed tets with more than 2 syms. If there are any, do a 1-4 move on the tet
+	# with the most syms.
+	unconed_symmetric_tets = []
+	for tet in orb.Tetrahedra:
+		if tet.canonize_info.part_of_coned_cell is False and tet.canonize_info.is_flat is False:
+			if len(tet.Symmetries) > 2:
+				unconed_symmetric_tets.append(tet)
+	if len(unconed_symmetric_tets) > 0:
+		# Find the tet with most syms from this list.
+		tet_most_syms = unconed_symmetric_tets[0]
+		for tet in unconed_symmetric_tets:
+			if len(tet_most_syms.Symmetries) < len(tet.Symmetries):
+				tet_most_syms = tet
+		orb.one_to_four(tet_most_syms)
+		return
+	# If we didn't find anythng in the previous step, we look for a transparent edge.
+
+
+#def transparent_edge(edge):
+
+
+
+
+# OLD
 # Find an unconed tet. Prioritize tets with transparent faces which are glued to themselves or with
 # the max number of symmetries over all choices. If all tets are coned, return None.
 def find_unconed_tet(orb):
@@ -101,6 +127,7 @@ def find_unconed_tet(orb):
 	return tet_most_syms
 
 
+# OLD though will use somewhere.
 # Probably replacing this with insert_finite_vertex somehow
 def attempt_one_to_zero(orb):
 	for tet in orb.Tetrahedra:
@@ -112,6 +139,14 @@ def attempt_one_to_zero(orb):
 							return
 						else:
 							raise Exception("error in attempt_one_to_zero")
+
+
+
+
+
+
+
+
 
 def expand_coned_region(orb):
 	for tet in orb.Tetrahedra:

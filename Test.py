@@ -21,12 +21,13 @@ def print_face_statuses(orb):
         else:
             print(tet,'has no canonize info')
 
-dest = [1, 2, 3, 4, 0, 5, 6, 7, 6, 7, 0, 8, 5, 0, 9, 10, 11, 12, 13, 0, 3, 14, 1, 15, 2, 1, 16, 17, 16, 18, 2, 1, 19, 20, 15, 2, 14, 3, 18, 21, 22, 23, 24, 3, 4, 25, 26, 16, 26, 27, 4, 24, 25, 4, 21, 20, 9, 28, 5, 29, 30, 8, 31, 5, 7, 6, 28, 11, 32, 31, 33, 6, 28, 9, 7, 33, 8, 30, 34, 32, 34, 33, 8, 13, 35, 13, 36, 9, 10, 37, 38, 30, 38, 39, 10, 36, 37, 10, 40, 12, 13, 35, 11, 39, 12, 11, 29, 31, 29, 36, 12, 35, 18, 16, 14, 41, 27, 26, 42, 14, 15, 43, 19, 22, 43, 15, 17, 26, 17, 44, 43, 19, 44, 17, 20, 18, 20, 19, 44, 45, 21, 42, 25, 27, 42, 21, 27, 23, 24, 46, 22, 43, 23, 22, 45, 46, 45, 41, 23, 25, 46, 24, 41, 42, 47, 40, 39, 28, 36, 29, 35, 40, 31, 32, 30, 37, 33, 34, 32, 47, 39, 38, 47, 34, 40, 47, 37, 38, 41, 45, 46, 44]
-orb = dest_to_orb(dest)
-orb.info()
-orb = hyperbolic_to_simplicial(orb)
-orb.info()
-
+def print_face_concavity(orb):
+    for tet in orb.Tetrahedra:
+        for face in TwoSubsimplices:
+            if concave_face(face,tet):
+                print('face',FaceIndex[face],'of',tet,'is concave')
+            if transparent_face(face,tet):
+                print('face',FaceIndex[face],'of',tet,'is transparent')
 
 """
 orb.info()
@@ -802,14 +803,20 @@ for i in range(len(Dests)):
     print(' ')
 """
 
-"""
-with open("OrbDictionary.json", "r") as read_file:
+
+with open("48seqs.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
-"""
-
+# The one dest where proto_canonize fails.
+dest = OrbDictionary[(45,2)]
+orb = dest_to_orb(dest)
+orb.info()
+print(proto_canonize(orb))
+orb.info()
+print_face_concavity(orb)
+# Could be I need a new case of retriangulate_cube to handle it.
 
 """
 num_fail = 0
@@ -829,7 +836,6 @@ for key in OrbDictionary.keys():
 print('num_success = ',num_success)
 print('num_fail = ',num_fail)
 """
-
 
 """
 for key in OrbDictionary.keys():
