@@ -59,24 +59,13 @@ def step_one(orb):
 		pass
 
 def cone_3_cell(orb):
-	tet = find_unconed_tet(orb)
-	if tet is None:
+	if insert_finite_vertex(orb) == 0:
 		return False
-	"""
-	orb.one_to_four(tet)
-	# Now we've introduced a finite vertex. Want it to be the barycenter of the polyhedron.
-	# We might need to collapse some of the newly created tetrahedra so that this finite
-	# vertex really is at the barycenter.
-	move_to_barycenter(orb)
-	"""
-	# Instead of the above, maybe I do some kind of insert_finite_vertex(tet).
 	# Now expand the coned region.	
 	while expand_coned_region(orb) == True:
-		print('expanded cone region')
 		pass
 	# attempt_cancellation is defined in canonize.py.
 	while attempt_cancellation(orb) == True:
-		print('cancelled tet(s)')
 		pass
 	if verify_coned_region(orb) == False:
 		raise Exception("in cone_3_cell, verify_coned_region returned False")
@@ -98,37 +87,79 @@ def insert_finite_vertex(orb):
 			if len(tet_most_syms.Symmetries) < len(tet.Symmetries):
 				tet_most_syms = tet
 		orb.one_to_four(tet_most_syms)
-		return
-	# If we didn't find anythng in the previous step, we look for a transparent edge.
-
-
-#def transparent_edge(edge):
-
-
-
-
-# OLD
-# Find an unconed tet. Prioritize tets with transparent faces which are glued to themselves or with
-# the max number of symmetries over all choices. If all tets are coned, return None.
-def find_unconed_tet(orb):
-	unconed_tets = []
+		return 1
+	# If we didn't find anythng in the previous step, we look for a transparent edge with
+	# more than one rotation axis intersecting it. If there is such an edge, then we do
+	# a stellar edge move on it. That puts a finite vertex in the edge.
+	for edge in orb.Edges:
+		if transparent_edge(edge) and more_than_one_rotation_intersecting(edge):
+			if orb.stellar_edge_move(edge):
+				return 1
+			else:
+				raise Exception("tried and failed to do a stellar edge move")
+	# If we still haven't returned yet, then we now look for any unconed tet with
+	# any non-trivial symmetry. That means it will have exactly 2 syms, since we
+	# would have already coned it if it had more than 2.
 	for tet in orb.Tetrahedra:
 		if tet.canonize_info.part_of_coned_cell is False and tet.canonize_info.is_flat is False:
-			for face in TwoSubsimplices:
-				if tet.canonize_info.face_status[face] == 1 and tet.face_glued_to_self(face):
-					return tet
-			unconed_tets.append(tet)
-	if len(unconed_tets) == 0:
-		return
-	tet_most_syms = unconed_tets[0]
-	for tet in unconed_tets:
-		if len(tet_most_syms.Symmetries) < len(tet.Symmetries):
-			tet_most_syms = tet
-	return tet_most_syms
+			if len(tet.Symmetries) == 2:
+				orb.one_to_four(tet)
+				return 1
+	# Finally, we'll do a 1-4 move on ANY unconed tet.
+	for tet in orb.Tetrahedra:
+		if tet.canonize_info.part_of_coned_cell is False and tet.canonize_info.is_flat is False:
+			orb.one_to_four(tet)
+			return 1
+	# If we haven't returned 1 by now, then there are no more 3-cells to cone.
+	return 0
+
+def transparent_edge(edge):
+	a = edge.get_arrow()
+	for corner in edge.Corners:
+		if a.Tetrahedron.true_face_status(a.Face) != 1:
+			return False
+		a.true_next()
+	return True
+
+def more_than_one_rotation_intersecting(edge):
+	# There are three ways a rotation axis could intersect an edge.
+	# 1. The edge itself is a rotation axis, i.e. its locus order is > 1.
+	# 2. A tet adjacent to the edge has the order 2 sym which is an involution of the edge.
+	# 3. A face adjacent to the edge is glued to itself in such a way that the gluing
+	# map restricts to an involution of the edge.
+	# We walk around the edge and count any occurences of these.
+	a = edge.get_arrow()
+	seen_tets = []
+	if edge.LocusOrder > 1:
+		num_axes = 1
+	else:
+		num_axes = 0
+	for corner in edge.Corners:
+		if a.Tetrahedron not in seen_tets:
+			for sym in a.Tetrahedron.Symmetries:
+				if sym.image(a.Edge) == a.Edge and sym.tuple() != (0,1,2,3):
+					num_axes = num_axes + 1
+					break
+			b = a.copy().reverse()
+			if a.glued() == b:
+				num_axes = num_axes + 1
+			if b.glued() == a:
+				num_axes = num_axes + 1
+				# We could have double counted an axis from this if the tet also
+				# has the symmetry, but in that case there are certainly more than
+				# 2 rotation axes intersecting the edge.
+			if num_axes > 1:
+				return True
+		seen_tets.append(a.Tetrahedron)
+		a.true_next()
+	return False
+
+
+
 
 
 # OLD though will use somewhere.
-# Probably replacing this with insert_finite_vertex somehow
+# Probably will incorporate into attempt cancellation step.
 def attempt_one_to_zero(orb):
 	for tet in orb.Tetrahedra:
 		if tet.canonize_info.part_of_coned_cell:
@@ -155,18 +186,35 @@ def expand_coned_region(orb):
 				if tet.canonize_info.face_status[face] == 1:
 					if tet.Neighbor[face].canonize_info.part_of_coned_cell is False:
 						# Then we'll do a 2-3 move through face, as long as there are
-						# either no symmetries or only rotations of face. And if face
-						# is not glued to itself.
-						if tet.face_glued_to_self(face):
-							raise Exception("unexpected face glued to self while expanding cone region")
+						# either no symmetries or only rotations of face.
 						if orb.check_two_to_three(face,tet) is False:
-							raise Exception("unexpected symmetries of a tet while expanding cone region")
+							if attempt_special_three_to_two(face,tet):
+								return True
+							else:
+								raise Exception("unexpected symmetries of a tet while expanding cone region")
 						if orb.two_to_three(face,tet):
 							return True
 						else:
 							# This shouldn't happen.
 							raise Exception("expand_coned_region, canonize_part2")
 	return False
+
+
+def attempt_special_three_to_two(face,tet):
+	nbr = tet.Neighbor[face]
+	if len(nbr.Symmetries) != 2:
+		return 0
+	for other_face in TwoSubsimplices:
+		if tet.face_glued_to_self(other_face):
+			one_subsimplex = other_face & face
+			edge = tet.Class[one_subsimplex]
+			if transparent_edge(edge) and edge.valence() == 3: 
+				orb.three_to_two(edge)
+				# NEED TO PROGRAM 3-2 FOR SIMPLICIAL ORBIFOLD CLASS.
+				return 1
+	return 0
+
+
 
 def verify_coned_region(orb):
 	for tet in orb.Tetrahedra:

@@ -839,6 +839,7 @@ class SimplicialOrbifold:
 			first_new[0].copy().reverse().glue(a.copy().opposite().reverse())
 			first_new[1].copy().reverse().glue(a.copy().opposite())
 		extend_stellar_subdivision(a, first_new)
+		return 1
 		
 
 	"""
