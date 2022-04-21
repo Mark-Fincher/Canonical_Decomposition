@@ -322,6 +322,158 @@ class SimplicialOrbifold:
 		return 1
 
 
+
+	"""
+	3-2 move.
+	"""
+	def three_to_two(self,edge,build = 1):
+		a = edge.get_arrow()
+		face_glued_to_self = False
+		face_rotation = False
+		if edge.valence() == 1 and edge.LocusOrder == 3:
+			face_rotation = True
+			if len(a.Tetrahedron.Symmetries) > 2:
+				return 0
+			for sym in a.Tetrahedron.Symmetries:
+				if sym.tuple() != (0,1,2,3):
+					if sym.image(a.Edge) == a.Edge:
+						face_glued_to_self = True
+					else:
+						return 0
+		elif edge.valence() == 3 and edge.LocusOrder == 1:
+			for corner in edge.Corners:
+				for sym in a.Tetrahedron.Symmetries:
+					if sym.image(a.Edge) != a.Edge:
+						return 0
+					if sym.tuple() != (0,1,2,3):
+						face_glued_to_self = True
+				if face_glued_to_self:
+					break
+				a.true_next()
+			#Now, if face_glued_to_self, a is in the tet with the symmetry.
+			if face_glued_to_self:
+				if a.glued().Tetrahedron is None:
+					a.reverse()
+				check = a.copy().next()
+				if len(check.Tetrahedron.Symmetries) > 1:
+					return 0
+				if check.next().next().reverse() != a:
+					return 0
+		else:
+			return 0
+		#If we haven't returned 0 by now, then a 3-2 move should be possible.
+		if face_glued_to_self and face_rotation:
+			b = self.new_arrow()
+			b_copy = b.copy()
+			b.glue(b_copy.reverse())
+			b.reverse()
+			b.add_sym(b_copy)
+			b.add_sym(b_copy.rotate(1))
+			b.add_sym(b_copy.rotate(1))
+			a.opposite()
+			b.true_glue_as(a)
+			#Now the edge labels.
+			b.Tetrahedron.edge_labels = {
+					b.equator(): a.Tetrahedron.edge_labels[a.north_head()],
+					b.axis(): a.Tetrahedron.edge_labels[a.axis()],
+					b.north_head(): a.Tetrahedron.edge_labels[a.north_head()],
+					b.north_tail(): a.Tetrahedron.edge_labels[a.axis()],
+					b.south_head(): a.Tetrahedron.edge_labels[a.north_head()],
+					b.south_tail(): a.Tetrahedron.edge_labels[a.axis()]
+					}
+		elif face_rotation:
+			b = self.new_arrow()
+			c = self.new_arrow()
+			b.glue(c)
+			b.reverse()
+			b_copy = b.copy()
+			b.add_sym(b_copy)
+			b.add_sym(b_copy.rotate(1))
+			b.add_sym(b_copy.rotate(1))
+			c_copy = c.copy()
+			c.add_sym(c_copy)
+			c.add_sym(c_copy.rotate(1))
+			c.add_sym(c_copy.rotate(1))
+			a.opposite()
+			b.true_glue_as(a)
+			a.reverse()
+			c.true_glue_as(a)
+			a.reverse()
+			for d in [b,c]:
+				d.Tetrahedron.edge_labels = {
+					d.equator(): a.Tetrahedron.edge_labels[a.north_head()],
+					d.axis(): a.Tetrahedron.edge_labels[a.axis()],
+					d.north_head(): a.Tetrahedron.edge_labels[a.north_head()],
+					d.north_tail(): a.Tetrahedron.edge_labels[a.axis()],
+					d.south_head(): a.Tetrahedron.edge_labels[a.north_head()],
+					d.south_tail(): a.Tetrahedron.edge_labels[a.axis()]
+					}
+				a.reverse() 
+		elif face_glued_to_self:
+			b = self.new_arrow()
+			b.add_sym(b.copy())
+			b.glue(b.copy().reverse())
+			b.reverse()
+			a.opposite()
+			b.true_glue_as(a)
+			c = a.copy().opposite()
+			if c.glued().Tetrahedron is None:
+				c.reverse()
+			c.next()
+			b.rotate(-1)
+			b.glue_as(c.opposite())
+			b.rotate(-1)
+			b.glue_as(c.reverse())
+			b.Tetrahedron.edge_labels = {
+				b.equator(): c.Tetrahedron.edge_labels[c.south_tail()],
+				b.axis(): a.Tetrahedron.edge_labels[a.axis()],
+				b.north_head(): a.Tetrahedron.edge_labels[a.north_head()],
+				b.north_tail(): c.Tetrahedron.edge_labels[c.axis()],
+				b.south_head(): a.Tetrahedron.edge_labels[a.south_head()],
+				b.south_tail(): c.Tetrahedron.edge_labels[c.axis()]
+				}
+			# This is the only case of the 3-2 move which could be used in canonize part 2.
+			# For that situation, update canonize info.
+			if a.Tetrahedron.canonize_info is not None:
+				b.Tetrahedron.canonize_info = CanonizeInfo()
+				b.Tetrahedron.canonize_info.part_of_coned_cell = True
+				b.Tetrahedron.canonize_info.is_flat = False
+				b.Tetrahedron.canonize_info.face_status = {
+					b.north_face(): c.Tetrahedron.canonize_info.face_status[c.west_face()],
+					b.south_face(): c.Tetrahedron.canonize_info.face_status[c.east_face()],
+					b.east_face(): a.Tetrahedron.canonize_info.face_status[a.east_face()],
+					b.west_face(): 2
+					}
+		else:
+			b = self.new_arrow()
+			c = self.new_arrow()
+			b.add_sym(b.copy())
+			c.add_sym(c.copy())
+			b.glue(c)
+			b.reverse()
+			for i in range(3):
+				a.opposite()
+				b.glue_as(a)
+				a.reverse()
+				c.glue_as(a)
+				a.reverse()
+				b.Tetrahedron.edge_labels[b.axis()] = a.Tetrahedron.edge_labels[a.axis()]
+				b.Tetrahedron.edge_labels[b.north_head()] = a.Tetrahedron.edge_labels[a.north_head()]
+				c.Tetrahedron.edge_labels[c.axis()] = a.Tetrahedron.edge_labels[a.axis()]
+				c.Tetrahedron.edge_labels[c.south_head()] = a.Tetrahedron.edge_labels[a.north_tail()]
+				b.rotate(-1)
+				c.rotate(1)
+				a.opposite().next()
+		for corner in edge.Corners:
+			if corner.Tetrahedron in self.Tetrahedra:
+				self.Tetrahedra.remove(corner.Tetrahedron)
+		if build:
+			self.clear_and_rebuild()
+		return 1
+
+
+
+
 	"""
 	1-4 move. There's a different case for each kind of symmetry group (up to iso).
 

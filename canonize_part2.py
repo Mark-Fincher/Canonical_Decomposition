@@ -210,7 +210,6 @@ def attempt_special_three_to_two(face,tet):
 			edge = tet.Class[one_subsimplex]
 			if transparent_edge(edge) and edge.valence() == 3: 
 				orb.three_to_two(edge)
-				# NEED TO PROGRAM 3-2 FOR SIMPLICIAL ORBIFOLD CLASS.
 				return 1
 	return 0
 
