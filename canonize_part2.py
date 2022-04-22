@@ -6,7 +6,7 @@ For going from a proto-canonical triangulation to the canonical re-triangulation
 I'm following very closely the structure of the manifold case in SnapPy.
 """
 from CanonizeInfo import*
-from canonize import*
+from canonize_part1 import*
 from SimplicialOrbifold import*
 from IsomorphismSignature import hyperbolic_to_simplicial
 

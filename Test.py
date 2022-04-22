@@ -6,7 +6,7 @@ from Exact_Arithmetic import*
 from simplex import*
 from Dest_to_Triang import*
 """
-from canonize import*
+from canonize_part1 import*
 from SimplicialOrbifold import*
 from IsomorphismSignature import*
 import json

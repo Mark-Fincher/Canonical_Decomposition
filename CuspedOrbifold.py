@@ -398,7 +398,7 @@ class CuspedOrbifold:
 	The next function tries to extend perm: tet0 --> teti to an isometry defined on every tet, given as a dictionary
 	"isom" whose assignments are: if tetj is mapped to tetk via "phi" then isom[tetj] = (phi, tetk).
 
-	It could be that perm already does not descend to a well-defined map on the orbifold. We chech this with
+	It could be that perm already does not descend to a well-defined map on the orbifold. We check this with
 	valid_tet_to_tet.
 
 	If perm is valid, to extend perm we look at the neighbors of tet0 and extend the map to them in the unique way (unique
