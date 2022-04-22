@@ -537,7 +537,7 @@ class SimplicialOrbifold:
 		if len(tet.Symmetries) == 2:
 			new = self.new_arrows(2)
 			for i in range(2):
-				new[i].Symmetries.append(Perm4((0,1,2,3)))
+				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			sym = tet.nontrivial_sym()
 			for one_subsimplex in OneSubsimplices:
 				if sym.image(one_subsimplex) == one_subsimplex:

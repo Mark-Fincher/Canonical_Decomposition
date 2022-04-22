@@ -64,6 +64,8 @@ def cone_3_cell(orb):
 	# Now expand the coned region.	
 	while expand_coned_region(orb) == True:
 		pass
+	# If a transparent face is glued to itself, we do a 1-0 move on it.
+	attempt_one_to_zero(orb)
 	# attempt_cancellation is defined in canonize.py.
 	while attempt_cancellation(orb) == True:
 		pass
@@ -126,7 +128,7 @@ def more_than_one_rotation_intersecting(edge):
 	# 1. The edge itself is a rotation axis, i.e. its locus order is > 1.
 	# 2. A tet adjacent to the edge has the order 2 sym which is an involution of the edge.
 	# 3. A face adjacent to the edge is glued to itself in such a way that the gluing
-	# map restricts to an involution of the edge.
+	#    map restricts to an involution of the edge.
 	# We walk around the edge and count any occurences of these.
 	a = edge.get_arrow()
 	seen_tets = []
@@ -146,38 +148,13 @@ def more_than_one_rotation_intersecting(edge):
 			if b.glued() == a:
 				num_axes = num_axes + 1
 				# We could have double counted an axis from this if the tet also
-				# has the symmetry, but in that case there are certainly more than
-				# 2 rotation axes intersecting the edge.
+				# has the symmetry, but in that case there is certainly more than
+				# 1 rotation axis intersecting the edge.
 			if num_axes > 1:
 				return True
 		seen_tets.append(a.Tetrahedron)
 		a.true_next()
 	return False
-
-
-
-
-
-# OLD though will use somewhere.
-# Probably will incorporate into attempt cancellation step.
-def attempt_one_to_zero(orb):
-	for tet in orb.Tetrahedra:
-		if tet.canonize_info.part_of_coned_cell:
-			for face in TwoSubsimplices:
-				if tet.canonize_info.face_status[face] == 1:
-					if tet.face_glued_to_self(face):
-						if orb.one_to_zero(face,tet):
-							return
-						else:
-							raise Exception("error in attempt_one_to_zero")
-
-
-
-
-
-
-
-
 
 def expand_coned_region(orb):
 	for tet in orb.Tetrahedra:
@@ -213,7 +190,16 @@ def attempt_special_three_to_two(face,tet):
 				return 1
 	return 0
 
-
+def attempt_one_to_zero(orb):
+	for tet in orb.Tetrahedra:
+		if tet.canonize_info.part_of_coned_cell:
+			for face in TwoSubsimplices:
+				if tet.canonize_info.face_status[face] == 1:
+					if tet.face_glued_to_self(face):
+						if orb.one_to_zero(face,tet):
+							return
+						else:
+							raise Exception("error in attempt_one_to_zero")
 
 def verify_coned_region(orb):
 	for tet in orb.Tetrahedra:
