@@ -375,6 +375,8 @@ class CuspedOrbifold:
 
 
 	"""
+	I'M RE-DOING THIS IN THE NEW FILE simplicial_maps.py.
+
 	Now I'm going to make the isometry_group and are_isometric functions. 
 
 	The function valid_tet_to_tet(self,tet_a,tet_b,map_a_to_b) checks if mapping tet_a to tet_b with map_a_to_b
