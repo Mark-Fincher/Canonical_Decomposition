@@ -1,12 +1,29 @@
 """
-Simplicial maps.
+A simplicial map is just a map of simplicial orbifolds which sends tetrahedra
+to tetrahedra and respects the face gluings, symmetries, and edge labels. Hence
+it descends to a covering map of the quotient orbifold.
+
+Throughout this file, orb_1 and orb_2 can be CuspedOrbifold or SimplicialOrbifold
+objects. Of course even if they are geometric (i.e. CuspedOrbifold), we never
+refer to their geometry here. Simplicial maps are purely combinatorial.
 """
 
 from SimplicialOrbifold import*
+from HoroTriangle import* # for the function glued_to()
 
-"""
-Find all simplicial maps from orb_1 to orb_2.
-"""
+# See if there is a simplicial covering map from orb_1 to orb_2.
+def exists_covering(orb_1,orb_2):
+	if len(simplicial_maps(orb_1,orb_2)) > 0:
+		return True
+	return False
+
+# See if orb_1 and orb_2 are simplicially isomorphic. This is true iff they cover each other.
+def simplicial_isomorphic(orb_1,orb_2):
+	if len(simplicial_maps(orb_1,orb_2)) > 0 and len(simplicial_maps(orb_2,orb_1)) > 0:
+		return True
+	return False
+
+# Find all simplicial maps from orb_1 to orb_2.
 def simplicial_maps(orb_1,orb_2):
 	simplicial_maps = []
 	seen_maps_of_tet0 = []
@@ -22,9 +39,9 @@ def simplicial_maps(orb_1,orb_2):
 
 def simplicial_maps_OP(orb_1,orb_2):
 	# Find the orientation preserving simplicial maps from orb_1 to orb_2.
-	simplicial_maps = simplicial_maps(orb_1,orb_2)
-	simplicial_maps_OP = [s_map for s_map in simplicial_maps if s_map[orb_1.Tetrahedra[0]][0].sign() == 0]
-	return simplicial_maps_OP
+	s_maps = simplicial_maps(orb_1,orb_2)
+	s_maps_OP = [s_map for s_map in s_maps if s_map[orb_1.Tetrahedra[0]][0].sign() == 0]
+	return s_maps_OP
 
 """
 This checks if mapping tet_a to tet_b with map_a_to_b respects symmetries and 

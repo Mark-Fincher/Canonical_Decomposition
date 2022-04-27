@@ -12,6 +12,8 @@ from IsomorphismSignature import*
 import json
 from canonize_part2 import*
 from CanonizeInfo import*
+from simplicial_maps import*
+from quotient import quotient
 
 def print_face_statuses(orb):
     for tet in orb.Tetrahedra:
@@ -695,13 +697,18 @@ covers_of_O14_1 = [[0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 
 [1, 2, 2, 2, 0, 3, 3, 4, 3, 0, 0, 0, 2, 1, 1, 5, 5, 6, 7, 1, 4, 8, 9, 3, 9, 10, 4, 9, 8, 4, 11, 8, 7, 12, 5, 7, 6, 5, 13, 6, 13, 14, 6, 15, 12, 7, 14, 16, 11, 17, 8, 18, 10, 9, 17, 19, 17, 11, 10, 20, 21, 19, 22, 10, 23, 24, 18, 11, 14, 13, 12, 25, 26, 16, 27, 12, 24, 23, 15, 13, 22, 27, 21, 14, 15, 20, 24, 24, 20, 15, 25, 27, 16, 26, 19, 26, 19, 21, 16, 21, 27, 22, 26, 17, 18, 25, 23, 23, 25, 18, 20, 22],]
 
 
+"""
 for dest in covers_of_O5:
     orb = dest_to_orb(dest)
-    print(dest)
-    new_orb = canonical_retriangulation(orb)
-    if new_orb is not None:
-        new_orb.info()
+    orb.info()
     print(' ')
+    print(orb.isometriesOP())
+    print(' ')
+    print(simplicial_maps_OP(orb,orb))
+    print(' ')
+    print('------------------------------------------------------')
+    print(' ')
+"""
 
 
 """
@@ -814,12 +821,40 @@ for i in range(len(Dests)):
     print(' ')
 """
 
-"""
+
 with open("48seqs.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
+min_orb = dest_to_orb(OrbDictionary[(1,0)])
+for key in OrbDictionary.keys():
+    print(key)
+    dest = OrbDictionary[key]
+    orb = dest_to_orb(dest)
+    print(exists_covering(orb,min_orb))
+    print(' ')
+
+
+"""
+for key in OrbDictionary.keys():
+    print(key)
+    print(' ')
+    dest = OrbDictionary[key]
+    orb = dest_to_orb(dest)
+    orb.info()
+    print(' ')
+    group = simplicial_maps_OP(orb,orb)
+    print(group)
+    print(' ')
+    quotient_orb = quotient(orb,group)
+    quotient_orb.info()
+    print(' ')
+    print('--------------------------------------------------------------')
+    print(' ')
+"""
+
+"""
 # The one dest where proto_canonize fails.
 dest = OrbDictionary[(45,2)]
 orb = dest_to_orb(dest)
