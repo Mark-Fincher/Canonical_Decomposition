@@ -164,3 +164,22 @@ class Edge:
         tail, head = other_arrow.tail(), other_arrow.head()
         self._edge_orient_cache[(arrow.Tetrahedron, tail, head)] = 1
         self._edge_orient_cache[(arrow.Tetrahedron, head, tail)] = -1
+
+    """
+    ORBIFOLDS.
+
+    An edge either has no symmetry, or reflection through its midpoint. It has the reflection
+    exactly when some tet has an order 2 sym fixing it or a face glued to itself fixing it.
+    This function returns True if it has the reflectional symmetry, False otherwise.
+    """
+    def has_symmetry(self):
+        a = self.get_arrow()
+        for i in range(self.valence()):
+            if a.Tetrahedron.non_trivial_sym_fixing(a.Edge):
+                return True
+            b = a.copy().reverse()
+            if a.copy().true_next() == b or b.true_next() == a:
+                return True
+            a.true_next()
+        return False
+

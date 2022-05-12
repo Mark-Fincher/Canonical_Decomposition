@@ -219,6 +219,26 @@ class Tetrahedron:
 
     """
     ORBIFOLDS.
+    This function makes obsolete the face_rotation function above. This
+    function works for any subsimplex.
+
+    If there's a non-trivial sym fixing a 0-simplex, then the sym group contains the
+    order 3 group of rotations fixing that 2-simplex.
+
+    If there's a non-trivial sym fixing a 1-simplex, then the sym group contains the
+    order 2 group of rotations fixing that 1-simplex.
+    
+    If there's a non-trivial sym fixing a 2-simplex, then the sym group contains the
+    order 3 group of rotations fixing that 2-simplex. 
+    """
+    def non_trivial_sym_fixing(self,subsimplex):
+        for sym in self.Symmetries:
+            if sym.image(subsimplex) == subsimplex and sym.tuple() != (0,1,2,3):
+                return True
+        return False
+
+    """
+    ORBIFOLDS.
     """
     def is_flat(self):
         z = self.edge_params[E01]

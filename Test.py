@@ -14,6 +14,7 @@ from canonize_part2 import*
 from CanonizeInfo import*
 from simplicial_maps import*
 from quotient import quotient
+from singular_locus import*
 
 def print_face_statuses(orb):
     for tet in orb.Tetrahedra:
@@ -830,17 +831,8 @@ with open("48seqs.json", "r") as read_file:
 dest = OrbDictionary[(1,0)]
 orb = dest_to_orb(dest)
 s_orb = hyperbolic_to_simplicial(orb)
-print(s_orb.Faces)
-face = s_orb.Faces[0]
-print(face.Corners)
-
-dest = OrbDictionary[(10,0)]
-orb = dest_to_orb(dest)
-s_orb = hyperbolic_to_simplicial(orb)
-s_orb.info()
-for face in s_orb.Faces:
-    print(face)
-    print(face.Corners)
+graph = barycentric_graph(s_orb)
+graph.info()
 
 
 
