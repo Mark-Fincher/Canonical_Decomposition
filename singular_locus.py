@@ -68,7 +68,7 @@ def barycentric_graph(orb):
 				if tet.non_trivial_sym_fixing(one_subsimplex):
 					graph.make_edge(vertex1,vertex2,2)
 				else:
-					graph.made_edge(vertex1,vertex2,1)
+					graph.make_edge(vertex1,vertex2,1)
 		skip = []
 		for two_subsimplex in TwoSubsimplices:
 			if two_subsimplex not in skip:
@@ -139,6 +139,25 @@ def barycentric_graph(orb):
 	for i in range(len(graph.Edges)):
 		graph.Edges[i].Index = i
 	return graph
+
+"""
+Given a simplicial orbifold "orb", return its singular locus. First it gets the barycentric
+graph, then it turns that into the singular locus.
+"""
+def singular_locus(orb):
+	graph = barycentric_graph(orb)
+	edges_list = [ edge for edge in graph.Edges ]
+	for edge in edges_list:
+		if edge.LocusOrder == 1:
+			graph.delete_edge(edge)
+	vertex_list = [ vertex for vertex in graph.Vertices]
+	for vertex in vertex_list:
+		if len(vertex.Edges) == 0:
+			graph.delete_vertex(vertex)
+		graph.attempt_remove_valence_2_vertex(vertex)
+	return graph
+
+
 
 
 

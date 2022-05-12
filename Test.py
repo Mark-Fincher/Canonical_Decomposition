@@ -828,10 +828,10 @@ with open("48seqs.json", "r") as read_file:
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
-dest = OrbDictionary[(1,0)]
+dest = OrbDictionary[(48,60)]
 orb = dest_to_orb(dest)
 s_orb = hyperbolic_to_simplicial(orb)
-graph = barycentric_graph(s_orb)
+graph = singular_locus(s_orb)
 graph.info()
 
 
