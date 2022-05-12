@@ -827,13 +827,21 @@ with open("48seqs.json", "r") as read_file:
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
-min_orb = dest_to_orb(OrbDictionary[(1,0)])
-for key in OrbDictionary.keys():
-    print(key)
-    dest = OrbDictionary[key]
-    orb = dest_to_orb(dest)
-    print(exists_covering(orb,min_orb))
-    print(' ')
+dest = OrbDictionary[(1,0)]
+orb = dest_to_orb(dest)
+s_orb = hyperbolic_to_simplicial(orb)
+print(s_orb.Faces)
+face = s_orb.Faces[0]
+print(face.Corners)
+
+dest = OrbDictionary[(10,0)]
+orb = dest_to_orb(dest)
+s_orb = hyperbolic_to_simplicial(orb)
+s_orb.info()
+for face in s_orb.Faces:
+    print(face)
+    print(face.Corners)
+
 
 
 """

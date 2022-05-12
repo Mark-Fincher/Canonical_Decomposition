@@ -2,6 +2,7 @@ from tetrahedron import*
 from arrow import*
 from edge import*
 from vertex import*
+from face import*
 from simplex import*
 from corner import*
 from perm4 import*
@@ -18,6 +19,7 @@ class SimplicialOrbifold:
 		self.Vertices = []
 		self.build_vertex_classes()
 		self.build_edge_classes()
+		self.build_face_classes()
 
 	def info(self):
 		tets = self.Tetrahedra
@@ -61,6 +63,27 @@ class SimplicialOrbifold:
 		self.build_vertex_classes()
 		self.build_edge_classes()
 
+	def build_face_classes(self):
+		for tet in self.Tetrahedra:
+			for two_subsimplex in TwoSubsimplices:
+				if tet.Class[two_subsimplex] == None:
+					nbr, perm = tet.true_glued(two_subsimplex)
+					nbr_two_subsimplex = perm.image(two_subsimplex)
+					newFace = Face()
+					self.Faces.append(newFace)
+					for sym in tet.Symmetries:
+						image = sym.image(two_subsimplex)
+						if tet.Class[image] == None:
+							tet.Class[image] = newFace
+							newFace.Corners.append(Corner(tet,image))
+					for sym in nbr.Symmetries:
+						image = sym.image(nbr_two_subsimplex)
+						if nbr.Class[image] == None:
+							nbr.Class[image] = newFace
+							newFace.Corners.append(Corner(nbr,image))
+		for i in range(len(self.Faces)):
+			self.Faces[i].Index = i
+
 	# Construct the vertices.
 	#
 	def build_vertex_classes(self):
@@ -94,11 +117,18 @@ class SimplicialOrbifold:
 
 	"""
 	We create edge classes just like we do for a CuspedOrbifold. The only difference is
-	that we don't have to figure out the LocusOrder at the end using the geometry. 
+	that we don't have to figure out the LocusOrder at the end using the geometry.
 
-	Also, we should allow for boundary faces now. It currently doesn't do that, but I'll change
-	it. We should allow boundary faces because we might want to get the isomorphism signature
-	of a simplicial orbifold with boundary, like if we're trying trying to build all triangulations
+	Note that edge.Corners will not give all 2-simplices belonging to the edge class. It only
+	contains the 2-simplices encountered on a complete walk around the edge. Some other 2-simplices
+	which are in the class due to symmetries will not be in it. This is not how we do things for
+	the vertex or face classes; there, all simplices in the class are in Corners. The reason is that
+	edge.valence(), which is the length of edge.Corners, needs to equal the "length" of the walk
+	around the edge, i.e. the number of distinct ARROWS around the edge (distint up to symmetries). 
+
+	Also, we should allow for boundary faces probably. It currently doesn't do that, but I might
+	change it. We should allow boundary faces because we might want to get the isomorphism signature
+	of a simplicial orbifold with boundary, like if we're trying to build all triangulations
 	up to a certain amount of tetrahedra and we want to avoid paths we've already gone down.
 	"""
 	def build_edge_classes(self):
