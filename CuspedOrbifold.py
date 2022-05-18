@@ -1590,7 +1590,7 @@ class CuspedOrbifold:
 		neighbor = tet.Neighbor[two_subsimplex]
 		if neighbor is None or neighbor is tet:
 			return 0
-		if not neighbor.is_regular():
+		if not tet.is_regular() or not neighbor.is_regular():
 			return 0
 		if len(tet.Symmetries) == 2:
 			for sym in tet.Symmetries:
@@ -1607,10 +1607,20 @@ class CuspedOrbifold:
 				return 0
 			case = 2
 		elif len(tet.Symmetries) == 12:
+			# Then neighbor certainly has the order 3 rotations fixing the common face.
+			# We need to make sure it doesn't have any other symmetries.
+			if len(neighbor.Symmetries) != 3:
+				return 0
 			case = 1
+		elif len(tet.Symmetries) == 4:
+			# Need to make sure neighbor doesn't have any non-trivial symmetries.
+			# Otherwise we can't do the cube re-triangulation.
+			if len(neighbor.Symmetries) != 1:
+				return 0
+			case = 3
 		else:
 			return 0
-		#For now I'll just program case 1.
+		# I'm not going to program case 2 right now. It might not be needed.
 		if case == 1:
 			for one_subsimplex in OneSubsimplices:
 				if is_subset(one_subsimplex,two_subsimplex):
@@ -1618,7 +1628,7 @@ class CuspedOrbifold:
 					b = a.glued()
 					if b.copy().next() is not None:
 						break
-			#Now a and b are is in the picture in the write-up.
+			#Now a and b are as in the picture in the write-up.
 			new = self.new_arrows(3)
 			#Tets of new[0] and new[1] are regular, new[2] is flat.
 			u = SquareRootCombination([(1,Fraction(1/2))])
@@ -1646,6 +1656,56 @@ class CuspedOrbifold:
 		elif case == 2:
 			return 0
 			#might add this later.
+		elif case == 3:
+			# Similar to case 1. But there are three new flat tets.
+			for one_subsimplex in OneSubsimplices:
+				if is_subset(one_subsimplex,two_subsimplex):
+					a = Arrow(one_subsimplex,two_subsimplex,tet)
+					b = a.glued()
+					break
+			#Now a and b are as in the picture in the write-up.
+			new = self.new_arrows(5)
+			#Tets of new[0] and new[1] are regular, new[2], new[3],new[4] are flat.
+			u = SquareRootCombination([(1,Fraction(1/2))])
+			v = SquareRootCombination([(Fraction(3,1),Fraction(1/2))])
+			z = ComplexSquareRootCombination(u,v)
+			One = ComplexSquareRootCombination.One()
+			Two = ComplexSquareRootCombination(SquareRootCombination.Two(),SquareRootCombination.Zero())
+			new[0].Tetrahedron.fill_edge_params(z)
+			new[1].Tetrahedron.fill_edge_params(z)
+			new[2].Tetrahedron.fill_edge_params(One/Two)
+			new[3].Tetrahedron.fill_edge_params(One/Two)
+			new[4].Tetrahedron.fill_edge_params(One/Two)
+			new[2].reverse().rotate(1)
+			new[3].reverse().rotate(1)
+			new[4].reverse().rotate(1)
+			new[0].glue(new[1])
+			new[1].glue(new[2])
+			#Now the arrows are as in the picture.
+			new[0].Tetrahedron.Symmetries = [
+				Perm4((0,1,2,3)),
+				Perm4((1,0,3,2)),
+				Perm4((2,3,0,1)),
+				Perm4((3,2,1,0))]
+			new[1].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[2].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[2].add_sym(new[2].copy().reverse())
+			new[3].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[3].add_sym(new[2].copy().reverse())
+			new[4].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			new[4].add_sym(new[2].copy().reverse())
+			new[2].opposite().reverse()
+			new[2].glue_as(b)
+			new[1].rotate(-1)
+			new[1].glue(new[3])
+			new[3].opposite().reverse()
+			new[3].glue_as(b.copy().rotate(1))
+			new[1].rotate(-1)
+			new[1].glue(new[4])
+			new[4].opposite()
+			new[4].glue_as(b.copy().rotate(-1))
+			self.Tetrahedra.remove(a.Tetrahedron)
+			self.Tetrahedra.remove(b.Tetrahedron)
 		else:
 			return 0
 		self.clear_and_rebuild()

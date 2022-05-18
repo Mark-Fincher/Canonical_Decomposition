@@ -828,11 +828,6 @@ with open("48seqs.json", "r") as read_file:
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
-dest = OrbDictionary[(48,60)]
-orb = dest_to_orb(dest)
-s_orb = hyperbolic_to_simplicial(orb)
-graph = singular_locus(s_orb)
-graph.info()
 
 
 
@@ -854,7 +849,7 @@ for key in OrbDictionary.keys():
     print(' ')
 """
 
-"""
+
 # The one dest where proto_canonize fails.
 dest = OrbDictionary[(45,2)]
 orb = dest_to_orb(dest)
@@ -863,7 +858,11 @@ print(proto_canonize(orb))
 orb.info()
 print_face_concavity(orb)
 # Could be I need a new case of retriangulate_cube to handle it.
-"""
+# UPDATE. I've added the new case to retriangulate_cube and it now seems to work.
+# It's an interesting canonical decomposition. It's only proto-canonical. There is
+# a transparent face. There are also two flat tets. I need to think about what they're
+# doing there.
+
 
 """
 num_fail = 0
