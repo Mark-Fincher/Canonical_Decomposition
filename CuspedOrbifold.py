@@ -1348,10 +1348,14 @@ class CuspedOrbifold:
 	having symmetries, this is just the usual manifold 4-4 move. There could be
 	an order 2 rotational symmetry swapping the two ends of the bypyramid. In that case
 	2 pairs of the resulting 4 tetrahedra are mapped to each other by the symmetry, so we can take
-	away 2 tetrahedra. Unfortunately we need to also insert a flat tetrahedron in that case.
+	away 2 tetrahedra. The axis of this symmetry either connects two vertices of the octahedron, or 
+	two edges of the ocahedron. In the latter case, we have to insert a flat tet after doing the 4-4 move.
+	Can think of this flat tet as expressing the way in which a square face is glued to itself.
 
 	Of course there are other symmetries of an octahedron. For now I just include the case where
 	there are no symmetries, or exactly this one non-trivial symmetry.
+
+	UPDATE: I need to make a case which reverses the 4-4 with symmetry that's already been programmed.
 	
 	So the symmetry can only be pi rotation swapping x1 with x4 and x2 with x3,
 	where the labels are from my write-up. 
@@ -1474,6 +1478,107 @@ class CuspedOrbifold:
 			for a in old:
 				if a.Tetrahedron in self.Tetrahedra:
 					self.Tetrahedra.remove(a.Tetrahedron)
+		self.clear_and_rebuild()
+		return 1
+
+	
+	"""
+	This 4-4 move is the reverse of the one above in the case of a symmetry. Maybe it should
+	be included in that function as a certain case. But for now, I'll treat it separately.
+	It's special because we're assuming we have a flat tet to start with, and because of its
+	role in canonize part 2. The non-geometric version of this move is programmed in SimplicialOrbifold.
+	All that's new here is determining geometry.
+
+	Something that I didn't realize until recently is that there are two cases. When the symmetry axis
+	is horizontal, and when it's vertical.
+	"""
+	def special_four_to_four(self,edge):
+		# This is the case where we have half of an octahedron, with the square face glued to 
+		# itself by rotation around an axis which intersects the midpoints of two sides.
+		if edge.valence() != 3 or edge.LocusOrder != 1:
+			return 0
+		a = edge.get_arrow()
+		if len(a.Tetrahedron.Symmetries) != 2:
+			# Let's move the arrow into the tet with a nontrivial symmetry (if it exists).
+			a.true_next()
+			if len(a.Tetrahedron.Symmetries) != 2:
+				a.true_next()
+			if len(a.Tetrahedron.Symmetries) != 2:
+				return 0
+		# Now the arrow a is positioned as in the diagram (in the write-up) and we do
+		# the final checks.
+		sym = a.Tetrahedron.nontrivial_sym()
+		if sym.image(a.Edge) == a.Edge:
+			return 0
+		b = a.copy().true_next()
+		c = b.glued()
+		if b.Tetrahedron is None or c.Tetrahedron is None:
+			return 0
+		if b.Tetrahedron is c.Tetrahedron:
+			return 0
+		if len(b.Tetrahedron.Symmetries) != 1 or len(c.Tetrahedron.Symmetries) != 1:
+			return 0
+		# If we've gotten to here, then this case of a 4-4 move can be done.
+		# We must determine if the symmetry axis is horizontal or vertical.
+		if comp(a.south_face()) == sym.image(a.head()):
+			case = 'horizontal'
+		elif comp(a.north_face()) == sym.image(a.head()):
+			case = 'vertical'
+		else:
+			raise Exception('error in special_four_to_four')
+		new = self.new_arrows(3)
+		# First we take care of geometry.
+		One = ComplexSquareRootCombination.One()
+		# u0 = shape of (y1,x4) in (y1,x1,x2,x4)
+		u0 = b.Tetrahedron.edge_params[b.north_head()]
+		# u1 = shape of (y1,x4) in (y1,x2,x3,x4)
+		u1 = c.Tetrahedron.edge_params[c.north_tail()]
+		# w0, w1, and w2 are points in the complex plane, ideal points of the octahedron.
+		w0 = u0*u1
+		w1 = u1
+		if case == 'horizontal':
+			w2 = One - One/u0 + u1
+		if case == 'vertical':
+			w2 = (One - u1)*(u0*u1 - One) + One
+		# z0 = shape of (y1,x4) in (y1,y2,x1,x4)
+		z0 = w0/w2
+		# z1 = shape of (y1,y2) in (y1,y2,x2,x3)
+		z1 = (One - w2)*w1/(w1 - w2)
+		# z2 = shape of (y1,x4) in (y1,y2,x3,x4)
+		z2 = w2
+		# z3 = shape of (y1,y2) in (y1,y2,x1,x2)
+		z3 = (w1 - w2)*w0/(w1*(w0 - w2))		
+		if case == 'horizontal':
+			new[0].Tetrahedron.fill_edge_params(z1)
+			new[1].Tetrahedron.fill_edge_params(One/(One - z2))
+			new[2].Tetrahedron.fill_edge_params(One - One/z0)
+			for i in range(3):
+				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			for i in range(2):
+				new[i].glue(new[i+1])
+			new[0].add_sym(new[0].copy().reverse())
+			new[2].add_sym(new[2].copy().reverse())
+			new[0].copy().opposite().glue_as(c.copy().reverse().rotate(-1))
+			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(1))
+			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(1))
+			new[2].copy().opposite().glue_as(b.copy().rotate(-1))
+		if case == 'vertical':
+			new[0].Tetrahedron.fill_edge_params(z3)
+			new[1].Tetrahedron.fill_edge_params(z1)
+			new[2].Tetrahedron.fill_edge_params(One/(One - z2))
+			for i in range(3):
+				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			for i in range(2):
+				new[i].glue(new[i+1])
+			new[0].add_sym(new[0].copy().reverse())
+			new[2].add_sym(new[2].copy().reverse())
+			new[0].copy().opposite().glue_as(b.copy().rotate(1))
+			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(-1))
+			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(-1))
+			new[2].copy().opposite().glue_as(c.copy().reverse().rotate(1))
+		self.Tetrahedra.remove(a.Tetrahedron)
+		self.Tetrahedra.remove(b.Tetrahedron)
+		self.Tetrahedra.remove(c.Tetrahedron)
 		self.clear_and_rebuild()
 		return 1
 
@@ -1691,9 +1796,9 @@ class CuspedOrbifold:
 			new[2].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			new[2].add_sym(new[2].copy().reverse())
 			new[3].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
-			new[3].add_sym(new[2].copy().reverse())
+			new[3].add_sym(new[3].copy().reverse())
 			new[4].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
-			new[4].add_sym(new[2].copy().reverse())
+			new[4].add_sym(new[4].copy().reverse())
 			new[2].opposite().reverse()
 			new[2].glue_as(b)
 			new[1].rotate(-1)

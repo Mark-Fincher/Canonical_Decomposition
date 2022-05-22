@@ -878,6 +878,129 @@ class SimplicialOrbifold:
 			return 0
 		if len(b.Tetrahedron.Symmetries) != 1 or len(c.Tetrahedron.Symmetries) != 1:
 			return 0
+		
+
+
+		# This is the case where we have half of an octahedron, with the square face glued to 
+		# itself by rotation around an axis which intersects the midpoints of two sides.
+		if edge.valence() != 3 or edge.LocusOrder != 1:
+			return 0
+		a = edge.get_arrow()
+		if len(a.Tetrahedron.Symmetries) != 2:
+			# Let's move the arrow into the tet with a nontrivial symmetry (if it exists).
+			a.true_next()
+			if len(a.Tetrahedron.Symmetries) != 2:
+				a.true_next()
+			if len(a.Tetrahedron.Symmetries) != 2:
+				return 0
+		# Now the arrow a is positioned as in the diagram (in the write-up) and we do
+		# the final checks.
+		sym = a.Tetrahedron.nontrivial_sym()
+		if sym.image(a.Edge) == a.Edge:
+			return 0
+		b = a.copy().true_next()
+		c = b.glued()
+		if b.Tetrahedron is None or c.Tetrahedron is None:
+			return 0
+		if b.Tetrahedron is c.Tetrahedron:
+			return 0
+		if len(b.Tetrahedron.Symmetries) != 1 or len(c.Tetrahedron.Symmetries) != 1:
+			return 0
+		# If we've gotten to here, then this case of a 4-4 move can be done.
+		# We must determine if the symmetry axis is horizontal or vertical.
+		if comp(a.south_face()) == sym.image(a.head()):
+			case = 'horizontal'
+		elif comp(a.north_face()) == sym.image(a.head()):
+			case = 'vertical'
+		else:
+			raise Exception('error in simplicial four_to_four')
+		new = self.new_arrows(3)
+		if case == 'horizontal':
+			for i in range(3):
+				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			for i in range(2):
+				new[i].glue(new[i+1])
+			new[0].add_sym(new[0].copy().reverse())
+			new[2].add_sym(new[2].copy().reverse())
+			new[0].copy().opposite().glue_as(c.copy().reverse().rotate(-1))
+			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(1))
+			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(1))
+			new[2].copy().opposite().glue_as(b.copy().rotate(-1))
+			b_tet = b.Tetrahedron
+			c_tet = c.Tetrahedron
+			new[0].Tetrahedron.edge_labels = {
+				new[0].equator(): c_tet.edge_labels[c.south_head()],
+				new[0].axis(): 1,
+				new[0].north_head(): c_tet.edge_labels[c.equator()],
+				new[0].north_tail(): c_tet.edge_labels[c.south_tail()],
+				new[0].south_head(): c_tet.edge_labels[c.south_tail()],
+				new[0].south_tail(): c_tet.edge_labels[c.equator()] 
+				}
+			new[1].Tetrahedron.edge_labels = {
+				new[1].equator(): c_tet.edge_labels[c.north_head()],
+				new[1].axis(): 1,
+				new[1].north_head(): c_tet.edge_labels[c.north_tail()],
+				new[1].north_tail(): c_tet.edge_labels[c.equator()],
+				new[1].south_head(): b_tet.edge_labels[b.equator()],
+				new[1].south_tail(): c_tet.edge_labels[c.south_tail()] 
+				}
+			new[2].Tetrahedron.edge_labels = {
+				new[2].equator(): b_tet.edge_labels[b.north_tail()],
+				new[2].axis(): 1,
+				new[2].north_head(): b_tet.edge_labels[b.equator()],
+				new[2].north_tail(): c_tet.edge_labels[c.north_tail()],
+				new[2].south_head(): c_tet.edge_labels[c.north_tail()],
+				new[2].south_tail(): b_tet.edge_labels[b.equator()] 
+				}
+
+			
+
+		if case == 'vertical':
+			for i in range(3):
+				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
+			for i in range(2):
+				new[i].glue(new[i+1])
+			new[0].add_sym(new[0].copy().reverse())
+			new[2].add_sym(new[2].copy().reverse())
+			new[0].copy().opposite().glue_as(b.copy().rotate(1))
+			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(-1))
+			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(-1))
+			new[2].copy().opposite().glue_as(c.copy().reverse().rotate(1))
+
+			new[0].Tetrahedron.edge_labels = {
+				new[0].equator(): b_tet.edge_labels[b.south_tail()],
+				new[0].axis(): 1,
+				new[0].north_head(): c_tet.edge_labels[south_tail()],
+				new[0].north_tail(): b_tet.edge_labels[b.equator()],
+				new[0].south_head(): b_tet.edge_labels[b.equator()],
+				new[0].south_tail(): c_tet.edge_labels[c.south_tail()] 
+				}
+			new[1].Tetrahedron.edge_labels = {
+				new[1].equator(): ,
+				new[1].axis(): ,
+				new[1].north_head(): ,
+				new[1].north_tail(): ,
+				new[1].south_head(): ,
+				new[1].south_tail():  
+				}
+			new[2].Tetrahedron.edge_labels = {
+				new[2].equator(): ,
+				new[2].axis(): ,
+				new[2].north_head(): ,
+				new[2].north_tail(): ,
+				new[2].south_head(): ,
+				new[2].south_tail():  
+				}
+
+		self.Tetrahedra.remove(a.Tetrahedron)
+		self.Tetrahedra.remove(b.Tetrahedron)
+		self.Tetrahedra.remove(c.Tetrahedron)
+		self.clear_and_rebuild()
+		return 1
+
+
+
+
 		# If we've gotten to here, then this case of a 4-4 move can be done.
 		new = new_arrows(3)
 		for i in range(3):
