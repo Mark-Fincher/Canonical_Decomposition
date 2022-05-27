@@ -849,7 +849,7 @@ for key in OrbDictionary.keys():
     print(' ')
 """
 
-
+"""
 # The one dest where proto_canonize fails.
 dest = OrbDictionary[(45,2)]
 orb = dest_to_orb(dest)
@@ -862,10 +862,13 @@ edge = tet0.Class[E23]
 print(orb.special_four_to_four(edge))
 print(' ')
 orb.info()
-print(' ')
-print(proto_canonize(orb))
 print_face_concavity(orb)
-orb.info()
+print(' ')
+tet5 = orb.Tetrahedra[5]
+edge = tet5.Class[E01]
+print(edge.LocusOrder)
+print(edge.Corners)
+"""
 # Could be I need a new case of retriangulate_cube to handle it.
 # UPDATE. I've added the new case to retriangulate_cube and it now seems to work.
 # It's an interesting canonical decomposition. It's only proto-canonical. There is
@@ -877,7 +880,7 @@ orb.info()
 # is another triangulation with all regular tetrahedra!
 
 
-"""
+
 num_fail = 0
 num_success = 0
 for key in OrbDictionary.keys():
@@ -894,7 +897,7 @@ for key in OrbDictionary.keys():
         print(' ')
 print('num_success = ',num_success)
 print('num_fail = ',num_fail)
-"""
+
 
 """
 for key in OrbDictionary.keys():

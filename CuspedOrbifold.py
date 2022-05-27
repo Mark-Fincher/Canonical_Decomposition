@@ -350,7 +350,7 @@ class CuspedOrbifold:
 							newEdge.LocusOrder = n
 							break
 					else:
-						print('Error getting edge locus order.')
+						raise Exception('error getting edge locus order')
 		for i in range(len(self.Edges)):
 			self.Edges[i].Index = i
 
@@ -369,9 +369,47 @@ class CuspedOrbifold:
 					face2 = tet1.Gluing[face1].image(face1)
 					if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
 						return False
-		#If it hasn't already returned, then return True.
+		# Now make sure that if there are any flat tetrahedra, they are admissible.
+		copy = self.copy()
+		# Make a list of flat tets.
+		flat_tets = []
+		for tet in copy.Tetrahedra:
+			if tet.is_flat():
+				flat_tets.append(tet)
+		if len(flat_tets) == 0:
+			return True
+		for tet in flat_tets:
+			for one_subsimplex in OneSubsimplices:
+				if copy.special_four_to_four(tet.Class[one_subsimplex]):
+					# Because of how special_four_to_four is written, the three new tets which
+					# make up the octahedron are in positions -1, -2, and -3 of copy.Tetrahedra.
+					# We know the interior edge of the newly created octahedron will be E01 of any
+					# of those tetrahedra. This tet is admissible iff this edge class is concave.
+					# To check it it's concave, we check the concavity of the faces adjacent to it.
+					# They are F2 and F3 of copy.Tetrahedra[-2].
+					new_0 = copy.Tetrahedra[-3]
+					new_1 = copy.Tetrahedra[-2]
+					new_2 = copy.Tetrahedra[-1]
+					if new_0.is_flat() and new_2.is_flat():
+						# This shouldn't happen.
+						raise Exception("Error when checking if proto_canonical")
+					elif new_0.is_flat():
+						if not (new_1.tilt(V3) + new_2.tilt(V2)).evaluate() > 0:
+							# Then the edge is not concave, so the tet is not admissible.
+							return False
+					else:
+						if not (new_1.tilt(V2) + new_0.tilt(V3)).evaluate() > 0:
+							# Then the edge is not concave, so the tet is not admissible.
+							return False
+					# If we haven't returned False, then that flat tet is admissible. We should
+					# reverse the special_four_to_four move before moving on to other flat tets. 
+					copy.four_to_four(new_0.Class[E01])
+					break
+			else:
+				# If we hit this, then this is a flat tet we weren't even able to do
+				# a special_four_to_four move on, so it's definitely not admissible.
+				return False
 		return True
-
 
 
 	"""
@@ -1345,17 +1383,14 @@ class CuspedOrbifold:
 
 	"""
 	4-4 move around a valence 4 edge. In the case that there are 4 distinct tetrahedra, none of them
-	having symmetries, this is just the usual manifold 4-4 move. There could be
-	an order 2 rotational symmetry swapping the two ends of the bypyramid. In that case
-	2 pairs of the resulting 4 tetrahedra are mapped to each other by the symmetry, so we can take
-	away 2 tetrahedra. The axis of this symmetry either connects two vertices of the octahedron, or 
-	two edges of the ocahedron. In the latter case, we have to insert a flat tet after doing the 4-4 move.
-	Can think of this flat tet as expressing the way in which a square face is glued to itself.
+	having symmetries, this is just the usual manifold 4-4 move. 
 
-	Of course there are other symmetries of an octahedron. For now I just include the case where
-	there are no symmetries, or exactly this one non-trivial symmetry.
+	The union of the 4 tetrahedra is an octahedron. We might consider an orbifold version of the 4-4
+	move for each group of symmetries of an octahedron. For my purposes, I'm only considering one such
+	case. The case where you have an order 2 symmetry, pi rotation through an axis connecting opposite
+	edges of the octahedron. See the write-up for a picture and explanation.
 
-	UPDATE: I need to make a case which reverses the 4-4 with symmetry that's already been programmed.
+	UPDATE: To reverse the 4-4 with symmetry, use the special_four_to_four function.
 	
 	So the symmetry can only be pi rotation swapping x1 with x4 and x2 with x3,
 	where the labels are from my write-up. 
@@ -1450,7 +1485,7 @@ class CuspedOrbifold:
 			new[0].Tetrahedron.fill_edge_params(wc)
 			#new[1] is [x1,x2,x3,y1]
 			new[1].Tetrahedron.fill_edge_params(wc*(wb - One)/((wc - One)*wb))
-			#new[2] is [x1,x2,x3,x4], which is flat.
+			#new[2] is [x1,x2,x3,x4], which could be flat.
 			new[2].Tetrahedron.fill_edge_params((wb - wc)/(One - wc))
 			new[0].opposite().reverse()
 			new[1].reverse().rotate(1)
@@ -1483,10 +1518,13 @@ class CuspedOrbifold:
 
 	
 	"""
-	This 4-4 move is the reverse of the one above in the case of a symmetry. Maybe it should
-	be included in that function as a certain case. But for now, I'll treat it separately.
-	It's special because we're assuming we have a flat tet to start with, and because of its
-	role in canonize part 2. The non-geometric version of this move is programmed in SimplicialOrbifold.
+	This 4-4 move is the reverse of the one above in the case of a symmetry. It could work even
+	if there isn't a flat tet, but I choose to have it return 0 then. The reason is that, if there
+	is not a flat tet, then some other pachner move will help you make progress when finding the
+	canonical decomposition. When there is a flat tet there, it's a special situation which must
+	be dealt with carefully when trying to canonize. 
+
+	The non-geometric version of this move is programmed in SimplicialOrbifold.
 	All that's new here is determining geometry.
 
 	Something that I didn't realize until recently is that there are two cases. When the symmetry axis
@@ -1507,6 +1545,8 @@ class CuspedOrbifold:
 				return 0
 		# Now the arrow a is positioned as in the diagram (in the write-up) and we do
 		# the final checks.
+		if a.Tetrahedron.is_flat() == False:
+			return 0
 		sym = a.Tetrahedron.nontrivial_sym()
 		if sym.image(a.Edge) == a.Edge:
 			return 0

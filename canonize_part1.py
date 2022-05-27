@@ -25,7 +25,7 @@ This function will modify orb, so make a copy of it if you want to save it. If i
 orb proto-canonical, it returns 1. Otherwise, it returns 0.
 """
 def proto_canonize(orb):
-	MAX_MOVES = 1000
+	MAX_MOVES = 100
 	for i in range(MAX_MOVES):
 		if attempt_cancellation(orb):
 			print("cancelled flat tet(s)")
@@ -47,6 +47,9 @@ def proto_canonize(orb):
 			continue
 		if attempt_retriangulate_cube(orb):
 			print("retriangulated a cube")
+			continue
+		if attempt_special_four_to_four(orb):
+			print("did special 4-4 move")
 			continue
 		#If none of the attempts work, then either it's proto-canonical, or the algorithm is stuck.
 		#In either case, we break out of the loop.
@@ -109,6 +112,31 @@ def attempt_retriangulate_cube(orb):
 		for face in TwoSubsimplices:
 			if concave_face(face,tet) and orb.retriangulate_cube(face,tet):
 				return 1
+	return 0
+
+def attempt_special_four_to_four(orb):
+	flat_tets = []
+	for tet in orb.Tetrahedra:
+		if tet.is_flat():
+			flat_tets.append(tet)
+	if len(flat_tets) == 0:
+		return 0
+	for tet in flat_tets:
+		for one_subsimplex in OneSubsimplices:
+			edge = tet.Class[one_subsimplex]
+			if orb.special_four_to_four(edge):
+				# Then we know we have the situation of the square face of a pyramid glued
+				# to itself, and we've just gotten rid of the flat tet which is the square face
+				# by doing the special_four_to_four move.
+				if attempt_four_to_four(orb):
+					# Then the special_four_to_four resulted in a concave edge inside the octahedron,
+					# so we reversed it with the 4-4 move. So the special_four_to_four was not actually
+					# worth doing. Move to the next flat tet.
+					break
+				else:
+					# Then the newly created edge is not concave, so we made progress with the
+					# special 4-4 move. It succeeded.
+					return 1
 	return 0
 
 

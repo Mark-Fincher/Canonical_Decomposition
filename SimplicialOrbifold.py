@@ -843,44 +843,15 @@ class SimplicialOrbifold:
 
 	"""
 	There are a few different cases of a 4-4 move. For now we just make the only one I think
-	we need for canonize_part2. Need to make the adding edge labels part nicer.
+	we need for canonize_part2. The version of this in CuspedOrbifold is called special_four_to_four.
+	We use the same arrow diagrams as there.
+
+	It takes three tets, one of which is flat with a sym, and makes it into 3 new tets, 2 with a sym.
+	It's a kind of 4-4 move because you're re-triangulating an octahedron. This is very important
+	in canonize_part2. It is used in step 2. Currently I don't have anything in this move to do with
+	CanonizeInfo. I might add that at some point, or it might not be necessary.
 	"""
 	def four_to_four(self, edge):
-		# This is the case where we have half of an octahedron, with the square face glued to 
-		# itself by rotation around an axis which intersects the midpoints of two sides.
-		if edge.valence() != 3 or edge.LocusOrder != 1:
-			return 0
-		a = edge.get_arrow()
-		# First suppose a is in the tet with the symmetry (thought of as a flat tet).
-		if len(a.Tetrahedron.Symmetries) == 2:
-			if a.glued().Tetrahedron is None:
-				a.opposite()
-			# Now a is positioned where we want it.
-		elif len(a.Tetrahedron.Symmetries) == 1:
-			# Let's move the arrow into the tet with a nontrivial symmetry (if it exists).
-			a.next()
-			if len(a.Tetrahedron.Symmetries) != 2:
-				a.next()
-			if len(a.Tetrahedron.Symmetries) != 2:
-				return 0
-		else:
-			return 0
-		# Now the arrow a is positioned as in the diagram (in the write-up) and we do
-		# the final checks.
-		sym = a.Tetrahedron.nontrivial_sym()
-		if sym.image(a.Edge) == a.Edge:
-			return 0
-		b = a.glued()
-		c = b.glued()
-		if b.Tetrahedron is None or c.Tetrahedron is None:
-			return 0
-		if b.Tetrahedron is c.Tetrahedron:
-			return 0
-		if len(b.Tetrahedron.Symmetries) != 1 or len(c.Tetrahedron.Symmetries) != 1:
-			return 0
-		
-
-
 		# This is the case where we have half of an octahedron, with the square face glued to 
 		# itself by rotation around an axis which intersects the midpoints of two sides.
 		if edge.valence() != 3 or edge.LocusOrder != 1:
@@ -900,11 +871,13 @@ class SimplicialOrbifold:
 			return 0
 		b = a.copy().true_next()
 		c = b.glued()
-		if b.Tetrahedron is None or c.Tetrahedron is None:
+		b_tet = b.Tetrahedron
+		c_tet = c.Tetrahedron
+		if b_tet is None or c_tet is None:
 			return 0
-		if b.Tetrahedron is c.Tetrahedron:
+		if b_tet is c_tet:
 			return 0
-		if len(b.Tetrahedron.Symmetries) != 1 or len(c.Tetrahedron.Symmetries) != 1:
+		if len(b_tet.Symmetries) != 1 or len(c_tet.Symmetries) != 1:
 			return 0
 		# If we've gotten to here, then this case of a 4-4 move can be done.
 		# We must determine if the symmetry axis is horizontal or vertical.
@@ -926,8 +899,6 @@ class SimplicialOrbifold:
 			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(1))
 			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(1))
 			new[2].copy().opposite().glue_as(b.copy().rotate(-1))
-			b_tet = b.Tetrahedron
-			c_tet = c.Tetrahedron
 			new[0].Tetrahedron.edge_labels = {
 				new[0].equator(): c_tet.edge_labels[c.south_head()],
 				new[0].axis(): 1,
@@ -952,9 +923,6 @@ class SimplicialOrbifold:
 				new[2].south_head(): c_tet.edge_labels[c.north_tail()],
 				new[2].south_tail(): b_tet.edge_labels[b.equator()] 
 				}
-
-			
-
 		if case == 'vertical':
 			for i in range(3):
 				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
@@ -976,61 +944,21 @@ class SimplicialOrbifold:
 				new[0].south_tail(): c_tet.edge_labels[c.south_tail()] 
 				}
 			new[1].Tetrahedron.edge_labels = {
-				new[1].equator(): ,
-				new[1].axis(): ,
-				new[1].north_head(): ,
-				new[1].north_tail(): ,
-				new[1].south_head(): ,
-				new[1].south_tail():  
+				new[1].equator(): c_tet.edge_labels[c.south_head()],
+				new[1].axis(): 1,
+				new[1].north_head(): c_tet.edge_labels[c.equator()],
+				new[1].north_tail(): c_tet.edge_labels[c.south_tail()],
+				new[1].south_head(): c_tet.edge_labels[c.north_tail()],
+				new[1].south_tail(): b_tet.edge_labels[b.equator()] 
 				}
 			new[2].Tetrahedron.edge_labels = {
-				new[2].equator(): ,
-				new[2].axis(): ,
-				new[2].north_head(): ,
-				new[2].north_tail(): ,
-				new[2].south_head(): ,
-				new[2].south_tail():  
+				new[2].equator(): c_tet.edge_labels[c.north_head()],
+				new[2].axis(): 1,
+				new[2].north_head(): c_tet.edge_labels[c.north_tail()],
+				new[2].north_tail(): c_tet.edge_labels[c.equator()],
+				new[2].south_head(): c_tet.edge_labels[c.equator()],
+				new[2].south_tail(): c_tet.edge_labels[c.north_tail()] 
 				}
-
-		self.Tetrahedra.remove(a.Tetrahedron)
-		self.Tetrahedra.remove(b.Tetrahedron)
-		self.Tetrahedra.remove(c.Tetrahedron)
-		self.clear_and_rebuild()
-		return 1
-
-
-
-
-		# If we've gotten to here, then this case of a 4-4 move can be done.
-		new = new_arrows(3)
-		for i in range(3):
-			new[i].Symmetries.append(Perm4((0,1,2,3)))
-		for i in range(2):
-			new[i].glue(new[i+1])
-		new[0].add_sym(new[0].copy().reverse())
-		new[2].add_sym(new[2].copy().reverse())
-		new[0].copy().opposite().reverse().glue_as(b.copy().rotate(1))
-		new[1].copy().opposite().glue_as(c.copy().reverse().rotate(-1))
-		new[1].copy().opposite().reverse().glue_as(b.copy().rotate(-1))
-		new[2].copy().opposite().reverse().glue_as(c.copy().reverse().rotate(1))
-		# Now we add all the edge labels.
-		for i in range(3):
-			new[i].copy().opposite().add_edge_label(1)
-		new[0].add_edge_label(b.copy().reverse().rotate(1).edge_label())
-		new[0].copy().rotate(-1).add_edge_label(b.edge_label())
-		new[0].copy().rotate(1).add_edge_label(b.copy().rotate(-1).edge_label())
-		new[0].copy().reverse().rotate(1).add_edge_label(b.copy().rotate(-1).edge_label())
-		new[0].copy().reverse().rotate(-1).add_edge_label(b.edge_label())
-		new[1].add_edge_label(b.copy().reverse().rotate(-1).edge_label())
-		new[1].copy().rotate(-1).add_edge_label(b.copy().rotate(1).edge_label())
-		new[1].copy().rotate(1).add_edge_label(c.edge_label())
-		new[1].copy().reverse().rotate(1).add_edge_label(b.edge_label())
-		new[1].copy().reverse().rotate(-1).add_edge_label(b.copy().rotate(-1).edge_label())
-		new[2].add_edge_label(c.copy().rotate(1).edge_label())
-		new[2].copy().rotate(1).add_edge_label(b.copy().rotate(1).edge_label())
-		new[2].copy().rotate(-1).add_edge_label(c.edge_label())
-		new[2].copy().reverse().rotate(1).add_edge_label(b.copy().rotate(1).edge_label())
-		new[2].copy().reverse().rotate(-1).add_edge_label(c.edge_label())
 		self.Tetrahedra.remove(a.Tetrahedron)
 		self.Tetrahedra.remove(b.Tetrahedron)
 		self.Tetrahedra.remove(c.Tetrahedron)
