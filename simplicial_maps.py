@@ -1,5 +1,5 @@
 """
-A simplicial map is just a map of simplicial orbifolds which sends tetrahedra
+A simplicial map is just a map of simplicial orbifolds. It sends tetrahedra
 to tetrahedra and respects the face gluings, symmetries, and edge labels. Hence
 it descends to a covering map of the quotient orbifold.
 
@@ -11,15 +11,15 @@ refer to their geometry here. Simplicial maps are purely combinatorial.
 from SimplicialOrbifold import*
 from HoroTriangle import* # for the function glued_to()
 
-# See if there is a simplicial covering map from orb_1 to orb_2.
-def exists_covering(orb_1,orb_2):
-	if len(simplicial_maps(orb_1,orb_2)) > 0:
+# See if orb_1 and orb_2 are simplicially isomorphic. This is true iff they cover each other.
+def simplicial_isomorphic(orb_1,orb_2):
+	if exists_covering(orb_1,orb_2) and exists_covering(orb_2,orb_1):
 		return True
 	return False
 
-# See if orb_1 and orb_2 are simplicially isomorphic. This is true iff they cover each other.
-def simplicial_isomorphic(orb_1,orb_2):
-	if len(simplicial_maps(orb_1,orb_2)) > 0 and len(simplicial_maps(orb_2,orb_1)) > 0:
+# See if there is a simplicial covering map from orb_1 to orb_2.
+def exists_covering(orb_1,orb_2):
+	if len(simplicial_maps(orb_1,orb_2)) > 0:
 		return True
 	return False
 
