@@ -370,46 +370,53 @@ class CuspedOrbifold:
 					if (tet1.tilt(comp(face1)) + tet2.tilt(comp(face2))).evaluate() > 0:
 						return False
 		# Now make sure that if there are any flat tetrahedra, they are admissible.
-		copy = self.copy()
-		# Make a list of flat tets.
-		flat_tets = []
-		for tet in copy.Tetrahedra:
-			if tet.is_flat():
-				flat_tets.append(tet)
-		if len(flat_tets) == 0:
-			return True
-		for tet in flat_tets:
-			for one_subsimplex in OneSubsimplices:
-				if copy.special_four_to_four(tet.Class[one_subsimplex]):
-					# Because of how special_four_to_four is written, the three new tets which
-					# make up the octahedron are in positions -1, -2, and -3 of copy.Tetrahedra.
-					# We know the interior edge of the newly created octahedron will be E01 of any
-					# of those tetrahedra. This tet is admissible iff this edge class is concave.
-					# To check it it's concave, we check the concavity of the faces adjacent to it.
-					# They are F2 and F3 of copy.Tetrahedra[-2].
-					new_0 = copy.Tetrahedra[-3]
-					new_1 = copy.Tetrahedra[-2]
-					new_2 = copy.Tetrahedra[-1]
-					if new_0.is_flat() and new_2.is_flat():
-						# This shouldn't happen.
-						raise Exception("Error when checking if proto_canonical")
-					elif new_0.is_flat():
-						if not (new_1.tilt(V3) + new_2.tilt(V2)).evaluate() > 0:
-							# Then the edge is not concave, so the tet is not admissible.
-							return False
-					else:
-						if not (new_1.tilt(V2) + new_0.tilt(V3)).evaluate() > 0:
-							# Then the edge is not concave, so the tet is not admissible.
-							return False
-					# If we haven't returned False, then that flat tet is admissible. We should
-					# reverse the special_four_to_four move before moving on to other flat tets. 
-					copy.four_to_four(new_0.Class[E01])
-					break
-			else:
-				# If we hit this, then this is a flat tet we weren't even able to do
-				# a special_four_to_four move on, so it's definitely not admissible.
+		for tet in self.Tetrahedra:
+			if tet.is_flat() and self.check_admissible(tet) == False:
 				return False
 		return True
+
+	"""
+	A flat tetrahedron is "admissible" if it represents a square face being glued to itself,
+	and if doing a special 4-4 move there results in a concave edge. See the write-up for a
+	more detailed explanation. The point is that our orbifold proto-canonical triangulations
+	very well could have flat tets in them (which I think is not the case for manifolds).
+	But you can't compute the tilt of a flat tet, so how are you really sure it's proto-canonical?
+	This is my solution. If a flat tet is "admissible", then it belongs. Otherwise the triangulation
+	is not proto-canonical.
+	"""
+	def check_admissible(self,tet):
+		if tet.is_flat() is False:
+			raise Exception("Tried to to check if a non-flat tet is admissible.")
+		tet_index = tet.Index
+		copy = self.copy()
+		tet = copy.Tetrahedra[tet_index]
+		for one_subsimplex in OneSubsimplices:
+			if copy.special_four_to_four(tet.Class[one_subsimplex]):
+				# Because of how special_four_to_four is written, the three new tets which
+				# make up the octahedron are in positions -1, -2, and -3 of copy.Tetrahedra.
+				# We know the interior edge of the newly created octahedron will be E01 of any
+				# of those tetrahedra. This tet is admissible iff this edge class is concave.
+				# To check it it's concave, we check the concavity of the faces adjacent to it.
+				# They are F2 and F3 of copy.Tetrahedra[-2].
+				new_0 = copy.Tetrahedra[-3]
+				new_1 = copy.Tetrahedra[-2]
+				new_2 = copy.Tetrahedra[-1]
+				if new_0.is_flat() and new_2.is_flat():
+					# This shouldn't happen.
+					raise Exception("Error when checking if flat tet is admissible")
+				elif new_0.is_flat():
+					if not (new_1.tilt(V3) + new_2.tilt(V2)).evaluate() > 0:
+						# Then the edge is not concave, so the tet is not admissible.
+						return False
+				else:
+					if not (new_1.tilt(V2) + new_0.tilt(V3)).evaluate() > 0:
+						# Then the edge is not concave, so the tet is not admissible.
+						return False
+				# If we haven't returned False, then that flat tet is admissible. 
+				return True
+		# If we hit this, then this is a flat tet we weren't even able to do
+		# a special_four_to_four move on, so it's definitely not admissible.
+		return False
 
 
 	"""

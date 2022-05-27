@@ -829,25 +829,28 @@ with open("48seqs.json", "r") as read_file:
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
 
+"""
+dest = OrbDictionary[(31,0)]
+orb = dest_to_orb(dest)
 
 
+tet2 = orb.Tetrahedra[2]
+orb.two_to_three(F3,tet2)
+tet0 = orb.Tetrahedra[0]
+orb.three_to_six(F0,tet0)
+tet1 = orb.Tetrahedra[1]
+orb.retriangulate_cube(F2,tet1)
+tet2 = orb.Tetrahedra[2]
+edge = tet2.Class[E23]
+orb.cancel_tetrahedra(edge)
+tet2 = orb.Tetrahedra[2]
+edge = tet2.Class[E01]
+print(orb.special_four_to_four(edge))
+orb.info()
+print_face_concavity(orb)
+print(orb.is_proto_canonical())
 """
-for key in OrbDictionary.keys():
-    print(key)
-    print(' ')
-    dest = OrbDictionary[key]
-    orb = dest_to_orb(dest)
-    orb.info()
-    print(' ')
-    group = simplicial_maps_OP(orb,orb)
-    print(group)
-    print(' ')
-    quotient_orb = quotient(orb,group)
-    quotient_orb.info()
-    print(' ')
-    print('--------------------------------------------------------------')
-    print(' ')
-"""
+
 
 """
 # The one dest where proto_canonize fails.

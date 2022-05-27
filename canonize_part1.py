@@ -114,31 +114,14 @@ def attempt_retriangulate_cube(orb):
 				return 1
 	return 0
 
+# Look for any flat tet which is not admissible, and try to do a special 4-4 move on it.
 def attempt_special_four_to_four(orb):
-	flat_tets = []
 	for tet in orb.Tetrahedra:
-		if tet.is_flat():
-			flat_tets.append(tet)
-	if len(flat_tets) == 0:
-		return 0
-	for tet in flat_tets:
-		for one_subsimplex in OneSubsimplices:
-			edge = tet.Class[one_subsimplex]
-			if orb.special_four_to_four(edge):
-				# Then we know we have the situation of the square face of a pyramid glued
-				# to itself, and we've just gotten rid of the flat tet which is the square face
-				# by doing the special_four_to_four move.
-				if attempt_four_to_four(orb):
-					# Then the special_four_to_four resulted in a concave edge inside the octahedron,
-					# so we reversed it with the 4-4 move. So the special_four_to_four was not actually
-					# worth doing. Move to the next flat tet.
-					break
-				else:
-					# Then the newly created edge is not concave, so we made progress with the
-					# special 4-4 move. It succeeded.
+		if tet.is_flat() and orb.check_admissible(tet) == False:
+			for one_subsimplex in OneSubsimplices:
+				if orb.special_four_to_four(tet.Class[one_subsimplex]):
 					return 1
 	return 0
-
 
 def concave_edge(edge):
 	#Checks if there is any face adjacent to edge with positive tilt sum.
