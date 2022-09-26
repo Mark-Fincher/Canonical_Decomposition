@@ -711,6 +711,135 @@ for dest in covers_of_O5:
     print(' ')
 """
 
+"""
+dest = O5
+orb = dest_to_orb(dest)
+new_orb = canonical_retriangulation(orb)
+new_orb.info()
+print(simplicial_maps_OP(new_orb,new_orb))
+print(' ')
+"""
+
+
+covers_of_O5_keys = ((5,0),(10,1),(15,0),(15,1),(20,5),(20,6),(20,9),(20,10),(20,11),(20,12),
+        (30,6),(30,8),(30,9),(30,11),(30,12),(30,13),(30,14),(30,17),(30,18),(30,19),(30,20),(30,21),
+        (30,22),(30,23),(30,24),(35,0),(35,1),(35,2),(40,13),(40,14),(40,15),(40,16),(40,17),(40,18),
+        (40,20),(40,21),(40,22),(40,23),(40,26),(40,27),(40,29),(40,30),(45,2),(45,3),(45,4),(45,5),
+        (45,6),(45,7))
+
+covers_of_O4_keys = ((4,0),(8,2),(12,0),(12,1),(12,4),(12,6),(20,5),(24,4),(24,13),(24,14),(24,15),
+        (24,16),(32,2),(32,3),(36,2),(36,4),(36,6),(36,7),(36,16),(36,17),(36,19),(36,25),(36,26),
+        (36,28),(40,9),(40,23),(48,2),(48,3),(48,15),(48,16),(48,33),(48,34),(48,35),(48,36),(48,40),
+        (48,42),(48,43),(48,44),(48,56),(48,57))
+
+
+with open("48seqs.json", "r") as read_file:
+    OrbDictionary = json.load(read_file)
+    keyz = OrbDictionary.keys()
+    OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
+
+print(len(OrbDictionary.keys()))
+"""
+orb1 = dest_to_orb(OrbDictionary[(48,2)])
+orb2 = dest_to_orb(OrbDictionary[(48,3)])
+print(proto_canonize(orb1))
+orb1.info()
+print_face_concavity(orb1)
+for edge in orb1.Edges:
+    print(' ')
+    print(edge.Corners)
+    print(edge.LocusOrder)
+"""
+
+"""
+isometry_classes = []
+for key in covers_of_O4_keys:
+    dest = OrbDictionary[key]
+    orb1 = dest_to_orb(dest)
+    proto_canonize(orb1)
+    if transparent_faces_or_flat_tets(orb1):
+        orb1 = canonical_retriangulation(orb1)
+    for iso_class in isometry_classes:
+        orb2 = iso_class[0][0]
+        if OP_simplicial_isomorphic(orb1,orb2):
+            iso_class.append((orb1,key))
+            break
+    else:
+        isometry_classes.append([(orb1,key)])
+classes = []
+for iso_class in isometry_classes:
+    keys = []
+    for orb in iso_class:
+        keys.append(orb[1])
+    classes.append(keys)
+print(' ')
+for iso_class in classes:
+    print(iso_class)
+    print(' ')
+"""
+
+
+"""
+for key in covers_of_O4_keys:
+    dest = OrbDictionary[key]
+    print(key)
+    print(dest)
+    orb = dest_to_orb(dest)
+    print(' ')
+    if orb.is_proto_canonical() and not transparent_faces_or_flat_tets(orb):
+        print("This starting triangulation is already canonical. Here's the info and isometry group.")
+        print(' ')
+        orb.info()
+        print(' ')
+        print(simplicial_maps_OP(orb,orb))
+    elif orb.is_proto_canonical() and transparent_faces_or_flat_tets(orb):
+        print("This starting triangulation is proto-canonical but not canonical.")
+        isoms = simplicial_maps_OP(orb,orb)
+        print("Its number of isometries is", len(isoms))
+        print("Will now compute the canonical re-triangulation, print its info and isometries.")
+        new_orb = canonical_retriangulation(orb)
+        print(' ')
+        new_orb.info()
+        print(' ')
+        isoms = simplicial_maps_OP(new_orb,new_orb)
+        print("The number of isometries of the canonical decomp is", len(isoms))
+        print("They are:")
+        print(isoms)
+    else:
+        print("Its starting triangulation is not proto-canonical. Its number of isoms is:")
+        print(len(simplicial_maps_OP(orb,orb)))
+        print("Let's canonize....")
+        print(' ')
+        if proto_canonize(orb):
+            print("proto_canonize succeeded.")
+            print(' ')
+            if transparent_faces_or_flat_tets(orb):
+                print("The proto-canonical triangulation is not yet the canonical decomposition.")
+                print("Will now compute the canonical re-triangulation, print its info and isometries.")
+                new_orb = canonical_retriangulation(orb)
+                print(' ')
+                new_orb.info()
+                print(' ')
+                isoms = simplicial_maps_OP(new_orb,new_orb)
+                print("The number of isometries of the canonical decomp is", len(isoms))
+                print("They are:")
+                print(isoms)
+            else:
+                print("The canonical decomposition is a triangulation. Here is info and isoms.")
+                print(' ')
+                orb.info()
+                print(' ')
+                isoms = simplicial_maps_OP(orb,orb)
+                print("Number of isoms is",len(isoms))
+                print("They are")
+                print(isoms)
+        else:
+            print("proto_canonize failed.")
+    print(' ')
+    print('--------------------------------------------------------------------------')
+    print(' ')
+"""
+
 
 """
 print("This file has info about covers of O5.")
@@ -822,12 +951,12 @@ for i in range(len(Dests)):
     print(' ')
 """
 
-
+"""
 with open("48seqs.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
-
+"""
 
 """
 dest = OrbDictionary[(31,0)]
@@ -883,7 +1012,7 @@ print(edge.Corners)
 # is another triangulation with all regular tetrahedra!
 
 
-
+"""
 num_fail = 0
 num_success = 0
 for key in OrbDictionary.keys():
@@ -900,29 +1029,9 @@ for key in OrbDictionary.keys():
         print(' ')
 print('num_success = ',num_success)
 print('num_fail = ',num_fail)
-
-
 """
-for key in OrbDictionary.keys():
-    dest = OrbDictionary[key]
-    orb = dest_to_orb(dest)
-    if len(orb.Tetrahedra) == 1:
-        continue
-    for tet in orb.Tetrahedra:
-        if len(tet.Symmetries) == 2:
-            break
-    else:
-        continue
-    break
-print(dest)
-orb.info()
-for edge in orb.Edges:
-    print(" ")
-    print(edge.Corners)
-    print(edge.LocusOrder)
-    print(" ")
 
-"""
+
 
 
 """
@@ -1007,14 +1116,3 @@ orb.info()
 #isometric.
 """
 
-"""
-O14_0 = [0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 4, 2, 7, 9, 3, 6, 6, 6, 7, 5, 4, 10, 
-    11, 9, 11, 4, 12, 13, 8, 5, 13, 12, 13, 7, 8, 8, 12, 12, 9, 11, 10, 11, 10, 10, 9, 13]
-orb = dest_to_orb(O14_0)
-#orb.info()
-for edge in orb.Edges:
-    print(edge)
-    print(edge.LocusOrder)
-    print(edge.Corners)
-    print(' ')
-"""

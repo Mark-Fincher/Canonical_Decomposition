@@ -29,6 +29,9 @@ from graph import*
 from SimplicialOrbifold import*
 
 
+# In addition to creating the barycentric graph, this function also sets CuspType for each
+# vertex of orb. Must be one of the strings 'finite','torus','(2,2,2,2)','(2,3,6)','(2,4,4)',
+# '(3,3,3)', or 'error'.
 def barycentric_graph(orb):
 	# Create the graph vertices and a dictionary associating them to
 	# the tets, vertex classes, edge classes, and face classes.

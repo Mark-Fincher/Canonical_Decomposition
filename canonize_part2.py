@@ -52,6 +52,7 @@ def initialize_tet_status(orb):
 				new_canonize_info.face_status[face] = 1
 			else:
 				# Note: this will occur if tet or its neighbor along face is flat.
+				# Or if face is glued to None.
 				new_canonize_info.face_status[face] = 0
 
 def step_one(orb):
@@ -66,7 +67,7 @@ def cone_3_cell(orb):
 		pass
 	# If a transparent face is glued to itself, we do a 1-0 move on it.
 	attempt_one_to_zero(orb)
-	# attempt_cancellation is defined in canonize.py.
+	# attempt_cancellation is defined in canonize_part1.py.
 	while attempt_cancellation(orb) == True:
 		pass
 	if verify_coned_region(orb) == False:
@@ -90,15 +91,24 @@ def insert_finite_vertex(orb):
 				tet_most_syms = tet
 		orb.one_to_four(tet_most_syms)
 		return 1
-	# If we didn't find anythng in the previous step, we look for a transparent edge with
-	# more than one rotation axis intersecting it. If there is such an edge, then we do
-	# a stellar edge move on it. That puts a finite vertex in the edge.
+	# 9/11/22 update. The following code replaces the commented out code beneath.
+	# The point is that it's simpler than I was making it before:
+	# the barycenter is in an edge if and only if it's transparent and
+	# has locus order greater than 1.
+	for edge in orb.Edges:
+		if edge.LocusOrder > 1 and transparent_edge(edge):
+			if orb.stellar_edge_move(edge):
+				return 1
+			else:
+				raise Exception("tried and failed to do a stellar edge move")
+	"""
 	for edge in orb.Edges:
 		if transparent_edge(edge) and more_than_one_rotation_intersecting(edge):
 			if orb.stellar_edge_move(edge):
 				return 1
 			else:
 				raise Exception("tried and failed to do a stellar edge move")
+	"""
 	# If we still haven't returned yet, then we now look for any unconed tet with
 	# any non-trivial symmetry. That means it will have exactly 2 syms, since we
 	# would have already coned it if it had more than 2.
@@ -116,6 +126,10 @@ def insert_finite_vertex(orb):
 	return 0
 
 def transparent_edge(edge):
+	# Returns True exactly when all faces adjacent to the edge are
+	# transparent AND are not inside a coned polyhedron. The latter part
+	# ensures that when we try to do a stellar edge move in the insert_finite_vertex
+	# function, we only do it to an edge which is not already part of a coned poly.
 	a = edge.get_arrow()
 	for corner in edge.Corners:
 		if a.Tetrahedron.true_face_status(a.Face) != 1:
@@ -123,6 +137,10 @@ def transparent_edge(edge):
 		a.true_next()
 	return True
 
+# UPDATE 9/11/22. We don't need to use this function. The barycenter is in an edge if and
+# only if the edge is transparent and has locus > 1. Checking if more than one rotation
+# axis intersects is irrelevant. Will leave it here for now, but comment out the use of it,
+# in insert_finite_vertex.
 def more_than_one_rotation_intersecting(edge):
 	# There are three ways a rotation axis could intersect an edge.
 	# 1. The edge itself is a rotation axis, i.e. its locus order is > 1.

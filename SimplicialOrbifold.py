@@ -1000,6 +1000,7 @@ class SimplicialOrbifold:
 			d = a.copy().reverse().next().reverse()
 			# One final check: let's make sure that the tetrahedra these arrows belong
 			# to are distinct.
+			# (Actually this might not be necessary. Might change this.)
 			tets_list = [e.Tetrahedron for e in (a,b,c,d)]
 			if len(tets_list) != len(set(tets_list)):
 				return 0

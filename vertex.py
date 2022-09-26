@@ -15,6 +15,7 @@ class Vertex:
     def __init__(self):
         self.Index = -1
         self.IntOrBdry = ''
+        self.CuspType = ''     # Set by barycentric graph function in singular_locus.py
         self.Corners = []      # Corners of type "0-simplex in Tetrahedron"
         self.Edges = []        # incident Edges
         # An Edge will appear twice if both its endpoints

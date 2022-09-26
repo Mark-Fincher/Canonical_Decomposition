@@ -23,6 +23,18 @@ def exists_covering(orb_1,orb_2):
 		return True
 	return False
 
+# See if orb_1 and orb_2 are OP simplicially isomorphic. This is true iff they OP cover each other.
+def OP_simplicial_isomorphic(orb_1,orb_2):
+	if exists_OP_covering(orb_1,orb_2) and exists_OP_covering(orb_2,orb_1):
+		return True
+	return False
+
+# See if there is an OP simplicial covering map from orb_1 to orb_2.
+def exists_OP_covering(orb_1,orb_2):
+	if len(simplicial_maps_OP(orb_1,orb_2)) > 0:
+		return True
+	return False
+
 # Find all simplicial maps from orb_1 to orb_2.
 def simplicial_maps(orb_1,orb_2):
 	simplicial_maps = []
