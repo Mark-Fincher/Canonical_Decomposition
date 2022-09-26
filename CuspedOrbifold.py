@@ -79,7 +79,7 @@ class CuspedOrbifold:
 	Clear all classes and horotriangles, then rebuild this data. Want to do this after changing
 	the triangulation.
 	"""
-	def clear_and_rebuild(self):
+	def clear_and_rebuild_old(self):
 		self.Edges = []
 		self.Vertices = []
 		for tet in self.Tetrahedra:
@@ -89,6 +89,45 @@ class CuspedOrbifold:
 			self.Tetrahedra[i].Index = i
 		self.build_vertex_classes()
 		self.build_edge_classes()
+		self.add_cusp_cross_sections()
+		for cusp in self.Vertices:
+			self.normalize_cusp(cusp)
+
+	# Completely clear and rebuild all edge classes. Build all vertex classes, assuming
+	# we possibly already have partially constructed vertex classes, i.e. right after doing
+	# a Pachner move. Then build all the cusp cross sections.
+	def clear_and_rebuild(self):
+		self.Edges = []
+		for tet in self.Tetrahedra:
+			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+			for one_subsimplex in OneSubsimplices:
+				tet.Class[one_subsimplex] = None
+		self.build_edge_classes()
+		for vertex in self.Vertices:
+			to_remove = []
+			for corner in vertex.Corners:
+				if corner.Tetrahedron not in self.Tetrahedra:
+					to_remove.append(corner)
+			for corner in to_remove:
+				vertex.Corners.remove(corner)
+		to_remove = []
+		for vertex in self.Vertices:
+			if len(vertex.Corners) == 0:
+				to_remove.append(vertex)
+		for vertex in to_remove:
+			self.Vertices.remove(vertex)
+		for tet in self.Tetrahedra:
+			for zero_subsimplex in ZeroSubsimplices:
+				if tet.Class[zero_subsimplex] is not None:
+					vertex = tet.Class[zero_subsimplex]
+					self.special_walk_vertex(vertex,zero_subsimplex,tet)
+		# Any 0-simplices which are not assigned a vertex at this point must actually belong
+		# to new vertex classes which don't exist yet. We create those by calling the usual
+		# build_vertex_classes function.
+		self.build_vertex_classes()
+		for tet in self.Tetrahedra:
+			# Reset these flags in case they're used in the future.
+			self.checked_sub_simplex = [0]*16
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
@@ -278,6 +317,24 @@ class CuspedOrbifold:
 				if perm.image(zero_subsimplex) != zero_subsimplex:
 					self.walk_vertex(vertex,perm.image(zero_subsimplex),tet)
 
+	def special_walk_vertex(self,vertex,zero_subsimplex,tet):
+		if tet.checked_sub_simplex[zero_subsimplex]:
+			return
+		else:
+			tet.checked_sub_simplex[zero_subsimplex] = 1
+			if tet.Class[zero_subsimplex] is None:
+				tet.Class[zero_subsimplex] = vertex
+				vertex.Corners.append(Corner(tet,zero_subsimplex))
+			for two_subsimplex in TwoSubsimplices:
+				if ( is_subset(zero_subsimplex,two_subsimplex)
+                     and
+                     tet.Gluing[two_subsimplex] != None):
+						self.special_walk_vertex(vertex,
+                                     tet.Gluing[two_subsimplex].image(zero_subsimplex),
+                                     tet.Neighbor[two_subsimplex])
+			for perm in tet.Symmetries:
+				if perm.image(zero_subsimplex) != zero_subsimplex:
+					self.special_walk_vertex(vertex,perm.image(zero_subsimplex),tet)
 	
 	"""
 	Here's my attempt at a new build_edge_classes function. Will delete the old one, which is below it,

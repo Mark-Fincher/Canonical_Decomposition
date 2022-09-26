@@ -28,28 +28,28 @@ def proto_canonize(orb):
 	MAX_MOVES = 100
 	for i in range(MAX_MOVES):
 		if attempt_cancellation(orb):
-			#print("cancelled flat tet(s)")
+			print("cancelled flat tet(s)")
 			continue
 		if attempt_two_to_three(orb):
-			#print("did 2-3 move")
+			print("did 2-3 move")
 			continue
 		if attempt_three_to_two(orb):
-			#print("did 3-2 move")
+			print("did 3-2 move")
 			continue
 		if attempt_three_to_six(orb):
-			#print("did 3-6 move")
+			print("did 3-6 move")
 			continue
 		if attempt_four_to_four(orb):
-			#print("did 4-4 move")
+			print("did 4-4 move")
 			continue
 		if attempt_six_to_three(orb):
-			#print("did 6-3 move")
+			print("did 6-3 move")
 			continue
 		if attempt_retriangulate_cube(orb):
-			#print("retriangulated a cube")
+			print("retriangulated a cube")
 			continue
 		if attempt_special_four_to_four(orb):
-			#print("did special 4-4 move")
+			print("did special 4-4 move")
 			continue
 		#If none of the attempts work, then either it's proto-canonical, or the algorithm is stuck.
 		#In either case, we break out of the loop.

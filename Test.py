@@ -720,7 +720,7 @@ print(simplicial_maps_OP(new_orb,new_orb))
 print(' ')
 """
 
-
+"""
 covers_of_O5_keys = ((5,0),(10,1),(15,0),(15,1),(20,5),(20,6),(20,9),(20,10),(20,11),(20,12),
         (30,6),(30,8),(30,9),(30,11),(30,12),(30,13),(30,14),(30,17),(30,18),(30,19),(30,20),(30,21),
         (30,22),(30,23),(30,24),(35,0),(35,1),(35,2),(40,13),(40,14),(40,15),(40,16),(40,17),(40,18),
@@ -737,8 +737,8 @@ with open("48seqs.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
+"""
 
-print(len(OrbDictionary.keys()))
 """
 orb1 = dest_to_orb(OrbDictionary[(48,2)])
 orb2 = dest_to_orb(OrbDictionary[(48,3)])

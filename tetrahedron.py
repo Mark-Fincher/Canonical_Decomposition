@@ -30,7 +30,7 @@ class Tetrahedron:
         # ORBIFOLDS
         self.Symmetries = []
         self.edge_labels = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
-
+        self.checked_sub_simplex = [0]*16             # flag for sub-simplices
         
         self.canonize_info = None
 
