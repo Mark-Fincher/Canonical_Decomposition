@@ -79,7 +79,7 @@ class CuspedOrbifold:
 	Clear all classes and horotriangles, then rebuild this data. Want to do this after changing
 	the triangulation.
 	"""
-	def clear_and_rebuild_old(self):
+	def clear_and_rebuild(self):
 		self.Edges = []
 		self.Vertices = []
 		for tet in self.Tetrahedra:
@@ -93,16 +93,38 @@ class CuspedOrbifold:
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
 
-	# Completely clear and rebuild all edge classes. Build all vertex classes, assuming
-	# we possibly already have partially constructed vertex classes, i.e. right after doing
-	# a Pachner move. Then build all the cusp cross sections.
-	def clear_and_rebuild(self):
+	"""
+	The following is a very important method which is used at the end of every Pachner move. It updates
+	the edge and vertex classes, horotriangles, and tet indices.
+
+	We do this in a very simple way for the indices. Just label the tets according to their indices in self.Tetrahedra.
+
+	For edge classes and horotriangles, it is also simple. We just throw out the previous data
+	we had for them and re-build them from scratch (assuming, for horotriangles, we already have updated vertex class data).
+
+	For vertex classes, we choose to make things more complicated. We could just throw them out and rebuild with
+	self.build_vertex_classes(), but there are reasons to try to instead update existing vertex classes. I.e. you might
+	want to refer to some particular vertex class (cusp) before and after a series of Pachner moves. Therefore, we keep
+	the same vertex classes and just update their corners. Meaning if a tet was removed, its 0-simplices should be removed
+	the corners lists of whatever vertex classes they belonged to. And if a new tet was added in, its 0-simplices should
+	be added to the correct vertex corners lists and its Class dictionary should be accordingly updated.
+
+	An important point: in the case of a CuspedOrbifold Pachner move, vertex classes cannot be created nor destroyed (because
+	vertex classes correspond exactly to cusps). But we DO have to worry about that for a non-geometric Pachner move.
+	"""
+	def clear_and_rebuild_new(self):
+		# Reset the tet indices.
+		for i in range(len(self.Tetrahedra)):
+			self.Tetrahedra[i].Index = i
+		# Clear edge classes.
 		self.Edges = []
 		for tet in self.Tetrahedra:
 			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 			for one_subsimplex in OneSubsimplices:
 				tet.Class[one_subsimplex] = None
+		# Rebuild edge classes.
 		self.build_edge_classes()
+		# For each vertex class, remove any corner belonging to a tet not in self.Tetrahedra.
 		for vertex in self.Vertices:
 			to_remove = []
 			for corner in vertex.Corners:
@@ -110,24 +132,29 @@ class CuspedOrbifold:
 					to_remove.append(corner)
 			for corner in to_remove:
 				vertex.Corners.remove(corner)
-		to_remove = []
+		# If a vertex class has no corners now, then it was completely destroyed by the Pachner move. That shouldn't happen
+		# but let's check.
 		for vertex in self.Vertices:
 			if len(vertex.Corners) == 0:
-				to_remove.append(vertex)
-		for vertex in to_remove:
-			self.Vertices.remove(vertex)
+				raise Exception('Error in clear_and_rebuild: missing cusp')
+		# Now we 
 		for tet in self.Tetrahedra:
 			for zero_subsimplex in ZeroSubsimplices:
 				if tet.Class[zero_subsimplex] is not None:
 					vertex = tet.Class[zero_subsimplex]
 					self.special_walk_vertex(vertex,zero_subsimplex,tet)
 		# Any 0-simplices which are not assigned a vertex at this point must actually belong
-		# to new vertex classes which don't exist yet. We create those by calling the usual
-		# build_vertex_classes function.
-		self.build_vertex_classes()
+		# to a new vertex class which didn't exist previously. This should not happen. Check for
+		# this and raise an exception.
 		for tet in self.Tetrahedra:
-			# Reset these flags in case they're used in the future.
-			self.checked_sub_simplex = [0]*16
+			for zero_subsimplex in ZeroSubsimplices:
+				if tet.Class[zero_subsimplex] is not None:
+					raise Exception('Error in clear_and_rebuild: created new cusp')
+		for tet in self.Tetrahedra:
+			# The tet.checked_sub_simplex flags were messed with by special_walk_vertex. We must 
+			# reset them for future use.
+			tet.checked_sub_simplex = [0]*16
+		# Now re-build horotriangles/cusp geometry. Note that we couldn't do this until we had correct vertex classes.
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
