@@ -92,6 +92,22 @@ class Arrow:
     def west_face(self):
         return comp(self.head())
 
+# ORBIFOLDS
+# The four vertices of a tetrahedron, as seen from the point of view of the arrow.
+
+    def north_vertex(self):
+        return OppTail[self.head(),self.tail()]
+
+    def south-vertex(self):
+        return OppTail[self.tail(),self.head()]
+
+    def east_vertex(self):
+        return self.head()
+
+    def west_vertex(self):
+        return self.tail()
+
+# Other methods.
 
     def is_null(self):
         if self.Tetrahedron is None:
@@ -127,7 +143,7 @@ class Arrow:
 # due to a symmetry. Instead of self.next() returning None, we might like it
 # to return the arrow you get from the implicit gluing, i.e. apply a symmetry
 # to self then do self.next(). By successive applications of self.true_next(),
-# you can walk around an edge in a simplicial orbifold. Although you might not
+# you can walk around an edge in a triangulated orbifold. Although you might not
 # know when you're back to where you started, unless you apply the right symmetry. 
     def true_next(self):
         if self.glued().Tetrahedron is not None:
