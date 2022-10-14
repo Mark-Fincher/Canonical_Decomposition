@@ -124,6 +124,19 @@ class CuspedOrbifold:
 				tet.Class[one_subsimplex] = None
 		# Rebuild edge classes.
 		self.build_edge_classes()
+		
+		# Now we make the vertex classes correct. Because of what we did in the Pachner move, it should currently be the case that
+		# for every tet and every zero_subsimplex, tet.Class[zero_subsimplex] is the correct vertex class. The only incorrect thing
+		# at this moment is that each vertex class could have the wrong set of corners. So we need to fix that.
+		Tets_ZeroSubsimplices = []
+		for tet in self.Tetrahedra:
+			for zero_subsimplex in ZeroSubsimplices:
+				Tets_ZeroSubsimplices.append((tet,zero_subsimplex))
+		for vertex in self.Vertices:
+			vertex.Corners = [Corner(pair[0],pair[1]) for pair in Tets_ZeroSubsimplices if pair[0].Class[pair[1]] is vertex]
+			
+
+		"""
 		# For each vertex class, remove any corner belonging to a tet not in self.Tetrahedra.
 		for vertex in self.Vertices:
 			to_remove = []
@@ -154,6 +167,8 @@ class CuspedOrbifold:
 			# The tet.checked_sub_simplex flags were messed with by special_walk_vertex. We must 
 			# reset them for future use.
 			tet.checked_sub_simplex = [0]*16
+		"""
+
 		# Now re-build horotriangles/cusp geometry. Note that we couldn't do this until we had correct vertex classes.
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
@@ -344,6 +359,7 @@ class CuspedOrbifold:
 				if perm.image(zero_subsimplex) != zero_subsimplex:
 					self.walk_vertex(vertex,perm.image(zero_subsimplex),tet)
 
+	# Shouldn't need this anymore.
 	def special_walk_vertex(self,vertex,zero_subsimplex,tet):
 		if tet.checked_sub_simplex[zero_subsimplex]:
 			return
@@ -695,15 +711,11 @@ class CuspedOrbifold:
 			b.Tetrahedron.fill_edge_params(One - (v0 - One)/(v0*v1 - One))
 			a.opposite()
 			b.true_glue_as(a)
-			#Because b.Tetrahedron has rotations, we are done specifying its face pairings.
-			#Except if the face we just glued is glued to itself. Then the other faces will
-			#also be glued to themselves, and my convention is that I should do those gluings,
-			#even though they're implied by the symmetries. 
-			if b.Tetrahedron.face_glued_to_self(b.Face):
-				perm = b.Tetrahedron.Gluing[b.Face]
-				for sym in b.Tetrahedron.Symmetries:
-					if sym.tuple() != (0,1,2,3):
-						b.Tetrahedron.attach(sym.image(b.Face),b.Tetrahedron,(sym*perm*inv(sym)).tuple())
+			# Link the vertices of the new tetrahedron to the pre-existing vertex classes.
+			b.Tetrahedron.Class[b.north_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
+			b.Tetrahedron.Class[b.south_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
+			b.Tetrahedron.Class[b.east_vertex()] = a.Tetrahedron.Class[a.east_vertex()]
+			b.Tetrahedron.Class[b.west_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
 		elif face_rotation:
 			b = self.new_arrow()
 			c = self.new_arrow()
@@ -725,18 +737,13 @@ class CuspedOrbifold:
 			b.true_glue_as(a)
 			a.reverse()
 			c.true_glue_as(a)
-			#Now if either of these faces was glued to itself, we do that for the others determined
-			#by the symmetries.
-			if b.Tetrahedron.face_glued_to_self(b.Face):
-				perm = b.Tetrahedron.Gluing[b.Face]
-				for sym in b.Tetrahedron.Symmetries:
-					if sym.tuple() != (0,1,2,3):
-						b.Tetrahedron.attach(sym.image(b.Face),b.Tetrahedron,(sym*perm*inv(sym)).tuple())
-			if c.Tetrahedron.face_glued_to_self(c.Face):
-				perm = c.Tetrahedron.Gluing[c.Face]
-				for sym in c.Tetrahedron.Symmetries:
-					if sym.tuple() != (0,1,2,3):
-						c.Tetrahedron.attach(sym.image(c.Face),c.Tetrahedron,(sym*perm*inv(sym)).tuple())
+			# Link the vertices of the new tetrahedra to the pre-existing vertex classes.
+			for d in [c,b]:
+				d.Tetrahedron.Class[d.north_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
+				d.Tetrahedron.Class[d.south_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
+				d.Tetrahedron.Class[d.east_vertex()] = a.Tetrahedron.Class[a.east_vertex()]
+				d.Tetrahedron.Class[d.west_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
+				a.reverse()
 		elif face_glued_to_self:
 			b = self.new_arrow()
 			b.add_sym(b.copy())
@@ -747,14 +754,17 @@ class CuspedOrbifold:
 			b.reverse()
 			a.opposite()
 			b.true_glue_as(a)
-			a.opposite()
-			if a.glued().Tetrahedron is None:
-				a.reverse()
-			a.next()
+			c = a.copy().opposite().true_next()
 			b.rotate(-1)
-			b.glue_as(a.opposite())
+			b.glue_as(c.copy().opposite())
 			b.rotate(-1)
-			b.glue_as(a.reverse())
+			b.glue_as(c.copy().opposite().reverse())
+			b.rotate(-1)
+			# Link the vertices of the new tetrahedron to the pre-existing vertex classes.
+			b.Tetrahedron.Class[b.north_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
+			b.Tetrahedron.Class[b.south_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
+			b.Tetrahedron.Class[b.east_vertex()] = a.Tetrahedron.Class[a.east_vertex()]
+			b.Tetrahedron.Class[b.west_vertex()] = c.Tetrahedron.Class[c.east_vertex()]
 		else:
 			b = self.new_arrow()
 			c = self.new_arrow()
@@ -766,6 +776,7 @@ class CuspedOrbifold:
 			c.Tetrahedron.fill_edge_params(One - v1*(v0 - One)/(One - v1))
 			b.glue(c)
 			b.reverse()
+			# Face gluings.
 			for i in range(3):
 				a.opposite()
 				b.glue_as(a)
@@ -774,6 +785,16 @@ class CuspedOrbifold:
 				b.rotate(-1)
 				c.rotate(1)
 				a.reverse().opposite().next()
+			# Link the vertices of the new tetrahedra to pre-existing vertex classes.
+			d = a.copy().next()
+			a.opposite()
+			for e in [b,c]:
+				e.Tetrahedron.Class[e.north_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
+				e.Tetrahedron.Class[e.south_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
+				e.Tetrahedron.Class[e.east_vertex()] = a.Tetrahedron.Class[a.east_vertex()]
+				e.Tetrahedron.Class[e.west_vertex()] = d.Tetrahedron.Class[d.east_vertex()]
+				a.reverse()
+				d.next().reverse()
 		for corner in edge.Corners:
 			if corner.Tetrahedron in self.Tetrahedra:
 				self.Tetrahedra.remove(corner.Tetrahedron)
