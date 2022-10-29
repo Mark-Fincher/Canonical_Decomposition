@@ -825,9 +825,7 @@ class CuspedOrbifold:
 			return 0
 		if len(tet.Symmetries) != 2:
 			return 0
-		for sym in tet.Symmetries:
-			if sym.tuple() != (0,1,2,3):
-				break
+		sym = tet.nontrivial_sym()
 		#now sym is the non-trivial symmetry.
 		for one_subsimplex in OneSubsimplices:
 			if is_subset(one_subsimplex,two_subsimplex) and sym.image(one_subsimplex) == one_subsimplex:
@@ -840,11 +838,6 @@ class CuspedOrbifold:
 		b = a.glued()
 		z = tet.edge_params[a.Edge]
 		w = voisin.edge_params[b.Edge]
-		"""
-		if ((z*w*w).imag).evaluate() < 0 or (z*w*w).imag == SquareRootCombination.Zero():
-			#In the latter case maybe a flat 3-6 move is possible, but let's not consider that currently.
-			return 0
-		"""
 		if ((z*w*w).imag).evaluate() < 0:
 			return 0
 		flat_u0_u1_v1_w1 = False
@@ -866,6 +859,8 @@ class CuspedOrbifold:
 			#the 2-3 move situation too. But for now, let's not allow it.
 			return 0
 		else:
+			# Get some complex numbers which we use to determine whether [u_0,w_1] is beneath, above, or
+			# intersecting [u_1,w_0].
 			x = tet.edge_params[a.north_tail()]
 			y = voisin.edge_params[b.Edge]
 			z = voisin.edge_params[b.south_tail()]
@@ -873,23 +868,19 @@ class CuspedOrbifold:
 			complex_abs_w0 = ComplexSquareRootCombination(abs(w0),SquareRootCombination.Zero())
 			w1 = One - One/(x*z)
 			complex_abs_w1 = ComplexSquareRootCombination(abs(w1),SquareRootCombination.Zero())
-			"""
-			if (w0/complex_abs_w0).real == (w1/complex_abs_w1).real:
-				#In this case the geodesics [u0,w1] and [u1,w0] intersect. You might think that 
-				#this could be allowed.
-				#It would create a flat tet, but we create flat tets sometimes, hoping to cancel
-				#them later. But I think it really doesn't make sense here for a different reason.
-				#When you create the flat tet, its nontrivial symmetry is incompatible with the
-				#way it's flat, i.e. where the edges with angle pi are. So we don't allow this case.
-				print("[u0,w1] and [u1,w0] intersect")
-				#return 0
-			"""
+			# Create a new arrow for the new tetrahedron which is the image under the symmetry of b.Tetrahedron.
 			c = self.new_arrow()
 			c.glue(a)
+			# Link the vertices of c.Tetrahedron to the correct vertex classes.
+			c.Tetrahedron.Class[c.north_vertex()] = b.Tetrahedron.Class[b.north_vertex()]
+			c.Tetrahedron.Class[c.south_vertex()] = b.Tetrahedron.Class[b.south_vertex()]
+			c.Tetrahedron.Class[c.east_vertex()] = a.Tetrahedron.Class[a.west_vertex()]
+			c.Tetrahedron.Class[c.west_vertex()] = b.Tetrahedron.Class[b.east_vertex()]
+			# Give c.Tetrahedron the geometry making it a copy of b.Tetrahedron under the symmetry.
 			c.Tetrahedron.fill_edge_params(b.Tetrahedron.edge_params[b.Edge])
 			if ((w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate() or
 				(w0/complex_abs_w0).real == (w1/complex_abs_w1).real):
-				#This is the case [u_0,w_1] "beneath" [u_1,w_0].
+				#This is the case [u_0,w_1] "beneath" or intersecting [u_1,w_0].
 				self.two_to_three(two_subsimplex,tet,0)
 				c.next()
 				new_c = c.copy().reverse()
@@ -912,11 +903,7 @@ class CuspedOrbifold:
 				e.rotate(1)
 				d.rotate(1)
 				if e.glued().Tetrahedron != None:
-					if e.Tetrahedron.face_glued_to_self(e.Face):
-						d.glue(e.glued())
-						d.glue(e.glued())
-					else:
-						d.glue(e.glued())
+					d.glue_as(e)
 				e.Tetrahedron.erase()
 				c.reverse().rotate(-1)
 				c.glue(f.glued())
@@ -946,11 +933,7 @@ class CuspedOrbifold:
 				d.rotate(1)
 				e.rotate(1)
 				if d.glued().Tetrahedron != None:
-					if d.Tetrahedron.face_glued_to_self(d.Face):
-						e.glue(d.glued())
-						e.glue(d.glued())
-					else:
-						e.glue(d.glued())
+					e.glue_as(d)
 				d.reverse()
 				e.reverse()
 				e.glue(d.glued())
