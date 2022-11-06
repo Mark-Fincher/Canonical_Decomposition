@@ -110,7 +110,8 @@ class CuspedOrbifold:
 	be added to the correct vertex corners lists and its Class dictionary should be accordingly updated.
 
 	An important point: in the case of a CuspedOrbifold Pachner move, vertex classes cannot be created nor destroyed (because
-	vertex classes correspond exactly to cusps). But we DO have to worry about that for a non-geometric Pachner move.
+	vertex classes correspond exactly to cusps). But we DO have to worry about that for a non-geometric Pachner move (i.e. for
+	SimplicialOrbifold objects).
 	"""
 	def clear_and_rebuild_new(self):
 		# Reset the tet indices.
@@ -124,9 +125,8 @@ class CuspedOrbifold:
 				tet.Class[one_subsimplex] = None
 		# Rebuild edge classes.
 		self.build_edge_classes()
-		
-		# Now we make the vertex classes correct. Because of what we did in the Pachner move, it should currently be the case that
-		# for every tet and every zero_subsimplex, tet.Class[zero_subsimplex] is the correct vertex class. The only incorrect thing
+		# Now we try to make the vertex classes correct. Because of what we did in the Pachner move, it should currently be the case that
+		# for every tet and every zero_subsimplex, tet.Class[zero_subsimplex] is the correct vertex class. The only potentially incorrect thing
 		# at this moment is that each vertex class could have the wrong set of corners. So we need to fix that.
 		Tets_ZeroSubsimplices = []
 		for tet in self.Tetrahedra:
@@ -134,45 +134,27 @@ class CuspedOrbifold:
 				Tets_ZeroSubsimplices.append((tet,zero_subsimplex))
 		for vertex in self.Vertices:
 			vertex.Corners = [Corner(pair[0],pair[1]) for pair in Tets_ZeroSubsimplices if pair[0].Class[pair[1]] is vertex]
-			
-
-		"""
-		# For each vertex class, remove any corner belonging to a tet not in self.Tetrahedra.
-		for vertex in self.Vertices:
-			to_remove = []
-			for corner in vertex.Corners:
-				if corner.Tetrahedron not in self.Tetrahedra:
-					to_remove.append(corner)
-			for corner in to_remove:
-				vertex.Corners.remove(corner)
-		# If a vertex class has no corners now, then it was completely destroyed by the Pachner move. That shouldn't happen
-		# but let's check.
-		for vertex in self.Vertices:
-			if len(vertex.Corners) == 0:
-				raise Exception('Error in clear_and_rebuild: missing cusp')
-		# Now we 
-		for tet in self.Tetrahedra:
-			for zero_subsimplex in ZeroSubsimplices:
-				if tet.Class[zero_subsimplex] is not None:
-					vertex = tet.Class[zero_subsimplex]
-					self.special_walk_vertex(vertex,zero_subsimplex,tet)
-		# Any 0-simplices which are not assigned a vertex at this point must actually belong
-		# to a new vertex class which didn't exist previously. This should not happen. Check for
-		# this and raise an exception.
-		for tet in self.Tetrahedra:
-			for zero_subsimplex in ZeroSubsimplices:
-				if tet.Class[zero_subsimplex] is not None:
-					raise Exception('Error in clear_and_rebuild: created new cusp')
-		for tet in self.Tetrahedra:
-			# The tet.checked_sub_simplex flags were messed with by special_walk_vertex. We must 
-			# reset them for future use.
-			tet.checked_sub_simplex = [0]*16
-		"""
-
+		# Let's do a check that the vertex classes are correct.
+		self.check_vertex_classes()
 		# Now re-build horotriangles/cusp geometry. Note that we couldn't do this until we had correct vertex classes.
 		self.add_cusp_cross_sections()
 		for cusp in self.Vertices:
 			self.normalize_cusp(cusp)
+
+	# Check the vertex classes are correctly assigned.
+	def check_vertex_classes(self):
+		seen_vertex_classes = []
+		for tet in self.Tetrahedra:
+			for zero_subsimplex in ZeroSubsimplices:
+				seen_vertex_class.append(tet.Class[zero_subsimplex])
+				for sym in tet.Symmetries:
+					assert tet.Class[zero_subsimplex] == tet.Class[sym.image(zero_subsimplex)]
+				for two_subsimplex in TwoSubsimplices:
+					if is_subset(zero_subsimplex,two_subsimplex) and tet.Neighbor[two_subsimplex] is not None:
+						nbr = tet.Neighbor[two_subsimplex]
+						gluing = tet.Gluing[two_subsimplex]
+						assert tet.Class[zero_subsimplex] == nbr.Class[gluing.image(zero_subsimplex)]
+		assert set(seen_vertex_class) == set(self.Vertices)
 
 	def add_tet(self, tet):
 		self.Tetrahedra.append(tet)
@@ -1160,6 +1142,29 @@ class CuspedOrbifold:
 			new[1].opposite().reverse()
 			new[2].rotate(1).reverse()
 			#new[3] is already in the right place.
+			# Now the old and new arrows are in position as in the diagram. We now
+			# link the vertices of the new tetrahedra to the correct vertex classes.
+			# new[0]
+			new[0].Tetrahedron.Class[new[0].north_vertex()] = old[1].Tetrahedron.Class[old[1].east_vertex()]
+			new[0].Tetrahedron.Class[new[0].south_vertex()] = old[0].Tetrahedron.Class[old[0].west_vertex()]
+			new[0].Tetrahedron.Class[new[0].east_vertex()] = old[1].Tetrahedron.Class[old[1].west_vertex()]
+			new[0].Tetrahedron.Class[new[0].west_vertex()] = old[1].Tetrahedron.Class[old[1].north_vertex()]
+			# new[1]
+			new[1].Tetrahedron.Class[new[1].north_vertex()] = old[1].Tetrahedron.Class[old[1].east_vertex()]
+			new[1].Tetrahedron.Class[new[1].south_vertex()] = old[0].Tetrahedron.Class[old[0].west_vertex()]
+			new[1].Tetrahedron.Class[new[1].east_vertex()] = old[1].Tetrahedron.Class[old[1].south_vertex()]
+			new[1].Tetrahedron.Class[new[1].west_vertex()] = old[1].Tetrahedron.Class[old[1].west_vertex()]
+			# new[2]
+			new[2].Tetrahedron.Class[new[2].north_vertex()] = old[1].Tetrahedron.Class[old[1].east_vertex()]
+			new[2].Tetrahedron.Class[new[2].south_vertex()] = old[0].Tetrahedron.Class[old[0].west_vertex()]
+			new[2].Tetrahedron.Class[new[2].east_vertex()] = old[2].Tetrahedron.Class[old[2].east_vertex()]
+			new[2].Tetrahedron.Class[new[2].west_vertex()] = old[1].Tetrahedron.Class[old[1].south_vertex()]
+			# new[3]
+			new[3].Tetrahedron.Class[new[3].north_vertex()] = old[1].Tetrahedron.Class[old[1].east_vertex()]
+			new[3].Tetrahedron.Class[new[3].south_vertex()] = old[0].Tetrahedron.Class[old[0].west_vertex()]
+			new[3].Tetrahedron.Class[new[3].east_vertex()] = old[1].Tetrahedron.Class[old[1].north_vertex()]
+			new[3].Tetrahedron.Class[new[3].west_vertex()] = old[2].Tetrahedron.Class[old[2].east_vertex()]
+			# Now we do the gluings.
 			for i in range(4):
 				new[i].glue(new[(i+1)%4])
 			#gluing faces of new[0]
@@ -1216,6 +1221,24 @@ class CuspedOrbifold:
 			new[0].opposite().reverse()
 			new[1].reverse().rotate(1)
 			new[2].rotate(1).reverse()
+			# Now old and new arrows are in correct positions as in the diagram.
+			# Link the vertices of the new tetahedra to the correct pre-existing vertex classes.
+			# new[0]
+			new[0].Tetrahedron.Class[new[0].north_vertex()] = old[1].Tetrahedron.Class[old[1].east_vertex()]
+			new[0].Tetrahedron.Class[new[0].south_vertex()] = old[0].Tetrahedron.Class[old[0].west_vertex()]
+			new[0].Tetrahedron.Class[new[0].east_vertex()] = old[1].Tetrahedron.Class[old[1].north_vertex()]
+			new[0].Tetrahedron.Class[new[0].west_vertex()] = old[2].Tetrahedron.Class[old[2].east_vertex()]
+			# new[1]
+			new[1].Tetrahedron.Class[new[1].north_vertex()] = old[1].Tetrahedron.Class[old[1].east_vertex()]
+			new[1].Tetrahedron.Class[new[1].south_vertex()] = old[0].Tetrahedron.Class[old[0].west_vertex()]
+			new[1].Tetrahedron.Class[new[1].east_vertex()] = old[1].Tetrahedron.Class[old[1].west_vertex()]
+			new[1].Tetrahedron.Class[new[1].west_vertex()] = old[1].Tetrahedron.Class[old[1].north_vertex()]
+			# new[2]
+			new[2].Tetrahedron.Class[new[2].north_vertex()] = old[1].Tetrahedron.Class[old[1].east_vertex()]
+			new[2].Tetrahedron.Class[new[2].south_vertex()] = old[0].Tetrahedron.Class[old[0].west_vertex()]
+			new[2].Tetrahedron.Class[new[2].east_vertex()] = old[2].Tetrahedron.Class[old[2].east_vertex()]
+			new[2].Tetrahedron.Class[new[2].west_vertex()] = old[1].Tetrahedron.Class[old[1].west_vertex()]
+			# Now do the face gluings.
 			for i in range(3):
 				new[i].glue(new[(i+1)%3])
 			#make the other face gluings for new[0]
@@ -1328,6 +1351,22 @@ class CuspedOrbifold:
 			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(1))
 			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(1))
 			new[2].copy().opposite().glue_as(b.copy().rotate(-1))
+			# Link the vertices of the new tetrahedra to existing vertex classes.
+			# new[0]
+			new[0].Tetrahedron.Class[new[0].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[0].Tetrahedron.Class[new[0].south_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[0].Tetrahedron.Class[new[0].east_vertex()] = c.Tetrahedron.Class[c.east_vertex()]
+			new[0].Tetrahedron.Class[new[0].west_vertex()] = c.Tetrahedron.Class[c.south_vertex()]
+			# new[1]
+			new[1].Tetrahedron.Class[new[1].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[1].Tetrahedron.Class[new[1].south_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[1].Tetrahedron.Class[new[1].east_vertex()] = c.Tetrahedron.Class[c.north_vertex()]
+			new[1].Tetrahedron.Class[new[1].west_vertex()] = c.Tetrahedron.Class[c.east_vertex()]
+			# new[2]
+			new[2].Tetrahedron.Class[new[2].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[2].Tetrahedron.Class[new[2].south_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[2].Tetrahedron.Class[new[2].east_vertex()] = b.Tetrahedron.Class[b.west_vertex()]
+			new[2].Tetrahedron.Class[new[2].west_vertex()] = c.Tetrahedron.Class[c.north_vertex()]
 		if case == 'vertical':
 			new[0].Tetrahedron.fill_edge_params(z3)
 			new[1].Tetrahedron.fill_edge_params(z1)
@@ -1342,6 +1381,22 @@ class CuspedOrbifold:
 			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(-1))
 			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(-1))
 			new[2].copy().opposite().glue_as(c.copy().reverse().rotate(1))
+			# Link the vertices of the new tetrahedra to existing vertex classes.
+			# new[0]
+			new[0].Tetrahedron.Class[new[0].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[0].Tetrahedron.Class[new[0].south_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[0].Tetrahedron.Class[new[0].east_vertex()] = c.Tetrahedron.Class[c.south_vertex()]
+			new[0].Tetrahedron.Class[new[0].west_vertex()] = b.Tetrahedron.Class[b.west_vertex()]
+			# new[1]
+			new[1].Tetrahedron.Class[new[1].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[1].Tetrahedron.Class[new[1].south_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[1].Tetrahedron.Class[new[1].east_vertex()] = c.Tetrahedron.Class[c.east_vertex()]
+			new[1].Tetrahedron.Class[new[1].west_vertex()] = c.Tetrahedron.Class[c.south_vertex()]
+			# new[2]
+			new[2].Tetrahedron.Class[new[2].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[2].Tetrahedron.Class[new[2].south_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
+			new[2].Tetrahedron.Class[new[2].east_vertex()] = c.Tetrahedron.Class[c.north_vertex()]
+			new[2].Tetrahedron.Class[new[2].west_vertex()] = c.Tetrahedron.Class[c.east_vertex()]
 		self.Tetrahedra.remove(a.Tetrahedron)
 		self.Tetrahedra.remove(b.Tetrahedron)
 		self.Tetrahedra.remove(c.Tetrahedron)
@@ -1513,7 +1568,26 @@ class CuspedOrbifold:
 			new[2].reverse().rotate(1)
 			new[0].glue(new[1])
 			new[1].glue(new[2])
-			#Now the arrows are as in the picture.
+			# Now the arrows are as in the picture.
+			# Let's link the vertices of the new tetrahedra to the existing vertex classes. Because of the symmetries
+			# of the cube, there are only two vertex classes we have to consider.
+			a_tet_vertex = a.Tetrahedron.Class[a.north_vertex()]
+			b_tet_vertex = b.Tetrahedron.Class[b.east_vertex()]
+			# new[0]
+			new[0].Tetrahedron.Class[new[0].north_vertex()] = b_tet_vertex
+			new[0].Tetrahedron.Class[new[0].south_vertex()] = b_tet_vertex
+			new[0].Tetrahedron.Class[new[0].east_vertex()] = b_tet_vertex
+			new[0].Tetrahedron.Class[new[0].west_vertex()] = b_tet_vertex
+			# new[1]
+			new[1].Tetrahedron.Class[new[1].north_vertex()] = b_tet_vertex
+			new[1].Tetrahedron.Class[new[1].south_vertex()] = b_tet_vertex
+			new[1].Tetrahedron.Class[new[1].east_vertex()] = a_tet_vertex
+			new[1].Tetrahedron.Class[new[1].west_vertex()] = b_tet_vertex
+			# new[2]
+			new[2].Tetrahedron.Class[new[2].north_vertex()] = b_tet_vertex
+			new[2].Tetrahedron.Class[new[2].south_vertex()] = b_tet_vertex
+			new[2].Tetrahedron.Class[new[2].east_vertex()] = a_tet_vertex
+			new[2].Tetrahedron.Class[new[2].west_vertex()] = a_tet_vertex
 			new[0].Tetrahedron.Symmetries = [Perm4((perm)) for perm in Perm4._rawA4]
 			new[1].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			new[1].add_sym(new[1].copy().rotate(1))
@@ -1552,7 +1626,30 @@ class CuspedOrbifold:
 			new[4].reverse().rotate(1)
 			new[0].glue(new[1])
 			new[1].glue(new[2])
-			#Now the arrows are as in the picture.
+			# Now the arrows are as in the picture.
+			# We now link the vertices of the new tetrahedra to the pre-existing vertex classes. As in case 1, the symmetries of
+			# the cube imply its vertices have two classes. One class for the vertices of a.Tetrahedron, and the other for the
+			# vertex of b.Tetrahedron opposite a.Tetrahedron. They could be the same class, depending on what's happening in the
+			# rest of the triangulation, but that doesn't matter to us here.
+			a_tet_vertex = a.Tetrahedron.Class[a.north_vertex()]
+			b_tet_vertex = b.Tetrahedron.Class[b.east_vertex()]
+			# new[0]
+			new[0].Tetrahedron.Class[new[0].north_vertex()] = b_tet_vertex
+			new[0].Tetrahedron.Class[new[0].south_vertex()] = b_tet_vertex
+			new[0].Tetrahedron.Class[new[0].east_vertex()] = b_tet_vertex
+			new[0].Tetrahedron.Class[new[0].west_vertex()] = b_tet_vertex
+			# new[1]
+			new[1].Tetrahedron.Class[new[1].north_vertex()] = b_tet_vertex
+			new[1].Tetrahedron.Class[new[1].south_vertex()] = b_tet_vertex
+			new[1].Tetrahedron.Class[new[1].east_vertex()] = a_tet_vertex
+			new[1].Tetrahedron.Class[new[1].west_vertex()] = b_tet_vertex
+			# new[2], new[3], new[4]
+			for new in [new[2],new[3],new[4]]:
+				new.Tetrahedron.Class[new.north_vertex()] = b_tet_vertex
+				new.Tetrahedron.Class[new.south_vertex()] = b_tet_vertex
+				new.Tetrahedron.Class[new.east_vertex()] = a_tet_vertex
+				new.Tetrahedron.Class[new.west_vertex()] = a_tet_vertex
+			# Symmetries and face gluings.
 			new[0].Tetrahedron.Symmetries = [
 				Perm4((0,1,2,3)),
 				Perm4((1,0,3,2)),
