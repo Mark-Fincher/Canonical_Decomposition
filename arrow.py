@@ -98,7 +98,7 @@ class Arrow:
     def north_vertex(self):
         return OppTail[self.head(),self.tail()]
 
-    def south-vertex(self):
+    def south_vertex(self):
         return OppTail[self.tail(),self.head()]
 
     def east_vertex(self):

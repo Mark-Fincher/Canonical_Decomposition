@@ -1116,3 +1116,8 @@ orb.info()
 #isometric.
 """
 
+class_name = type(SquareRootCombination())
+print(class_name.One())
+print(type(class_name.One()))
+print(type(class_name))
+print(type(None))

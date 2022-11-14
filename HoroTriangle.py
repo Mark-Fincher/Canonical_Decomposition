@@ -40,7 +40,12 @@ class HoroTriangle:
         self.lengths = {center:L, left:abs(z_l)*L, right:L/abs(z_r)}
         a, b, c = self.lengths.values()
 
-        self.area = L * L * z_l.imag / SquareRootCombination.Two()
+        real_arithmetic_type = type(z_l.real)
+        Zero = real_arithmetic_type.Zero()
+        One = real_arithmetic_type.One()
+        Two = One + One
+        Four = Two + Two
+        self.area = L * L * z_l.imag / Two
         # Below is the usual formula for circumradius combined with 
         # Heron's formula.
         
@@ -49,9 +54,9 @@ class HoroTriangle:
         # We don't care about making sense of tilt for flat tets. Canonize will
         # try to either cancel flat tets, or just ignore them until they can be
         # cancelled.
-        if self.area != SquareRootCombination.Zero():
+        if self.area != Zero:
             self.circumradius = (a * b * c /
-                                 (SquareRootCombination.Four() * self.area))
+                                 (Four * self.area))
         else:
             self.circumradius = None
 

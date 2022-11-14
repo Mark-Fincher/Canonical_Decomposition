@@ -18,10 +18,22 @@ from Exact_Arithmetic import*
 class CuspedOrbifold:
 	def __init__(self,tets_list):
 		self.Tetrahedra = tets_list
+		# Make the indices of the tetrahedra match their indices in the list.
+		for i in range(len(self.Tetrahedra)):
+			self.Tetrahedra[i].Index = i
 		# Make sure all tets have at least the identity map in their Symmetries list, required by some functions.
 		for tet in self.Tetrahedra:
 			if len(tet.Symmetries) == 0:
 				tet.Symmetries.append(Perm4((0,1,2,3)))
+		# Self is geometric if it has values assigned to its edge parameters. 
+		if self.Tetrahedra[0].edge_params[E01] is None:
+			self.complex_arithmetic_type = None
+			self.real_arithmetic_type = None
+			self.is_geometric = False
+		else:
+			self.complex_arithmetic_type = type(self.Tetrahedra[0].edge_params[E01])
+			self.real_arithmetic_type = type(self.Tetrahedra[0].edge_params[E01].real)
+			self.is_geometric = True
 		self.Edges = []
 		self.Faces = []
 		self.Vertices = []
@@ -31,12 +43,17 @@ class CuspedOrbifold:
 			T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		self.build_vertex_classes()
 		self.build_edge_classes()
-		self.add_cusp_cross_sections()
-		for cusp in self.Vertices:
-			self.normalize_cusp(cusp)
+		if self.is_geometric:
+			self.add_cusp_cross_sections()
+			for cusp in self.Vertices:
+				self.normalize_cusp(cusp)
 
 	def info(self):
 		tets = self.Tetrahedra
+		if self.is_geometric:
+			print('this triangulation is geometric')
+		else:
+			print('this triangulation is not geometric')
 		print('number of tetrahedra is',len(tets))
 		for i in range(len(tets)):
 			print('gluing data for', tets[i], 'is')
@@ -46,13 +63,21 @@ class CuspedOrbifold:
 			print('symmetries of',tets[i],'are')
 			for sym in tets[i].Symmetries:
 				print(sym)
-			print('edge_params of',tets[i],'are')
-			print('edge 01',tets[i].edge_params[E01].real,'+',tets[i].edge_params[E01].imag,'* i')
-			print('edge 02',tets[i].edge_params[E02].real,'+',tets[i].edge_params[E02].imag,'* i')
-			print('edge 03',tets[i].edge_params[E03].real,'+',tets[i].edge_params[E03].imag,'* i')
-			print('edge 12',tets[i].edge_params[E12].real,'+',tets[i].edge_params[E12].imag,'* i')
-			print('edge 13',tets[i].edge_params[E13].real,'+',tets[i].edge_params[E13].imag,'* i')
-			print('edge 23',tets[i].edge_params[E23].real,'+',tets[i].edge_params[E23].imag,'* i')
+			if self.is_geometric:
+				print('edge_params of',tets[i],'are')
+				print('edge 01',tets[i].edge_params[E01].real,'+',tets[i].edge_params[E01].imag,'* i')
+				print('edge 02',tets[i].edge_params[E02].real,'+',tets[i].edge_params[E02].imag,'* i')
+				print('edge 03',tets[i].edge_params[E03].real,'+',tets[i].edge_params[E03].imag,'* i')
+				print('edge 12',tets[i].edge_params[E12].real,'+',tets[i].edge_params[E12].imag,'* i')
+				print('edge 13',tets[i].edge_params[E13].real,'+',tets[i].edge_params[E13].imag,'* i')
+				print('edge 23',tets[i].edge_params[E23].real,'+',tets[i].edge_params[E23].imag,'* i')
+			print('edge labels of',tets[i],'are')
+			print('edge 01: ',tets[i].edge_labels[E01])
+			print('edge 02: ',tets[i].edge_labels[E02])
+			print('edge 03: ',tets[i].edge_labels[E03])
+			print('edge 12: ',tets[i].edge_labels[E12])
+			print('edge 13: ',tets[i].edge_labels[E13])
+			print('edge 23: ',tets[i].edge_labels[E23])
 
 	def copy(self):
 		new_tets = []
@@ -65,8 +90,10 @@ class CuspedOrbifold:
 			new_tets.append(new_tet)
 		for new_tet in new_tets:
 			new_tet.Index = new_to_old[new_tet].Index
-			for edge in OneSubsimplices:
-				new_tet.edge_params[edge] = new_to_old[new_tet].edge_params[edge]
+			for one_subsimplex in OneSubsimplices:
+				if self.is_geometric:
+					new_tet.edge_params[one_subsimplex] = new_to_old[new_tet].edge_params[one_subsimplex]
+				new_tet.edge_labels[one_subsimplex] = new_to_old[new_tet].edge_labels[one_subsimplex]
 			for sym in new_to_old[new_tet].Symmetries:
 				new_tet.Symmetries.append(sym)
 			for face in TwoSubsimplices:
@@ -74,6 +101,18 @@ class CuspedOrbifold:
 					new_tet.attach(face,old_to_new[new_to_old[new_tet].Neighbor[face]],
 						new_to_old[new_tet].Gluing[face].tuple())
 		return CuspedOrbifold(new_tets)
+
+	def remove_geometry(self):
+		"""
+		If self is geometric, remove its geometry by setting edge_params and horotriangles to None and is_geometric
+		to False. If self is already not geometric, do nothing.
+		"""
+		if self.is_geometric is False:
+			return
+		for tet in self.Tetrahedra:
+			tet.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
+        	tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+        self.is_geometric = False
 
 	"""
 	Clear all classes and horotriangles, then rebuild this data. Want to do this after changing
@@ -137,9 +176,10 @@ class CuspedOrbifold:
 		# Let's do a check that the vertex classes are correct.
 		self.check_vertex_classes()
 		# Now re-build horotriangles/cusp geometry. Note that we couldn't do this until we had correct vertex classes.
-		self.add_cusp_cross_sections()
-		for cusp in self.Vertices:
-			self.normalize_cusp(cusp)
+		if self.is_geometric:
+			self.add_cusp_cross_sections()
+			for cusp in self.Vertices:
+				self.normalize_cusp(cusp)
 
 	# Check the vertex classes are correctly assigned.
 	def check_vertex_classes(self):
@@ -182,12 +222,12 @@ class CuspedOrbifold:
 		face0 = FacesAnticlockwiseAroundVertices[vert0][0]
 		tet0.horotriangles[vert0] = HoroTriangle(
 			tet0, vert0, face0,
-			SquareRootCombination.One())
+			self.real_arithmetic_type.One())
 		active = [(tet0, vert0)]
 		while active:
 			tet0, vert0 = active.pop()
 			for face0 in FacesAnticlockwiseAroundVertices[vert0]:
-				# We need the following for orbifolds becuse some faces might be unglued.
+				# We need the following for orbifolds because some faces might be unglued.
 				if tet0.Neighbor[face0] != None:
 					tet1, face1 = glued_to(tet0, face0)
 					vert1 = tet0.Gluing[face0].image(vert0)
@@ -227,7 +267,7 @@ class CuspedOrbifold:
 	"""
 	def cusp_area(self, cusp):
 		cusp = self._get_cusp(cusp)
-		area = SquareRootCombination.Zero()
+		area = self.real_arithmetic_type.Zero()
 		already_counted = []
 		for T, V in tets_and_vertices_of_cusp(cusp):
 			if (T,V) not in already_counted:
@@ -261,7 +301,12 @@ class CuspedOrbifold:
 		"""
 		cusp = self._get_cusp(cusp)
 
-		target_area = SquareRootCombination.SqrtThree()
+		One = self.real_arithmetic_type.One()
+		Three = One + One + One
+		# This target area is chosen because the arithmetic works nicely for orbifolds commensurable
+		# to the fig eight knot complement. See FGGTV. It works fine for other orbifolds too if
+		# we are just using sage interval arithmetic.
+		target_area = Three.sqrt()
 
 		area = self.cusp_area(cusp)
 		ratio = (target_area/area).sqrt()
@@ -341,44 +386,27 @@ class CuspedOrbifold:
 				if perm.image(zero_subsimplex) != zero_subsimplex:
 					self.walk_vertex(vertex,perm.image(zero_subsimplex),tet)
 
-	# Shouldn't need this anymore.
-	def special_walk_vertex(self,vertex,zero_subsimplex,tet):
-		if tet.checked_sub_simplex[zero_subsimplex]:
-			return
-		else:
-			tet.checked_sub_simplex[zero_subsimplex] = 1
-			if tet.Class[zero_subsimplex] is None:
-				tet.Class[zero_subsimplex] = vertex
-				vertex.Corners.append(Corner(tet,zero_subsimplex))
-			for two_subsimplex in TwoSubsimplices:
-				if ( is_subset(zero_subsimplex,two_subsimplex)
-                     and
-                     tet.Gluing[two_subsimplex] != None):
-						self.special_walk_vertex(vertex,
-                                     tet.Gluing[two_subsimplex].image(zero_subsimplex),
-                                     tet.Neighbor[two_subsimplex])
-			for perm in tet.Symmetries:
-				if perm.image(zero_subsimplex) != zero_subsimplex:
-					self.special_walk_vertex(vertex,perm.image(zero_subsimplex),tet)
-	
 	"""
-	Here's my attempt at a new build_edge_classes function. Will delete the old one, which is below it,
-	after enough testing. I'm re-doing it because it can be much simpler, and because I want to 
-	allow for self to not be geometric (?). In that case we don't have edge_params and the edge locus
-	order should already be given; it doesn't need to be figured out by this function.
-
 	Two edges are in the same class if they're identified by a sequence of face gluings and
 	symmetries. In that case, the two edges are assigned the same edge object (defined in edge.py).
 	For example, if edge E01 of tet0 has the edge object EDGE, then tet0.Class[E01] == EDGE.
 	One attribute of the edge class is "Corners". A Corner is an object with attributes Tetrahedron
 	and Subsimplex. It might make sense for EDGE.Corners to be the list of all Corners such that
 	Corner.Tetrahedron.Class[Corner.Subsimplex] == EDGE. But in fact we do things slightly
-	differently. We walk around EDGE using arrows, and only the (one)Subsimplex-Tetrahedron pairs we
-	encounter there get recorded into EDGE.Corners. Because of symmetries, this might not be all of them.
-	Additionally, there could be repeats in this list, if an arrow and its reverse both apppear
-	in the walk. We do it this way because we need to know the total dihedral angle traversed in a
+	differently. We can walk around EDGE using arrows, and only the (one)Subsimplex-Tetrahedron pairs we
+	encounter in a complete walk get recorded into EDGE.Corners. Because of symmetries, this need not be all of the
+	1-simplices belonging to this edge class. Additionally, there could be repeats in this list, if an 
+	arrow and its reverse both apppear in the walk. 
+
+	We do it this way because, in the geometric case, we need to know the total dihedral angle traversed in a
 	walk, theta. Then the integer n satisfying n*theta = 2*pi is the order of the local group fixing the
-	edge, recorded as EDGE.LocusOrder == n.  
+	edge, recorded as EDGE.LocusOrder == n.
+
+	If self is not geometric, then of course we don't worry about this. We just set EDGE.LocusOrder to be
+	the edge_label of any of the 1-simplices belonging to EDGE.
+
+	From this perpective, it would really make more sense for EDGE.Corners to be a list of arrows in
+	a complete walk around EDGE. We choose not to do this, but that's the way to think of it. 
 	"""
 	def build_edge_classes(self):
 		for tet in self.Tetrahedra:
@@ -392,12 +420,10 @@ class CuspedOrbifold:
 					unfinished_walk = True
 					while unfinished_walk:
 						if sanity_check > 12*len(self.Tetrahedra):
-							print('Bad gluing data: could not construct edge link.')
-							break
+							raise Exception('Bad gluing data: could not construct edge link.')
 						newEdge.Corners.append(Corner(a.Tetrahedron, a.Edge))
 						if a.true_next() is None:
-							print('Hit boundary. Did not construct edge link.')
-							break
+							raise Exception('Hit boundary. Did not construct edge link.')
 						else:
 							#Check if a is now first_arrow, or the image of a under 
 							#a symmetry is first_arrow.
@@ -414,30 +440,45 @@ class CuspedOrbifold:
 					#We've finished walking around the edge, and now we want to assign newEdge to all
 					#edges in this class. This might not just be the edges in newEdge.Corners; have
 					#to apply symmetries to get other edges in the class.
-					#We also take the product of all the edge_params in this walk.
-					z = ComplexSquareRootCombination.One()
 					for corner in newEdge.Corners:
-						z = z*corner.Tetrahedron.edge_params[corner.Subsimplex]
 						for sym in corner.Tetrahedron.Symmetries:
 							corner.Tetrahedron.Class[sym.image(corner.Subsimplex)] = newEdge
-					#Now we figure out the order of the local group fixing newEdge. This is
-					#the smallest n such that z^n == 1.
-					n = 0
-					w = ComplexSquareRootCombination.One()
-					while n < 1000:
-						w = w*z
-						n = n + 1
-						# So w = z^n
-						if w == ComplexSquareRootCombination.One():
-							newEdge.LocusOrder = n
-							break
+					#Now we figure out the order of the local group fixing newEdge.
+					if newEdge.Corners[0].Tetrahedron.edge_labels[Corners.Subsimplex] is not None:
+						# Then just use this edge label to set the LocusOrder.
+						newEdge.LocusOrder = newEdge.Corners[0].Tetrahedron.edge_labels[Corners.Subsimplex]
+					elif self.is_geometric:
+						z = self.complex_arithmetic_type.One()
+						for corner in newEdge.Corners:
+							z = z*corner.Tetrahedron.edge_params[corner.Subsimplex]
+						# LocusOrder is the smallest positive integer n such that z^n == 1.
+						n = 0
+						w = self.complex_arithmetic_type.One()
+						while n < 1000:
+							w = w*z
+							n = n + 1
+							# So w = z^n
+							if w == self.complex_arithmetic_type.One():
+								newEdge.LocusOrder = n
+								break
+						else:
+							raise Exception('error getting edge locus order')
 					else:
-						raise Exception('error getting edge locus order')
+						raise Exception('cannot determine LocusOrder of edge because the orb is not geometric and has no edge_labels')
+		# Make sure all edge labels are assigned. If we initiated a CuspedOrbifold object with edge parameters but not edge labels, then
+		# edge labels would not be assigned at this point.
+		for tet in self.Tetrahedra:
+			for one_subsimplex in OneSubsimplices:
+				if tet.edge_labels[one_subsimplex] is None:
+					tet.edge_labels[one_subsimplex] = tet.Class[one_subsimplex].LocusOrder
+		# Set the indices of the edges.				
 		for i in range(len(self.Edges)):
 			self.Edges[i].Index = i
 
 	# Checks if the triangulation is proto_canonical or not.
 	def is_proto_canonical(self):
+		# Can't talk about being proto-canonical if it's not geometric.
+		assert self.is_geometric
 		for tet1 in self.Tetrahedra:
 			if tet1.is_flat():
 				#don't try to compute tilts of a flat tetrahedron.
@@ -514,12 +555,13 @@ class CuspedOrbifold:
 			return 0
 		if tet.Neighbor[two_subsimplex] == tet and not tet.face_glued_to_self(two_subsimplex):
 			return 0
-		for one_subsimplex in OneSubsimplices:
-			if is_subset(one_subsimplex,two_subsimplex):
-				z = tet.edge_params[one_subsimplex]
-				w = tet.Neighbor[two_subsimplex].edge_params[tet.Gluing[two_subsimplex].image(one_subsimplex)]
-				if (z*w).imag.evaluate() < 0:
-					return 0
+		if self.is_geometric:
+			for one_subsimplex in OneSubsimplices:
+				if is_subset(one_subsimplex,two_subsimplex):
+					z = tet.edge_params[one_subsimplex]
+					w = tet.Neighbor[two_subsimplex].edge_params[tet.Gluing[two_subsimplex].image(one_subsimplex)]
+					if (z*w).imag.evaluate() < 0:
+						return 0
 		for sym in tet.Symmetries:
 			if sym.image(two_subsimplex) != two_subsimplex:
 				return 0
@@ -537,26 +579,30 @@ class CuspedOrbifold:
 	def two_to_three(self, two_subsimplex, tet, build = 1):
 		if tet.Neighbor[two_subsimplex] is None:
 			return 0
-		One = ComplexSquareRootCombination.One()
+		if self.is_geometric:
+			One = self.complex_arithmetic_type.One()
 		if tet.face_glued_to_self(two_subsimplex):
 			for one_subsimplex in OneSubsimplices:
 				if tet.Gluing[two_subsimplex].image(one_subsimplex) == one_subsimplex:
 					if is_subset(one_subsimplex,two_subsimplex):
 						a = Arrow(one_subsimplex,two_subsimplex,tet)
-						b = self.new_arrow()
-						b.Tetrahedron.fill_edge_params(a.Tetrahedron.edge_params[a.Edge])
 						break
 		else:
 			a = Arrow(PickAnEdge[two_subsimplex], two_subsimplex, tet)
 			b = a.glued()
-		z = a.Tetrahedron.edge_params[a.south_head()]
-		w = b.Tetrahedron.edge_params[b.north_tail()]
+		if self.is_geometric:
+			z = a.Tetrahedron.edge_params[a.south_head()]
+			if tet.face_glued_to_self(two_subsimplex):
+				w = z
+			else:
+				w = b.Tetrahedron.edge_params[b.north_tail()]
 		#Now we make the new tets. We consider each case separately. That means some redundant
 		#lines are written, but I think it's easier to understand this way. 
 		if tet.face_glued_to_self(two_subsimplex) and tet.face_rotation(two_subsimplex):
 			new = self.new_arrow()
 			# Edge params.
-			new.Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			if self.is_geometric:
+				new.Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
 			# Symmetries.
 			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			new.add_sym(new.copy().reverse())
@@ -568,10 +614,20 @@ class CuspedOrbifold:
 			new.Tetrahedron.Class[new.south_vertex()] = a.Tetrahedron.Class[a.west_vertex()]
 			new.Tetrahedron.Class[new.east_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
 			new.Tetrahedron.Class[new.west_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
+			# Assign edge labels to the new tetrahedron.
+			new.Tetrahedron.edge_labels = {
+				new.equator(): tet.edge_labels[a.axis()], 
+				new.axis(): 3,
+				new.north_head(): tet.edge_labels[a.south_tail()], 
+				new.north_tail(): tet.edge_labels[a.north_tail()],
+				new.south_head(): tet.edge_labels[a.north_tail()],
+				new.south_tail(): tet.edge_labels[a.south_tail()]
+				}
 		elif tet.face_rotation(two_subsimplex):
 			new = self.new_arrow()
 			# Edge params.
-			new.Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+			if self.is_geometric:
+				new.Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
 			# Symmetries.
 			new.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			# Face gluings.
@@ -583,11 +639,35 @@ class CuspedOrbifold:
 			new.Tetrahedron.Class[new.south_vertex()] = b.Tetrahedron.Class[b.east_vertex()]
 			new.Tetrahedron.Class[new.east_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
 			new.Tetrahedron.Class[new.west_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
+			# Update the edge labels. Changing arrow positions first, just so I can copy paste
+			# from another time I did this.
+			new.opposite().reverse()
+			a.reverse()
+			new.Tetrahedron.edge_labels = {
+				new.equator(): 3,
+				new.axis(): tet.edge_labels[a.axis()],
+				new.north_head(): b.Tetrahedron.edge_labels[b.north_head()],
+				new.north_tail(): tet.edge_labels[a.south_head()],
+				new.south_head(): b.Tetrahedron.edge_labels[b.south_head()],
+				new.south_tail(): tet.edge_labels[a.north_head()] 
+				}
+			# Update the canonize info.
+			if tet.canonize_info is not None:
+				new.Tetrahedron.canonize_info = CanonizeInfo()
+				new.Tetrahedron.canonize_info.part_of_coned_cell = True
+				new.Tetrahedron.canonize_info.is_flat = False
+				new.Tetrahedron.canonize_info.face_status = {
+					new.north_face(): 2,
+					new.south_face(): 2,
+					new.east_face(): b.Tetrahedron.true_face_status(b.east_face()),
+					new.west_face(): a.Tetrahedron.true_face_status(a.east_face())
+					}
 		elif tet.face_glued_to_self(two_subsimplex):
 			new = self.new_arrows(2)
 			# Edge params.
-			new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
-			new[1].Tetrahedron.fill_edge_params(z/(One-w))
+			if self.is_geometric:
+				new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+				new[1].Tetrahedron.fill_edge_params(z/(One-w))
 			# Symmetries.
 			for c in new:
 				c.Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
@@ -605,13 +685,34 @@ class CuspedOrbifold:
 				c.Tetrahedron.Class[c.east_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
 				c.Tetrahedron.Class[c.west_vertex()] = a.Tetrahedron.Class[a.north_vertex()]
 				a.opposite().rotate(-1)
+			# Update the edge labels. Re-arranging arrows so I can copy paste this from another place I did it.
+			a.reverse().rotate(1)
+			new[0].opposite()
+			new[1].opposite().reverse()
+			new[0].Tetrahedron.edge_labels = {
+				new[0].equator(): 1,
+				new[0].axis(): tet.edge_labels[a.north_tail()],
+				new[0].north_head(): tet.edge_labels[a.equator()],
+				new[0].north_tail(): tet.edge_labels[a.north_head()],
+				new[0].south_head(): tet.edge_labels[a.north_head()],
+				new[0].south_tail(): tet.edge_labels[a.equator()]
+				}
+			new[1].Tetrahedron.edge_labels = {
+				new[1].equator(): 1,
+				new[1].axis(): tet.edge_labels[a.south_tail()],
+				new[1].north_head(): tet.edge_labels[a.north_head()],
+				new[1].north_tail(): tet.edge_labels[a.equator()],
+				new[1].south_head(): tet.edge_labels[a.south_head()],
+				new[1].south_tail(): tet.edge_labels[a.south_head()]
+				}
 		else:
 			#In this case there is no face rotation nor is the face glued to itself.
 			new = self.new_arrows(3)
 			# Edge params.
-			new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
-			new[1].Tetrahedron.fill_edge_params(z/(One-w))
-			new[2].Tetrahedron.fill_edge_params(w/(One-z))
+			if self.is_geometric:
+				new[0].Tetrahedron.fill_edge_params((One-z)*(One-w)/(z*w))
+				new[1].Tetrahedron.fill_edge_params(z/(One-w))
+				new[2].Tetrahedron.fill_edge_params(w/(One-z))
 			# Face gluings and symmetries.
 			for i in range(3):
 				new[i].glue(new[(i+1)%3])
@@ -630,8 +731,34 @@ class CuspedOrbifold:
 				c.Tetrahedron.Class[c.west_vertex()] = a.Tetrahedron.Class[a.south_vertex()]
 				a.rotate(-1)
 				b.rotate(1)
+			# Update the edge labels.
+			for c in new:
+				c.Tetrahedron.edge_labels = {
+					c.equator(): tet.edge_labels[a.axis()],
+					c.axis(): 1,
+					c.north_head(): tet.edge_labels[a.north_head()],
+					c.north_tail(): tet.edge_labels[a.south_head()],
+					c.south_head(): b.Tetrahedron.edge_labels[b.south_head()],
+					c.south_tail(): b.Tetrahedron.edge_labels[b.north_head()]
+					}
+				a.rotate(-1)
+				b.rotate(1)
+			# Update the canonize info.
+			if tet.canonize_info is not None:	
+				for c in new:
+					c.Tetrahedron.canonize_info = CanonizeInfo()
+					c.Tetrahedron.canonize_info.part_of_coned_cell = True
+					c.Tetrahedron.canonize_info.is_flat = False
+					c.Tetrahedron.canonize_info.face_status = {
+						c.north_face(): a.Tetrahedron.canonize_info.face_status[a.east_face()],
+						c.south_face(): b.Tetrahedron.canonize_info.face_status[b.east_face()],
+						c.east_face(): 2,
+						c.west_face(): 2
+						}
+					a.rotate(-1)
+					b.rotate(1)
 		self.Tetrahedra.remove(tet)
-		if b.Tetrahedron in self.Tetrahedra:
+		if not tet.face_glued_to_self(two_subsimplex):
 			self.Tetrahedra.remove(b.Tetrahedron)
 		if build:
 			self.clear_and_rebuild()
