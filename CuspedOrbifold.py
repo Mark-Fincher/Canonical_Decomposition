@@ -983,6 +983,9 @@ class CuspedOrbifold:
 	def three_to_six(self,two_subsimplex,tet):
 		if self.is_geometric:
 			One = self.complex_arithmetic_type.One()
+		else:
+			# For now, let's not allow a non-geometric 3-6 move.
+			return 0
 		if tet.Neighbor[two_subsimplex] is None:
 			return 0
 		if len(tet.Symmetries) != 2:
@@ -998,122 +1001,121 @@ class CuspedOrbifold:
 			return 0
 		a = Arrow(one_subsimplex,two_subsimplex,tet)
 		b = a.glued()
-		if self.is_geometric:
-			z = tet.edge_params[a.Edge]
-			w = voisin.edge_params[b.Edge]
-			if ((z*w*w).imag).evaluate() < 0:
-				return 0
-			flat_u0_u1_v1_w1 = False
-			flat_u0_u1_v0_w1 = False
-			z = tet.edge_params[a.south_head()]
-			w = voisin.edge_params[b.south_tail()]
-			if ((z*w).imag).evaluate() < 0:
-				return 0
-			if (z*w).imag == self.real_arithmetic_type.Zero():
-				flat_u0_u1_v1_w1 = True
-			z = tet.edge_params[a.north_head()]
-			w = voisin.edge_params[b.north_tail()]
-			if ((z*w).imag).evaluate() < 0:
-				return 0
-			if (z*w).imag == self.real_arithmetic_type.Zero():
-				flat_u0_u1_v0_w1 = True
-			if flat_u0_u1_v0_w1 and flat_u0_u1_v1_w1:
-				#Maybe this is actually a valid case, and it could be a valid case for
-				#the 2-3 move situation too. But for now, let's not allow it.
-				return 0
-		else:
-			# Get some complex numbers which we use to determine whether [u_0,w_1] is beneath, above, or
-			# intersecting [u_1,w_0]. Need to adjust this to allow for a non-geometric triangulation.
-			x = tet.edge_params[a.north_tail()]
-			y = voisin.edge_params[b.Edge]
-			z = voisin.edge_params[b.south_tail()]
-			w0 = One - One/(y - x*y + x)
-			complex_abs_w0 = ComplexSquareRootCombination(abs(w0),SquareRootCombination.Zero())
-			w1 = One - One/(x*z)
-			complex_abs_w1 = ComplexSquareRootCombination(abs(w1),SquareRootCombination.Zero())
-			# Create a new arrow for the new tetrahedron which is the image under the symmetry of b.Tetrahedron.
-			c = self.new_arrow()
-			c.glue(a)
-			# Link the vertices of c.Tetrahedron to the correct vertex classes.
-			c.Tetrahedron.Class[c.north_vertex()] = b.Tetrahedron.Class[b.north_vertex()]
-			c.Tetrahedron.Class[c.south_vertex()] = b.Tetrahedron.Class[b.south_vertex()]
-			c.Tetrahedron.Class[c.east_vertex()] = a.Tetrahedron.Class[a.west_vertex()]
-			c.Tetrahedron.Class[c.west_vertex()] = b.Tetrahedron.Class[b.east_vertex()]
-			# Give c.Tetrahedron the geometry making it a copy of b.Tetrahedron under the symmetry.
-			c.Tetrahedron.fill_edge_params(b.Tetrahedron.edge_params[b.Edge])
-			if ((w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate() or
-				(w0/complex_abs_w0).real == (w1/complex_abs_w1).real):
-				#This is the case [u_0,w_1] "beneath" or intersecting [u_1,w_0].
-				self.two_to_three(two_subsimplex,tet,0)
-				c.next()
-				new_c = c.copy().reverse()
-				c.opposite().next().reverse()
-				self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
-				new_c = c.copy()
-				c.reverse().next()
-				self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
-				d = c.copy()
-				c.reverse().next()
-				e = c.copy().opposite().reverse()
-				c.add_sym(e)
-				e.reverse().next()
-				c.next()
-				f = c.copy()
-				c.opposite().reverse().next()
-				c.add_sym(c.copy().opposite().reverse())
-				c.rotate(-1).next()
-				d.glue(e.glued())
-				e.rotate(1)
-				d.rotate(1)
-				if e.glued().Tetrahedron != None:
-					d.glue_as(e)
-				e.Tetrahedron.erase()
-				c.reverse().rotate(-1)
-				c.glue(f.glued())
-				f.Tetrahedron.erase()
-				self.Tetrahedra.remove(e.Tetrahedron)
-				self.Tetrahedra.remove(f.Tetrahedron)
-			elif (w0/complex_abs_w0).real.evaluate() > (w1/complex_abs_w1).real.evaluate():
-				#This is the case [u_0,w_1] "above" [u_1,w_0].
-				self.two_to_three(c.Face,c.Tetrahedron,0)
-				b.reverse()
-				new_b = b.copy()
-				b.next().opposite().next()
-				self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
-				new_b = b.copy().next()
-				self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
-				#Now add symmetries.
-				d = b.copy()
-				b.next()
-				b.add_sym(b.copy().opposite())
-				e = b.copy().opposite().reverse().next().reverse()
-				b.next()
-				f = b.copy()
-				b.opposite().next()
-				b.add_sym(b.copy().opposite())
-				b.rotate(1).next()
-				#Now we adjust face gluings and remove two tets.
-				d.rotate(1)
-				e.rotate(1)
-				if d.glued().Tetrahedron != None:
-					e.glue_as(d)
-				d.reverse()
-				e.reverse()
-				e.glue(d.glued())
-				d.Tetrahedron.erase()
-				b.rotate(-1)
-				f.reverse().rotate(1).reverse()
-				f.glue(b.glued())
-				b.Tetrahedron.erase()
-				self.Tetrahedra.remove(d.Tetrahedron)
-				self.Tetrahedra.remove(b.Tetrahedron)
-		for tet in self.Tetrahedra:
-			tet.fix_glued_to_self()
-		self.clear_and_rebuild()
-		return 1
+		z = tet.edge_params[a.Edge]
+		w = voisin.edge_params[b.Edge]
+		if ((z*w*w).imag).evaluate() < 0:
+			return 0
+		flat_u0_u1_v1_w1 = False
+		flat_u0_u1_v0_w1 = False
+		z = tet.edge_params[a.south_head()]
+		w = voisin.edge_params[b.south_tail()]
+		if ((z*w).imag).evaluate() < 0:
+			return 0
+		if (z*w).imag == self.real_arithmetic_type.Zero():
+			flat_u0_u1_v1_w1 = True
+		z = tet.edge_params[a.north_head()]
+		w = voisin.edge_params[b.north_tail()]
+		if ((z*w).imag).evaluate() < 0:
+			return 0
+		if (z*w).imag == self.real_arithmetic_type.Zero():
+			flat_u0_u1_v0_w1 = True
+		if flat_u0_u1_v0_w1 and flat_u0_u1_v1_w1:
+			#Maybe this is actually a valid case, and it could be a valid case for
+			#the 2-3 move situation too. But for now, let's not allow it.
+			return 0
+		# Get some complex numbers which we use to determine whether [u_0,w_1] is beneath, above, or
+		# intersecting [u_1,w_0]. Need to adjust this to allow for a non-geometric triangulation.
+		x = tet.edge_params[a.north_tail()]
+		y = voisin.edge_params[b.Edge]
+		z = voisin.edge_params[b.south_tail()]
+		w0 = One - One/(y - x*y + x)
+		complex_abs_w0 = ComplexSquareRootCombination(abs(w0),SquareRootCombination.Zero())
+		w1 = One - One/(x*z)
+		complex_abs_w1 = ComplexSquareRootCombination(abs(w1),SquareRootCombination.Zero())
+		# Create a new arrow for the new tetrahedron which is the image under the symmetry of b.Tetrahedron.
+		c = self.new_arrow()
+		c.glue(a)
+		# Link the vertices of c.Tetrahedron to the correct vertex classes.
+		c.Tetrahedron.Class[c.north_vertex()] = b.Tetrahedron.Class[b.north_vertex()]
+		c.Tetrahedron.Class[c.south_vertex()] = b.Tetrahedron.Class[b.south_vertex()]
+		c.Tetrahedron.Class[c.east_vertex()] = a.Tetrahedron.Class[a.west_vertex()]
+		c.Tetrahedron.Class[c.west_vertex()] = b.Tetrahedron.Class[b.east_vertex()]
+		# Give c.Tetrahedron the geometry making it a copy of b.Tetrahedron under the symmetry.
+		c.Tetrahedron.fill_edge_params(b.Tetrahedron.edge_params[b.Edge])
+		if ((w0/complex_abs_w0).real.evaluate() < (w1/complex_abs_w1).real.evaluate() or
+			(w0/complex_abs_w0).real == (w1/complex_abs_w1).real):
+			#This is the case [u_0,w_1] "beneath" or intersecting [u_1,w_0].
+			self.two_to_three(two_subsimplex,tet,0)
+			c.next()
+			new_c = c.copy().reverse()
+			c.opposite().next().reverse()
+			self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
+			new_c = c.copy()
+			c.reverse().next()
+			self.two_to_three(new_c.Face,new_c.Tetrahedron,0)
+			d = c.copy()
+			c.reverse().next()
+			e = c.copy().opposite().reverse()
+			c.add_sym(e)
+			e.reverse().next()
+			c.next()
+			f = c.copy()
+			c.opposite().reverse().next()
+			c.add_sym(c.copy().opposite().reverse())
+			c.rotate(-1).next()
+			d.glue(e.glued())
+			e.rotate(1)
+			d.rotate(1)
+			if e.glued().Tetrahedron != None:
+				d.glue_as(e)
+			e.Tetrahedron.erase()
+			c.reverse().rotate(-1)
+			c.glue(f.glued())
+			f.Tetrahedron.erase()
+			self.Tetrahedra.remove(e.Tetrahedron)
+			self.Tetrahedra.remove(f.Tetrahedron)
+		elif (w0/complex_abs_w0).real.evaluate() > (w1/complex_abs_w1).real.evaluate():
+			#This is the case [u_0,w_1] "above" [u_1,w_0].
+			self.two_to_three(c.Face,c.Tetrahedron,0)
+			b.reverse()
+			new_b = b.copy()
+			b.next().opposite().next()
+			self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
+			new_b = b.copy().next()
+			self.two_to_three(new_b.Face,new_b.Tetrahedron,0)
+			#Now add symmetries.
+			d = b.copy()
+			b.next()
+			b.add_sym(b.copy().opposite())
+			e = b.copy().opposite().reverse().next().reverse()
+			b.next()
+			f = b.copy()
+			b.opposite().next()
+			b.add_sym(b.copy().opposite())
+			b.rotate(1).next()
+			#Now we adjust face gluings and remove two tets.
+			d.rotate(1)
+			e.rotate(1)
+			if d.glued().Tetrahedron != None:
+				e.glue_as(d)
+			d.reverse()
+			e.reverse()
+			e.glue(d.glued())
+			d.Tetrahedron.erase()
+			b.rotate(-1)
+			f.reverse().rotate(1).reverse()
+			f.glue(b.glued())
+			b.Tetrahedron.erase()
+			self.Tetrahedra.remove(d.Tetrahedron)
+			self.Tetrahedra.remove(b.Tetrahedron)
+	for tet in self.Tetrahedra:
+		tet.fix_glued_to_self()
+		tet.remove_extra_glued_to_self()
+	self.clear_and_rebuild()
+	return 1
 
 	# Reverse of 3-6. This hasn't really been used yet, it might have bugs. It seems like it's
-	# not actually necessary for canonize.
+	# not actually necessary for canonize. For now, do not use this.
 	def six_to_three(self,edge):
 		#Try to do a 6-3 move, viewing edge as [w0,w1]. This gets complicated and requires a lot
 		#of checking before you know you can do the move. See my write-up.
@@ -1561,6 +1563,9 @@ class CuspedOrbifold:
 	where the labels are from my write-up. 
 	"""	
 	def four_to_four(self,edge):
+		if self.is_geometric is False:
+			# For now, only allow this move for geometric triangulations.
+			return 0
 		if edge.valence() != 4:
 			return 0
 		for corner in edge.Corners:
@@ -1730,8 +1735,7 @@ class CuspedOrbifold:
 	canonical decomposition. When there is a flat tet there, it's a special situation which must
 	be dealt with carefully when trying to canonize. 
 
-	The non-geometric version of this move is programmed in SimplicialOrbifold.
-	All that's new here is determining geometry.
+	This move is also important for non-geometric triangulations. It's used in canonize part 2.
 
 	Something that I didn't realize until recently is that there are two cases. When the symmetry axis
 	is horizontal, and when it's vertical.
@@ -1751,7 +1755,7 @@ class CuspedOrbifold:
 				return 0
 		# Now the arrow a is positioned as in the diagram (in the write-up) and we do
 		# the final checks.
-		if a.Tetrahedron.is_flat() == False:
+		if self.is_geometric and a.Tetrahedron.is_flat() == False:
 			return 0
 		sym = a.Tetrahedron.nontrivial_sym()
 		if sym.image(a.Edge) == a.Edge:
@@ -1774,30 +1778,32 @@ class CuspedOrbifold:
 			raise Exception('error in special_four_to_four')
 		new = self.new_arrows(3)
 		# First we take care of geometry.
-		One = ComplexSquareRootCombination.One()
-		# u0 = shape of (y1,x4) in (y1,x1,x2,x4)
-		u0 = b.Tetrahedron.edge_params[b.north_head()]
-		# u1 = shape of (y1,x4) in (y1,x2,x3,x4)
-		u1 = c.Tetrahedron.edge_params[c.north_tail()]
-		# w0, w1, and w2 are points in the complex plane, ideal points of the octahedron.
-		w0 = u0*u1
-		w1 = u1
+		if self.is_geometric:
+			One = ComplexSquareRootCombination.One()
+			# u0 = shape of (y1,x4) in (y1,x1,x2,x4)
+			u0 = b.Tetrahedron.edge_params[b.north_head()]
+			# u1 = shape of (y1,x4) in (y1,x2,x3,x4)
+			u1 = c.Tetrahedron.edge_params[c.north_tail()]
+			# w0, w1, and w2 are points in the complex plane, ideal points of the octahedron.
+			w0 = u0*u1
+			w1 = u1
+			if case == 'horizontal':
+				w2 = One - One/u0 + u1
+			if case == 'vertical':
+				w2 = (One - u1)*(u0*u1 - One) + One
+			# z0 = shape of (y1,x4) in (y1,y2,x1,x4)
+			z0 = w0/w2
+			# z1 = shape of (y1,y2) in (y1,y2,x2,x3)
+			z1 = (One - w2)*w1/(w1 - w2)
+			# z2 = shape of (y1,x4) in (y1,y2,x3,x4)
+			z2 = w2
+			# z3 = shape of (y1,y2) in (y1,y2,x1,x2)
+			z3 = (w1 - w2)*w0/(w1*(w0 - w2))		
 		if case == 'horizontal':
-			w2 = One - One/u0 + u1
-		if case == 'vertical':
-			w2 = (One - u1)*(u0*u1 - One) + One
-		# z0 = shape of (y1,x4) in (y1,y2,x1,x4)
-		z0 = w0/w2
-		# z1 = shape of (y1,y2) in (y1,y2,x2,x3)
-		z1 = (One - w2)*w1/(w1 - w2)
-		# z2 = shape of (y1,x4) in (y1,y2,x3,x4)
-		z2 = w2
-		# z3 = shape of (y1,y2) in (y1,y2,x1,x2)
-		z3 = (w1 - w2)*w0/(w1*(w0 - w2))		
-		if case == 'horizontal':
-			new[0].Tetrahedron.fill_edge_params(z1)
-			new[1].Tetrahedron.fill_edge_params(One/(One - z2))
-			new[2].Tetrahedron.fill_edge_params(One - One/z0)
+			if self.is_geometric:
+				new[0].Tetrahedron.fill_edge_params(z1)
+				new[1].Tetrahedron.fill_edge_params(One/(One - z2))
+				new[2].Tetrahedron.fill_edge_params(One - One/z0)
 			for i in range(3):
 				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			for i in range(2):
@@ -1808,6 +1814,31 @@ class CuspedOrbifold:
 			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(1))
 			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(1))
 			new[2].copy().opposite().glue_as(b.copy().rotate(-1))
+			# Set the edge labels.
+			new[0].Tetrahedron.edge_labels = {
+				new[0].equator(): c_tet.edge_labels[c.south_head()],
+				new[0].axis(): 1,
+				new[0].north_head(): c_tet.edge_labels[c.equator()],
+				new[0].north_tail(): c_tet.edge_labels[c.south_tail()],
+				new[0].south_head(): c_tet.edge_labels[c.south_tail()],
+				new[0].south_tail(): c_tet.edge_labels[c.equator()] 
+				}
+			new[1].Tetrahedron.edge_labels = {
+				new[1].equator(): c_tet.edge_labels[c.north_head()],
+				new[1].axis(): 1,
+				new[1].north_head(): c_tet.edge_labels[c.north_tail()],
+				new[1].north_tail(): c_tet.edge_labels[c.equator()],
+				new[1].south_head(): b_tet.edge_labels[b.equator()],
+				new[1].south_tail(): c_tet.edge_labels[c.south_tail()] 
+				}
+			new[2].Tetrahedron.edge_labels = {
+				new[2].equator(): b_tet.edge_labels[b.north_tail()],
+				new[2].axis(): 1,
+				new[2].north_head(): b_tet.edge_labels[b.equator()],
+				new[2].north_tail(): c_tet.edge_labels[c.north_tail()],
+				new[2].south_head(): c_tet.edge_labels[c.north_tail()],
+				new[2].south_tail(): b_tet.edge_labels[b.equator()] 
+				}
 			# Link the vertices of the new tetrahedra to existing vertex classes.
 			# new[0]
 			new[0].Tetrahedron.Class[new[0].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
@@ -1825,9 +1856,10 @@ class CuspedOrbifold:
 			new[2].Tetrahedron.Class[new[2].east_vertex()] = b.Tetrahedron.Class[b.west_vertex()]
 			new[2].Tetrahedron.Class[new[2].west_vertex()] = c.Tetrahedron.Class[c.north_vertex()]
 		if case == 'vertical':
-			new[0].Tetrahedron.fill_edge_params(z3)
-			new[1].Tetrahedron.fill_edge_params(z1)
-			new[2].Tetrahedron.fill_edge_params(One/(One - z2))
+			if self.is_geometric:
+				new[0].Tetrahedron.fill_edge_params(z3)
+				new[1].Tetrahedron.fill_edge_params(z1)
+				new[2].Tetrahedron.fill_edge_params(One/(One - z2))
 			for i in range(3):
 				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
 			for i in range(2):
@@ -1838,6 +1870,31 @@ class CuspedOrbifold:
 			new[1].copy().opposite().glue_as(c.copy().reverse().rotate(-1))
 			new[1].copy().opposite().reverse().glue_as(b.copy().rotate(-1))
 			new[2].copy().opposite().glue_as(c.copy().reverse().rotate(1))
+			# Set the edge labels.
+			new[0].Tetrahedron.edge_labels = {
+				new[0].equator(): b_tet.edge_labels[b.south_tail()],
+				new[0].axis(): 1,
+				new[0].north_head(): c_tet.edge_labels[south_tail()],
+				new[0].north_tail(): b_tet.edge_labels[b.equator()],
+				new[0].south_head(): b_tet.edge_labels[b.equator()],
+				new[0].south_tail(): c_tet.edge_labels[c.south_tail()] 
+				}
+			new[1].Tetrahedron.edge_labels = {
+				new[1].equator(): c_tet.edge_labels[c.south_head()],
+				new[1].axis(): 1,
+				new[1].north_head(): c_tet.edge_labels[c.equator()],
+				new[1].north_tail(): c_tet.edge_labels[c.south_tail()],
+				new[1].south_head(): c_tet.edge_labels[c.north_tail()],
+				new[1].south_tail(): b_tet.edge_labels[b.equator()] 
+				}
+			new[2].Tetrahedron.edge_labels = {
+				new[2].equator(): c_tet.edge_labels[c.north_head()],
+				new[2].axis(): 1,
+				new[2].north_head(): c_tet.edge_labels[c.north_tail()],
+				new[2].north_tail(): c_tet.edge_labels[c.equator()],
+				new[2].south_head(): c_tet.edge_labels[c.equator()],
+				new[2].south_tail(): c_tet.edge_labels[c.north_tail()] 
+				}
 			# Link the vertices of the new tetrahedra to existing vertex classes.
 			# new[0]
 			new[0].Tetrahedron.Class[new[0].north_vertex()] = c.Tetrahedron.Class[c.west_vertex()]
