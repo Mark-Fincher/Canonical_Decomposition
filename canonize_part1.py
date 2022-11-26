@@ -42,9 +42,9 @@ def proto_canonize(orb):
 		if attempt_four_to_four(orb):
 			print("did 4-4 move")
 			continue
-		if attempt_six_to_three(orb):
-			print("did 6-3 move")
-			continue
+		#if attempt_six_to_three(orb):
+		#	print("did 6-3 move")
+		#	continue
 		if attempt_retriangulate_cube(orb):
 			print("retriangulated a cube")
 			continue

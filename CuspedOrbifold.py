@@ -111,14 +111,14 @@ class CuspedOrbifold:
 			return
 		for tet in self.Tetrahedra:
 			tet.edge_params = {E01:None,E23:None,E02:None,E13:None,E03:None,E12:None}
-        	tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
-        self.is_geometric = False
+			tet.horotriangles = {V0:None, V1:None, V2:None, V3:None}
+		self.is_geometric = False
 
 	"""
 	Clear all classes and horotriangles, then rebuild this data. Want to do this after changing
 	the triangulation.
 	"""
-	def clear_and_rebuild(self):
+	def old_clear_and_rebuild(self):
 		self.Edges = []
 		self.Vertices = []
 		for tet in self.Tetrahedra:
@@ -152,7 +152,7 @@ class CuspedOrbifold:
 	vertex classes correspond exactly to cusps). But we DO have to worry about that for a non-geometric Pachner move (i.e. for
 	SimplicialOrbifold objects).
 	"""
-	def clear_and_rebuild_new(self):
+	def clear_and_rebuild(self):
 		# Reset the tet indices.
 		for i in range(len(self.Tetrahedra)):
 			self.Tetrahedra[i].Index = i
@@ -175,6 +175,7 @@ class CuspedOrbifold:
 			vertex.Corners = [Corner(pair[0],pair[1]) for pair in Tets_ZeroSubsimplices if pair[0].Class[pair[1]] is vertex]
 		# Let's do a check that the vertex classes are correct.
 		self.check_vertex_classes()
+		self.check_edge_classes()
 		# Now re-build horotriangles/cusp geometry. Note that we couldn't do this until we had correct vertex classes.
 		if self.is_geometric:
 			self.add_cusp_cross_sections()
@@ -186,7 +187,7 @@ class CuspedOrbifold:
 		seen_vertex_classes = []
 		for tet in self.Tetrahedra:
 			for zero_subsimplex in ZeroSubsimplices:
-				seen_vertex_class.append(tet.Class[zero_subsimplex])
+				seen_vertex_classes.append(tet.Class[zero_subsimplex])
 				for sym in tet.Symmetries:
 					assert tet.Class[zero_subsimplex] == tet.Class[sym.image(zero_subsimplex)]
 				for two_subsimplex in TwoSubsimplices:
@@ -194,7 +195,24 @@ class CuspedOrbifold:
 						nbr = tet.Neighbor[two_subsimplex]
 						gluing = tet.Gluing[two_subsimplex]
 						assert tet.Class[zero_subsimplex] == nbr.Class[gluing.image(zero_subsimplex)]
-		assert set(seen_vertex_class) == set(self.Vertices)
+		assert set(seen_vertex_classes) == set(self.Vertices)
+
+	def check_edge_classes(self):
+		seen_edge_classes = []
+		for tet in self.Tetrahedra:
+			for one_subsimplex in OneSubsimplices:
+				edge = tet.Class[one_subsimplex]
+				seen_edge_classes.append(edge)
+				assert edge != None
+				for sym in tet.Symmetries:
+					assert tet.edge_labels[one_subsimplex] == edge.LocusOrder
+				for two_subsimplex in TwoSubsimplices:
+					if is_subset(one_subsimplex,two_subsimplex):
+						nbr = tet.Neighbor[two_subsimplex]
+						perm = tet.Gluing[two_subsimplex]
+						if nbr is not None:
+							assert tet.edge_labels[one_subsimplex] == nbr.edge_labels[perm.image(one_subsimplex)]
+		assert set(seen_edge_classes) == set(self.Edges)
 
 	def add_tet(self, tet):
 		self.Tetrahedra.append(tet)
@@ -444,9 +462,9 @@ class CuspedOrbifold:
 						for sym in corner.Tetrahedron.Symmetries:
 							corner.Tetrahedron.Class[sym.image(corner.Subsimplex)] = newEdge
 					#Now we figure out the order of the local group fixing newEdge.
-					if newEdge.Corners[0].Tetrahedron.edge_labels[Corners.Subsimplex] is not None:
+					if newEdge.Corners[0].Tetrahedron.edge_labels[newEdge.Corners[0].Subsimplex] is not None:
 						# Then just use this edge label to set the LocusOrder.
-						newEdge.LocusOrder = newEdge.Corners[0].Tetrahedron.edge_labels[Corners.Subsimplex]
+						newEdge.LocusOrder = newEdge.Corners[0].Tetrahedron.edge_labels[newEdge.Corners[0].Subsimplex]
 					elif self.is_geometric:
 						z = self.complex_arithmetic_type.One()
 						for corner in newEdge.Corners:
@@ -474,6 +492,15 @@ class CuspedOrbifold:
 		# Set the indices of the edges.				
 		for i in range(len(self.Edges)):
 			self.Edges[i].Index = i
+
+	# We use the following in cancel_tetrahedra, because we collapse an edge into the singular locus.
+	def change_edge_labels(self,edge,new_label):
+		for corner in edge.Corners:
+			tet = corner.Tetrahedron
+			one_subsimplex = corner.Subsimplex
+			for sym in tet.Symmetries:
+				tet.edge_labels[sym.image(one_subsimplex)] = new_label
+		edge.LocusOrder = new_label
 
 	# Checks if the triangulation is proto_canonical or not.
 	def is_proto_canonical(self):
@@ -1024,7 +1051,7 @@ class CuspedOrbifold:
 			#the 2-3 move situation too. But for now, let's not allow it.
 			return 0
 		# Get some complex numbers which we use to determine whether [u_0,w_1] is beneath, above, or
-		# intersecting [u_1,w_0]. Need to adjust this to allow for a non-geometric triangulation.
+		# intersecting [u_1,w_0]. Need to adjust this to allow for a non-geometric triangulation and general arithmetic class.
 		x = tet.edge_params[a.north_tail()]
 		y = voisin.edge_params[b.Edge]
 		z = voisin.edge_params[b.south_tail()]
@@ -1108,11 +1135,11 @@ class CuspedOrbifold:
 			b.Tetrahedron.erase()
 			self.Tetrahedra.remove(d.Tetrahedron)
 			self.Tetrahedra.remove(b.Tetrahedron)
-	for tet in self.Tetrahedra:
-		tet.fix_glued_to_self()
-		tet.remove_extra_glued_to_self()
-	self.clear_and_rebuild()
-	return 1
+		for tet in self.Tetrahedra:
+			tet.fix_glued_to_self()
+			tet.remove_extra_glued_to_self()
+		self.clear_and_rebuild()
+		return 1
 
 	# Reverse of 3-6. This hasn't really been used yet, it might have bugs. It seems like it's
 	# not actually necessary for canonize. For now, do not use this.
@@ -1779,7 +1806,7 @@ class CuspedOrbifold:
 		new = self.new_arrows(3)
 		# First we take care of geometry.
 		if self.is_geometric:
-			One = ComplexSquareRootCombination.One()
+			One = self.complex_arithmetic_type.One()
 			# u0 = shape of (y1,x4) in (y1,x1,x2,x4)
 			u0 = b.Tetrahedron.edge_params[b.north_head()]
 			# u1 = shape of (y1,x4) in (y1,x2,x3,x4)
@@ -1920,11 +1947,124 @@ class CuspedOrbifold:
 
 
 	"""
-	We use the following to try to get rid of flat tetrahedra. If two are glued to themselves in a
-	certain way, or one is glued to itself in a certain way, then it will be "cancelled" out by this
-	function. This is the orbifold version of a 2-0 move. See the write-up for more detail.
+	I'm migrating SimplicialOrbifold into CuspedOrbifold. Because cancel_tetrahedra doesn't really have anything to
+	do with the geometric structure anyway, I will just use the cancel_tetrahedra code from SimplicialOrbifold. I will
+	keep the CuspedOrb code for now in case some issues come up later, and call it CuspOrb_cancel_tetrahedra.
 	"""
+
 	def cancel_tetrahedra(self,edge):
+		# First check valence and locus order.
+		if edge.valence() == 2 and edge.LocusOrder == 1:
+			case = 1
+		elif edge.valence() == 1 and edge.LocusOrder == 2:
+			case = 2
+		else:
+			return 0
+		a = edge.get_arrow()
+		if a.copy().next() is None:
+			a.reverse()
+		# We need to make sure the one-simplex opposite edge has label 1, because we are collapsing it.
+		# We do this check in the cases below.
+		# We don't want to try the cancellation if there are certain nontrivial symmetries.
+		# They probably couldn't be there anyway for a geometric triangulation.
+		for sym in a.Tetrahedron.Symmetries:
+			if sym.image(a.Edge) != a.Edge:
+				return 0
+		if case == 1:
+			# valence 2, locus order 1.
+			# Then the possible sub-cases are:
+			# 1. A single tet with faces properly glued to themselves, and without the symmetry.
+			# 2. Two tets without the symmetry.
+			# 3. Two tets both with the symmetry.
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				# Check the one-simplex opposite edge has label 1.
+				if a.Tetrahedron.edge_labels[a.equator()] != 1:
+					return 0
+				# Check it's glued to itself properly.
+				perm = a.Tetrahedron.Gluing[a.Face]
+				if perm.image(a.Edge) != a.Edge:
+					return 0
+				b = a.copy().opposite()
+				if len(a.Tetrahedron.Symmetries) != 1:
+					# Don't think this can happen.
+					return 0	
+				c = b.copy().reverse()
+				b.next().reverse()
+				b.glue(c.glued())
+				new_edge = b.Tetrahedron.Class[b.Edge]	
+				self.change_edge_labels(new_edge, 2)
+				self.Tetrahedra.remove(a.Tetrahedron)
+			else:
+				#In this case there are two distinct tetrahedra.
+				b = a.glued()
+				#Make sure the other tet doesn't have any illegal symmetries.
+				for sym in b.Tetrahedron.Symmetries:
+					if sym.image(b.Edge) != b.Edge:
+						return 0
+				#Another sanity check.
+				if len(a.Tetrahedron.Symmetries) != len(b.Tetrahedron.Symmetries):
+					return 0
+				# Check that at least one of the two one-simplices opposite edge is labelled 1.
+				if a.Tetrahedron.edge_labels[a.equator()] == 1: 
+					new_label = b.Tetrahedron.edge_labels[b.equator()]
+				elif b.Tetrahedron.edge_labels[b.equator()] == 1:
+					new_label = a.Tetrahedron.edge_labels[a.equator()]
+				else:
+					return 0 
+				#Now there are two cases: they have the nontrivial symmetry or not.
+				a.opposite()
+				b.opposite()
+				if len(a.Tetrahedron.Symmetries) == 1:
+					c = a.copy().next().reverse()
+					c.glue(b.glued())
+					a.reverse()
+					b.reverse()
+					c = a.copy().next().reverse()
+					c.glue(b.glued())
+				else:
+					if a.copy().next() is None:
+						a.reverse()
+						b.reverse()
+					c = a.copy().next().reverse()
+					if b.copy().next() is None:
+						c.glue(b.reverse().glued())
+					else:
+						c.glue(b.glued())
+				new_edge = c.Tetrahedron.Class[c.Edge]	
+				self.change_edge_labels(new_edge, new_label)
+				self.Tetrahedra.remove(a.Tetrahedron)
+				self.Tetrahedra.remove(b.Tetrahedron)
+		if case == 2:
+			# valence 1, locus order 2.
+			# Then there are two sub-cases. 
+			# 1. A single tet with faces adjacent to the edge glued to each other, with
+			# a nontrivial symmetry taking the edge to itself. 
+			# 2. A single tet with no non-trivial symmetries, the faces adjacent to the edge
+			# glued to each other via a map which fixes the edge.
+			if a.Tetrahedron.edge_labels[a.equator()] != 1:
+				return 0
+			b = a.copy().opposite()
+			if len(a.Tetrahedron.Symmetries) == 2:
+				# Sub-case 1.
+				if b.copy().next() is None:
+					b.reverse()
+				b.next().reverse()
+				b.glue(b.copy().reverse())
+				new_edge = b.Tetrahedron.Class[b.Edge]
+				self.change_edge_labels(new_edge, 2)
+				self.Tetrahedra.remove(a.Tetrahedron)
+			else:
+				# Sub-case 2.
+				b.next().reverse()
+				b.glue(b.copy().reverse())
+				b = a.copy().opposite().reverse()
+				b.next().reverse()
+				b.glue(b.copy().reverse())
+				self.Tetrahedra.remove(a.Tetrahedron)
+		self.clear_and_rebuild()
+		return 1
+
+	def CuspOrb_cancel_tetrahedra(self,edge):
 		if edge.valence() == 2 and edge.LocusOrder == 1:
 			#Then the adjacent tet(s) are/is definitely flat. The possible cases are:
 			#1. A single tet with faces properly glued to themselves, and without the symmetry.
@@ -2025,8 +2165,10 @@ class CuspedOrbifold:
 		return 1
 
 
-
+	# For now, let's only allow this for geometric triangulations.
 	def retriangulate_cube(self,two_subsimplex,tet):
+		if self.is_geometric is False:
+			return 0
 		neighbor = tet.Neighbor[two_subsimplex]
 		if neighbor is None or neighbor is tet:
 			return 0
@@ -2192,6 +2334,238 @@ class CuspedOrbifold:
 			return 0
 		self.clear_and_rebuild()
 		return 1
+
+
+	"""
+	Sometimes we can collapse a tetrahedron onto one of its faces. We need this
+	move in canonize_part2 when a face internal to the polyhedron is glued to itself.
+	This can arise after a 1-4 move when one of the faces of the original tetrahedron
+	is glued to itself.
+
+	I don't currently have plans to use this anywhere other than canonize_part2.
+
+	We don't do this move for geometric triangulations.
+	"""
+	def one_to_zero(self, two_subsimplex, tet):
+		if self.is_geometric:
+			return 0
+		# Check that two_subsimplex is glued to itself.
+		if tet.face_glued_to_self(two_subsimplex) is False:
+			return 0
+		# Now check that the "internal" edges have label 1. These are the edges of
+		# tet which contain the vertex opposite two_subsimplex.
+		inner_vertex = comp(two_subsimplex)
+		for one_subsimplex in OneSubsimplices:
+			if is_subset(inner_vertex,one_subsimplex) and tet.edge_labels[one_subsimplex] != 1:
+				return 0
+		# Find the edge which is mapped to itself by the face gluing map.
+		perm = tet.Gluing[two_subsimplex]
+		for one_subsimplex in OneSubsimplices:
+			if (is_subset(one_subsimplex,two_subsimplex) and 
+				perm.image(one_subsimplex) == one_subsimplex):
+				break
+		# We have two cases. When the symmetry group of tet has 3 elements,
+		# the rotations of two_subsimplex, or when the symmetry group is trivial.
+		# In either case, we start with this arrow.
+		a = Arrow(one_subsimplex,two_subsimplex,tet)
+		if len(tet.Symmetries) == 1:
+			b = a.copy().opposite().reverse().next().reverse()
+			c = a.copy().opposite().next()
+			d = a.copy().reverse().next().reverse()
+			# One final check: let's make sure that the tetrahedra these arrows belong
+			# to are distinct.
+			# (Actually this might not be necessary. Might change this.)
+			tets_list = [e.Tetrahedron for e in (a,b,c,d)]
+			if len(tets_list) != len(set(tets_list)):
+				return 0
+			b.glue(c)
+			d.glue(d.copy().reverse())
+			# Now we adjust the edge labels.
+			b.Tetrahedron.edge_labels[b.axis()] = 2
+			c.Tetrahedron.edge_labels[c.axis()] = 2
+		elif len(tet.Symmetries) == 3 and tet.face_rotation(two_subsimplex):
+			b = a.copy().reverse().true_next().reverse()
+			if a.Tetrahedron is b.Tetrahedron:
+				return 0
+			b.glue(b.copy().reverse())
+			b.Tetrahedron.edge_labels[b.north_head()] = 2
+			b.Tetrahedron.edge_labels[b.south_head()] = 2
+		else:
+			return 0
+		self.Tetrahedra.remove(tet)
+		self.clear_and_rebuild()
+		return 1
+
+
+	"""
+	The folowing method does the stellar move on a given edge. In other words, it introduces a
+	finite vertex in the edge and cones the boundary of the star of the edge to that vertex. We only
+	do it for non-geometric triangulations.
+
+	The tetrahedra around the edge are allowed to have the non-trivial order 2 symmetry which maps
+	that edge to itself, but no other symmetries are allowed. We also require that any tet belonging
+	to the star of the edge only has a single 1-simplex belonging to that edge's class (this actually
+	implies the previous requirement about symmetries).
+	"""
+	def stellar_edge_move(self,edge):
+		# Check if the move is possible.
+		if self.is_geometric:
+			return 0
+		for corner in edge.Corners:
+			tet = corner.Tetrahedron
+			one_subsimplex = corner.Subsimplex
+			for other_one_subsimplex in OneSubsimplices:
+				if (other_one_subsimplex != one_subsimplex and 
+					tet.Class[other_one_subsimplex] == tet.Class[one_subsimplex]):
+					return 0
+		# Now we know the move is possible.
+		# Our next step it to find a tet with the symmetry or with a face
+		# adjacent to edge which is glued to itself.
+		a = edge.get_arrow()
+		for i in range(len(edge.Corners)):
+			if len(a.Tetrahedron.Symmetries) == 2:
+				if a.glued().Tetrahedron is None:
+					a.reverse()
+				break
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				a.reverse()
+				break
+			a.reverse()
+			if a.Tetrahedron.face_glued_to_self(a.Face):
+				a.reverse()
+				break
+			a.reverse().next()
+		# If a tet had the symmetry or a face glued to itself, then 'a' is now
+		# in that tet. Otherwise, 'a' is just in some arbitrary tet containing
+		# the edge.
+		# Now we want to divide up a.Tetrahedron into two tets if it doesn't
+		# have the symmetry, or one tet if it does.
+		first_arrow = a.copy()
+		if len(a.Tetrahedron.Symmetries) == 2:
+			first_new = self.new_arrows(1)
+			first_new[0].glue(first_new[0].copy().reverse())
+			first_new[0].copy().reverse().true_glue_as(a.copy().opposite().reverse())
+		else:
+			first_new = self.new_arrows(2)
+			first_new[0].glue(first_new[1].copy().reverse())
+			first_new[0].copy().reverse().glue_as(a.copy().opposite().reverse())
+			first_new[1].copy().reverse().glue_as(a.copy().opposite())
+		# Make a new vertex class representing the newly created vertex inside edge.
+		new_vertex = Vertex()
+		extend_stellar_subdivision(a, first_new, new_vertex)
+		return 1
+		
+
+	"""
+	Helper function for the stellar_edge_move function above.
+
+	The arrow a is in an old tet around the edge. new is a list with one or two elements,
+	which are arrows for the new tets which are in a.Tetrahedron. We check if we've
+	seen all tetrahedra already. If not, we continue it one more step into a.next(),
+	and recurse.
+
+	new_vertex is the vertex class for the finite vertex inside the edge. We need to pass it
+	along in this function so we can correctly link the zero subsimplices of the newly created
+	tets to vertex classes. We want to pass on all the old vertex classes. The only new one is
+	new_vertex.
+	"""
+	def extend_stellar_subdivision(self, a, new, new_vertex):
+		tet = a.Tetrahedron
+		# Assign the edge labels, canonize info, and pass on vertex classes for the new tets.
+		b = a.copy()
+		for c in new:
+			c.Tetrahedron.edge_labels = {
+				c.equator(): tet.edge_labels[b.axis()],
+				c.axis(): tet.edge_labels[b.equator()],
+				c.north_head(): 1,
+				c.north_tail(): tet.edge_labels[b.south_head()],
+				c.south_head(): 1,
+				c.south_tail(): tet.edge_labels[b.south_tail()] 
+				}
+			if tet.canonize_info is not None:
+				c.Tetrahedron.canonize_info = CanonizeInfo()
+				c.Tetrahedron.canonize_info.part_of_coned_cell = True
+				c.Tetrahedron.canonize_info.is_flat = False
+				c.Tetrahedron.canonize_info.face_status = {
+					c.north_face(): 2,
+					c.south_face(): 2,
+					c.east_face(): 2,
+					c.west_face(): tet.canonize_info.face_status[b.south_face()]
+					}
+			c.Tetrahedron.Class[c.north_vertex()] = tet.Class[b.east_vertex()]
+			c.Tetrahedron.Class[c.south_vertex()] = tet.Class[b.west_vertex()]
+			c.Tetrahedron.Class[c.east_vertex()] = new_vertex
+			c.Tetrahedron.Class[c.west_vertex()] = tet.Class[b.south_vertex()]
+			b.reverse()
+		# If either of the faces of tet adjacent to the edge are glued to themselves,
+		# then we'll actually change some of the labels from 1 to 2. We do this later.
+		# Now check if we've run through every tet in the star of the edge.
+		# This will be true exactly when one of the following occurs.
+		# 1. a.glued() == first_arrow.
+		# 2. a.glued() == a.copy().reverse()
+		# 3. a.glued().Tetrahedron is None
+		# In (2), the face is glued to itself.
+		# In (3), a.Tetrahedron has the symmetry and it is not the first tet.
+		# If (2) occurs and a.Tetrahedron has the symmetry, then it must be
+		# the first tet.
+		if a.glued().Tetrahedron is None:
+			self.Tetrahedra.remove(tet)
+			self.clear_and_rebuild()
+			return
+		elif a.glued() == first_arrow:
+			# In this case, it must be that there was no symmetry nor face glued to self.
+			new[0].copy().opposite().glue(first_new[0].copy().opposite())
+			new[1].copy().opposite().reverse().glue(first_new[1].copy().opposite().reverse())
+			self.Tetrahedra.remove(tet)
+			self.clear_and_rebuild()
+			return
+		elif a.glued() == a.copy().reverse():
+			# Correct the edge labels.
+			if len(tet.Symmetries) == 2:
+				# Note this can only happen if a == first_arrow.
+				# So the next case below is the other thing that can happen
+				# if a == first_arrow.
+				new[0].edge_labels[new[0].north_head()] = 2
+				new[0].edge_labels[new[0].south_head()] = 2
+				new[0].copy().opposite().glue(new[0].copy().opposite())
+			elif a == first_arrow:
+				# Then there is no sym, and both adjacent faces are glued to themselves.
+				for c in new:
+					c.edge_labels[c.north_head()] = 2
+					c.edge_labels[c.south_head()] = 2
+				new[0].copy().reverse().rotate(1).glue(new[1].copy().opposite().rotate(-1))
+				new[1].copy().reverse().rotate(1).glue(new[0].copy().opposite().rotate(-1))
+			else:
+				new[0].edge_labels[north_head()] = 2
+				new[1].edge_labels[south_head()] = 2
+				new[0].copy().reverse().rotate(1).glue(new[1].copy().opposite().rotate(-1))
+			self.Tetrahedra.remove(tet)
+			self.clear_and_rebuild()
+			return
+		# If we've gotten to this point, then we know a.glued() lies in a new tet we must
+		# extend to.
+		b = a.glued()
+		next_tet = b.Tetrahedron
+		if len(next_tet.Symmetries) == 2:
+			next_arrows = self.new_arrows(1)
+			next_arrows[0].glue(next_arrows[0].copy().reverse())
+			new[0].copy().opposite().glue(next_arrows[0].copy().opposite())
+			next_arrows[0].copy().reverse().true_glue_as(b.copy().opposite().reverse())
+			if len(tet.Symmetries) == 2:
+				new[0].copy().opposite().reverse().glue(next_arrows[0].copy().opposite().reverse())
+			else:
+				new[1].copy().opposite().reverse().glue(next_arrows[0].copy().opposite().reverse())
+		else:
+			next_arrows = self.new_arrows(2)
+			next_arrows[0].glue(next_arrows[1].copy().reverse())
+			new[0].copy().opposite().glue(next_arrows[0].copy().opposite())
+			if len(tet.Symmetries) == 2:
+				new[0].copy().opposite().reverse().glue(next_arrows[1].copy().opposite().reverse())
+			else:
+				new[1].copy().opposite().reverse().glue(next_arrows[1].copy().opposite().reverse())
+				next_arrows[0].copy().reverse().glue_as(b.copy().opposite().reverse())
+				next_arrows[1].copy().reverse().glue_as(b.copy().opposite())
+		self.extend_stellar_subdivision(b, next_arrows, new_vertex)
 
 
 

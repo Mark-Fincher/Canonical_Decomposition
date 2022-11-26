@@ -259,6 +259,8 @@ def eliminate_opaque_face(orb):
 						return True
 	return False
 
+# Note: I'm migrating the SimplicialOrbifold class into CuspedOrbifold. The 4-4 move in SimplicialOrb is called
+# special 4-4 in CuspedOrb. So should change the four_to_four call here to special_four_to_four. In progress.
 def opaque_four_to_four(face,tet):
 	nbr = tet.Neighbor[face]
 	if len(nbr.Symmetries) != 2:
