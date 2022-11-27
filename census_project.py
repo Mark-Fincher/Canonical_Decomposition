@@ -24,10 +24,15 @@ with open("48seqs.json", "r") as read_file:
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
+
 for key in OrbDictionary.keys():
 	dest = OrbDictionary[key]
 	orb = dest_to_orb(dest)
-	print(proto_canonize(orb))
+	if proto_canonize(orb):
+		print('proto_canonize succeeded')
+	else:
+		raise Exception('proto_canonize failed on dest',dest)
+	
 
 
 # Covers of O(20,5).
