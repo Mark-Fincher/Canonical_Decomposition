@@ -14,6 +14,7 @@ from arrow import Arrow
 from edge import Edge
 from vertex import Vertex
 from Exact_Arithmetic import*
+from CanonizeInfo import CanonizeInfo
 
 class CuspedOrbifold:
 	def __init__(self,tets_list):
@@ -176,6 +177,20 @@ class CuspedOrbifold:
 		# Let's do a check that the vertex classes are correct.
 		self.check_vertex_classes()
 		self.check_edge_classes()
+		if self.is_geometric:
+			for tet in self.Tetrahedra:
+				for one_subsimplex in OneSubsimplices:
+					z = tet.edge_params[one_subsimplex]
+					if z.imag.evaluate() < 0:
+						raise Exception('bad geometry')
+		# Assign indices to any newly created vertices.
+		vert_indices = [vertex.Index for vertex in self.Vertices]
+		max_index = max(vert_indices)
+		i = 1
+		for vertex in self.Vertices:
+			if vertex.Index == -1:
+				vertex.Index = max_index + i
+				i = i + 1
 		# Now re-build horotriangles/cusp geometry. Note that we couldn't do this until we had correct vertex classes.
 		if self.is_geometric:
 			self.add_cusp_cross_sections()
@@ -213,6 +228,23 @@ class CuspedOrbifold:
 						if nbr is not None:
 							assert tet.edge_labels[one_subsimplex] == nbr.edge_labels[perm.image(one_subsimplex)]
 		assert set(seen_edge_classes) == set(self.Edges)
+		if self.is_geometric:
+			for edge in self.Edges:
+				z = self.complex_arithmetic_type.One()
+				for corner in edge.Corners:
+					z = z*corner.Tetrahedron.edge_params[corner.Subsimplex]
+				# LocusOrder is the smallest positive integer n such that z^n == 1.
+				n = 0
+				w = self.complex_arithmetic_type.One()
+				while n < 1000:
+					w = w*z
+					n = n + 1
+					# So w = z^n
+					if w == self.complex_arithmetic_type.One():
+						assert edge.LocusOrder == n
+						break
+				else:
+					raise Exception('error getting edge locus order in check_edge_classes')
 
 	def add_tet(self, tet):
 		self.Tetrahedra.append(tet)
@@ -1027,7 +1059,7 @@ class CuspedOrbifold:
 		b = a.glued()
 		z = tet.edge_params[a.Edge]
 		w = voisin.edge_params[b.Edge]
-		if ((z*w*w).imag).evaluate() < 0:
+		if ((z*w*w).imag).evaluate() < 0 or (z*w*w).imag == self.real_arithmetic_type.Zero():
 			return 0
 		flat_u0_u1_v1_w1 = False
 		flat_u0_u1_v0_w1 = False
@@ -1574,11 +1606,11 @@ class CuspedOrbifold:
 
 	"""
 	4-4 move around a valence 4 edge. In the case that there are 4 distinct tetrahedra, none of them
-	having symmetries, this is just the usual manifold 4-4 move. 
+	having symmetries, and the edge having LocusOrder 1, this is just the usual manifold 4-4 move. 
 
 	The union of the 4 tetrahedra is an octahedron. We might consider an orbifold version of the 4-4
 	move for each group of symmetries of an octahedron. For my purposes, I'm only considering one such
-	case. The case where you have an order 2 symmetry, pi rotation through an axis connecting opposite
+	non-trivial case. The case where you have an order 2 symmetry, pi rotation through an axis connecting opposite
 	edges of the octahedron. See the write-up for a picture and explanation.
 
 	UPDATE: To reverse the 4-4 with symmetry, use the special_four_to_four function.
@@ -1590,35 +1622,60 @@ class CuspedOrbifold:
 		if self.is_geometric is False:
 			# For now, only allow this move for geometric triangulations.
 			return 0
-		if edge.valence() != 4:
+		if edge.valence() != 4 or edge.LocusOrder != 1:
 			return 0
-		for corner in edge.Corners:
-			if len(corner.Tetrahedron.Symmetries) == 1:
-				a = Arrow(corner.Subsimplex,RightFace[corner.Subsimplex],corner.Tetrahedron)
-				break
-		else:
-			return 0
-		b = a.glued()
-		c = a.reverse().glued()
-		for d in [b,c]:
-			for sym in d.Tetrahedron.Symmetries:
-				if sym.image(d.Edge) != d.Edge:
+		a = edge.get_arrow()
+		old = [a.true_next().copy() for i in range(4)]
+		# Make sure that we are either in the case that the octahedron has no symmetries,
+		# or it has exactly one, an order two symmetry which is an involution of a pair of
+		# edges opposite to "edge".
+		symmetry = False
+		for i in range(4):
+			for sym in old[i].Tetrahedron.Symmetries:
+				if sym.image(old[i].Edge) != old[i].Edge:
 					return 0
-		if len(b.Tetrahedron.Symmetries) == 2 and len(c.Tetrahedron.Symmetries) == 2:
-			symmetry = True
-		elif len(b.Tetrahedron.Symmetries) == 1 and len(c.Tetrahedron.Symmetries) == 1:
-			symmetry = False
-		else:
-			return 0
-		za = a.Tetrahedron.edge_params[a.north_head()]
-		zb = b.Tetrahedron.edge_params[b.Edge]
-		zc = c.Tetrahedron.edge_params[c.north_tail()]
-		One = ComplexSquareRootCombination.One()
+			if old[i].Tetrahedron is old[(i + 1)%4].Tetrahedron:
+				return 0
+			if len(old[i].Tetrahedron.Symmetries) == 2:
+				symmetry = True
+		# Check that the octahedron is convex. It suffices to check the dihedral angles of the
+		# edges which share a vertex with "edge".
+		One = self.complex_arithmetic_type.One()
+		Zero = self.real_arithmetic_type.Zero()
+		for i in range(4):
+			z = old[i].Tetrahedron.edge_params[old[i].north_head()]
+			w = old[(i+1)%4].Tetrahedron.edge_params[old[(i+1)%4].north_tail()]
+			if (z*w).imag.evaluate() < 0:
+				return 0
+			z = old[i].Tetrahedron.edge_params[old[i].south_head()]
+			w = old[(i+1)%4].Tetrahedron.edge_params[old[(i+1)%4].south_tail()]
+			if (z*w).imag.evaluate() < 0:
+				return 0
+		# See the diagram in the notes for the labels of the octahedron, y1, y2, x1, x2, x3, x4.
+		# We want to make sure that, from the perspective of the viewer of the diagram, the geodesic
+		# [x1, x3] is intersecting (flat case) or in front of [x2, x4]. This doesn't matter in the 
+		# case that symmetry == False, but it does matter when symmetry == True. If it's not the
+		# case, we can just rotate the picture 90 degrees by taking next of every arrow in "old"
+		# so that it is satisfied.
+		za = old[2].Tetrahedron.edge_params[old[2].north_head()]
+		zb = old[1].Tetrahedron.edge_params[old[1].axis()]
+		zc = old[3].Tetrahedron.edge_params[old[3].north_tail()]
 		wa = za
 		wb = za*zb/(zb + za - One)
 		wc = za*zc
+		if ((wb - One)/(wb - wc)).imag.evaluate() < 0:
+			# Then [x1, x3] is behind [x2, x4], so we should rotate the picture 90 degrees.
+			for i in range(4):
+				old[i].true_next()
+			# Reset the complex numbers according to the new arrows. They will be used to get the
+			# edge params of the new tetrahedra.
+			za = old[2].Tetrahedron.edge_params[old[2].north_head()]
+			zb = old[1].Tetrahedron.edge_params[old[1].axis()]
+			zc = old[3].Tetrahedron.edge_params[old[3].north_tail()]
+			wa = za
+			wb = za*zb/(zb + za - One)
+			wc = za*zc
 		if not symmetry:
-			old = [c.next() for i in range(4)]
 			new = self.new_arrows(4)
 			new[0].Tetrahedron.fill_edge_params(wc*(wb - One)/((wc - One)*wb))
 			new[1].Tetrahedron.fill_edge_params(wc)
@@ -1690,13 +1747,6 @@ class CuspedOrbifold:
 			for a in old:
 				self.Tetrahedra.remove(a.Tetrahedron)
 		else:
-			#Because there is no tet at [x1,x2,y1,y2], have to awkwardly define old
-			#to be consistent with how I chose to write this.
-			old = []
-			old.append(a.copy().reverse())
-			old.append(b.reverse())
-			old.append(a)
-			old.append(c)
 			new = self.new_arrows(3)
 			#new[0] is [x1,x3,x4,y1]
 			new[0].Tetrahedron.fill_edge_params(wc)
@@ -1730,21 +1780,29 @@ class CuspedOrbifold:
 			#make the other face gluings for new[0]
 			new[0].rotate(-1)
 			old[2].opposite()
-			new[0].glue_as(old[2])
+			new[0].true_glue_as(old[2])
 			new[0].rotate(-1)
 			old[3].opposite()
 			new[0].true_glue_as(old[3])
 			#now for new[1]
 			new[1].reverse().rotate(-1)
 			old[0].opposite()
-			new[1].glue_as(old[0])
+			new[1].true_glue_as(old[0])
 			new[1].rotate(-1)
 			old[1].opposite()
 			new[1].true_glue_as(old[1])
 			#now add the symmetries.
 			for i in range(3):
 				new[i].Tetrahedron.Symmetries.append(Perm4((0,1,2,3)))
-			new[2].add_sym(new[2].copy().opposite().reverse())
+			# We know new[2].Tetrahedron gets an order 2 sym, but we need to figure out which one.
+			for i in range(4):
+				if len(old[i].Tetrahedron.Symmetries) == 2 and i % 2 == 0:
+					# Then the sym axis is vertical.
+					new[2].add_sym(new[2].copy().opposite())
+					break
+				if len(old[1].Tetrahedron.Symmetries) == 2 and i % 2 != 0:
+					# Then the sym axis is horizontal.
+					new[2].add_sym(new[2].copy().opposite().reverse())
 			for a in old:
 				if a.Tetrahedron in self.Tetrahedra:
 					self.Tetrahedra.remove(a.Tetrahedron)
@@ -1753,20 +1811,17 @@ class CuspedOrbifold:
 
 	
 	"""
-	This 4-4 move is the reverse of the one above in the case of a symmetry. It could work even
-	if there isn't a flat tet, but I choose to have it return 0 then. The reason is that, if there
-	is not a flat tet, then some other pachner move will help you make progress when finding the
-	canonical decomposition. When there is a flat tet there, it's a special situation which must
-	be dealt with carefully when trying to canonize. 
+	The special 4-4 move is the reverse of the 4-4 move above in the case of a symmetry. It makes sense
+	whether or not that middle tetrahedron is flat.
 
-	This move is also important for non-geometric triangulations. It's used in canonize part 2.
+	We have to be careful about the subtlety of the horizontal vs vertical symmetry axis.  
 
-	Something that I didn't realize until recently is that there are two cases. When the symmetry axis
-	is horizontal, and when it's vertical.
+	This move is important for non-geometric triangulations. It's used in canonize part 2.
+
+	In the geometric case, we DO NEED to check geometry. Namely, we need to check that the
+	octahedron which we're re-triangulating is convex. Just like we do with the 4-4 move.
 	"""
 	def special_four_to_four(self,edge):
-		# This is the case where we have half of an octahedron, with the square face glued to 
-		# itself by rotation around an axis which intersects the midpoints of two sides.
 		if edge.valence() != 3 or edge.LocusOrder != 1:
 			return 0
 		a = edge.get_arrow()
@@ -1779,30 +1834,57 @@ class CuspedOrbifold:
 				return 0
 		# Now the arrow a is positioned as in the diagram (in the write-up) and we do
 		# the final checks.
-		if self.is_geometric and a.Tetrahedron.is_flat() == False:
-			return 0
 		sym = a.Tetrahedron.nontrivial_sym()
 		if sym.image(a.Edge) == a.Edge:
+			# If this was true, then we could actually do a 3-2 move around this edge.
 			return 0
 		b = a.copy().true_next()
 		c = b.glued()
 		b_tet = b.Tetrahedron
 		c_tet = c.Tetrahedron
+		if self.is_geometric:
+			if b_tet.is_flat() or c_tet.is_flat():
+				return 0
 		if b_tet is None or c_tet is None:
 			return 0
 		if b_tet is c_tet:
 			return 0
 		if len(b_tet.Symmetries) != 1 or len(c_tet.Symmetries) != 1:
 			return 0
-		# If we've gotten to here, then this case of a 4-4 move can be done.
-		# We must determine if the symmetry axis is horizontal or vertical.
+		# Determine if the symmetry axis is horizontal or vertical.
 		if comp(a.south_face()) == sym.image(a.head()):
 			case = 'horizontal'
 		elif comp(a.north_face()) == sym.image(a.head()):
 			case = 'vertical'
 		else:
 			raise Exception('error in special_four_to_four')
-		new = self.new_arrows(3)
+		# Check that the octahedron is convex. It suffices (I think) to check the total dihedral
+		# angles at the [x_i, x_j] edges are less than pi.
+		if self.is_geometric:
+			Zero = self.real_arithmetic_type.Zero()
+			z_1_2 = b_tet.edge_params[b.south_tail()]
+			z_1_4 = b_tet.edge_params[b.north_tail()]
+			z_2_3 = c_tet.edge_params[c.south_head()]
+			z_3_4 = c_tet.edge_params[c.north_head()]
+			w_1_2 = a.Tetrahedron.edge_params[a.south_head()]
+			w_1_4 = a.Tetrahedron.edge_params[a.north_head()]
+			w_2_3 = a.Tetrahedron.edge_params[a.south_tail()]
+			w_3_4 = a.Tetrahedron.edge_params[a.north_tail()]
+			if case == 'horizontal':
+				total = z_1_4*w_1_4*z_1_4
+				if (total).imag.evaluate() < 0 or total.imag == Zero:
+					return 0
+				total = z_2_3*w_2_3*z_2_3
+				if (total).imag.evaluate() < 0 or total.imag == Zero:
+					return 0
+			if case == 'vertical':
+				total = z_1_2*w_1_2*z_1_2
+				if (total).imag.evaluate() < 0 or total.imag == Zero:
+					return 0
+				total = z_3_4*w_3_4*z_3_4
+				if (total).imag.evaluate() < 0 or total.imag == Zero:
+					return 0
+		# If we've gotten to here, then the special 4-4 move is possible.
 		# First we take care of geometry.
 		if self.is_geometric:
 			One = self.complex_arithmetic_type.One()
@@ -1824,7 +1906,8 @@ class CuspedOrbifold:
 			# z2 = shape of (y1,x4) in (y1,y2,x3,x4)
 			z2 = w2
 			# z3 = shape of (y1,y2) in (y1,y2,x1,x2)
-			z3 = (w1 - w2)*w0/(w1*(w0 - w2))		
+			z3 = (w1 - w2)*w0/(w1*(w0 - w2))
+		new = self.new_arrows(3)		
 		if case == 'horizontal':
 			if self.is_geometric:
 				new[0].Tetrahedron.fill_edge_params(z1)

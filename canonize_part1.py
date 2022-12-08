@@ -27,6 +27,9 @@ orb proto-canonical, it returns 1. Otherwise, it returns 0.
 def proto_canonize(orb):
 	MAX_MOVES = 100
 	for i in range(MAX_MOVES):
+		print(' ')
+		#orb.info()
+		print(' ')
 		if attempt_cancellation(orb):
 			print("cancelled flat tet(s)")
 			continue

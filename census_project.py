@@ -16,15 +16,87 @@ from Test import*
 
 # For any of the files in the dest_seqs folder (or its subfolders), we turn the dest
 # seqs into CuspedOrbifold objects.
-with open("./dest_seqs/Q_pi tilde covers, pi composite/CoversOfO20_5.txt", "r") as read_file:
-    dest_seqs = read_file.read()
+with open("./dest_seqs/96seqs_sorted.txt", "r") as read_file:
+    dest_seqs_string = read_file.read()
 
 with open("48seqs.json", "r") as read_file:
     OrbDictionary = json.load(read_file)
     keyz = OrbDictionary.keys()
     OrbDictionary = {eval(k):OrbDictionary[k] for k in keyz}
 
+ints_as_strings = ['0','1','2','3','4','5','6','7','8','9']
 
+"""
+L = dest_seqs_string
+dests = []
+for i in range(len(L)):
+	if L[i] == '[':
+		dest = []
+		getting_dest = True
+	if L[i] == ']':
+		dests.append(dest)
+		getting_dest = False
+		continue
+	if L[i] in ints_as_strings:
+		continue
+	if L[i] == ',':
+		continue
+	if getting_dest == False:
+		continue
+	j = 1
+	while L[i + j] in ints_as_strings:
+		j += 1
+	num = int(L[i+1:i+j])
+	dest.append(num)
+
+
+failed = []
+for dest in dests:
+	print(' ')
+	print(dest)
+	orb = dest_to_orb(dest)
+	if proto_canonize(orb):
+		print('proto_canonize succeeded')
+	else:
+		failed.append(dests.index(dest))
+if len(failed) > 0:
+	print('failed for orbs with the following dest indices')
+	print(failed)
+else:
+	print('proto canonize succeeded for all orbs')
+"""
+
+dests_failed = [107, 121, 180, 244, 245, 266, 337, 428, 429, 464, 485, 493, 523, 526, 530, 531, 538, 541, 556, 557, 564, 571, 572, 573, 587, 
+588, 636, 642, 653, 723, 746, 777, 778, 783, 800, 802, 839, 840, 846, 850, 855, 857, 860, 861, 901, 906, 907, 918, 929, 930, 942, 943, 953, 
+957, 958, 977, 984, 995, 997, 1000, 1001, 1002, 1038, 1040, 1266, 1267, 1268, 1269, 1270, 1274, 1277, 1296, 1308, 1311, 1312, 1313, 1315, 1320, 
+1321, 1326, 1333, 1337, 1339, 1344, 1352, 1353, 1386, 1403, 1404, 1411, 1412, 1454, 1460, 1465, 1491, 1492, 1494, 1495, 1509, 1510, 1513, 1522, 
+1523, 1524, 1573, 1586, 1593, 1624, 1625, 1693, 1770, 1772, 1774, 1829, 1830, 1834, 1838, 1839, 1840, 1841, 1842, 1866, 1933, 1934, 1942, 1950, 
+1957, 1973, 1977, 1978, 1985, 1986, 1996, 2003, 2229, 2239, 2261, 2262, 2269, 2270, 2273, 2274, 2283, 2284, 2285, 2287, 2288, 2291, 2324, 2325, 
+2326, 2327, 2332, 2333, 2341, 2343, 2351, 2352, 2366, 2368, 2370, 2371, 2372, 2373, 2374, 2376, 2378, 2381, 2382, 2383, 2403, 2432, 2433, 2463, 
+2464, 2469, 2471, 2472, 2476, 2478, 2479, 2488, 2489, 2512, 2513, 2521, 2523, 2534, 2535, 2537, 2538, 2540, 2550, 2568, 2569, 2570, 2571, 2573, 
+2574, 2587, 2589, 2597, 2599, 2631, 2632, 2633, 2635, 2640, 2641, 2642, 2643, 2644, 2650, 2653, 2672, 2674, 2697, 2698, 2717, 2720, 2721, 2735, 
+2736, 2737, 2741, 2742, 2744, 2747, 2753, 2754, 2755, 2762, 2763, 2764, 2768, 2770, 2773, 2774, 2778, 2779, 2792, 2793, 2798, 2799, 2833, 2834, 
+2835, 2836, 2837, 2838, 2839, 2840, 2841, 2842, 2843, 2844, 2845, 2846, 2847, 2848, 2852, 2853, 2860, 2863, 2864, 2865, 2866, 2867, 2868, 2870, 
+2874, 2883, 2884, 2885, 2886, 2887, 2888, 2889, 2891, 2893, 2894, 2895, 2897, 2899, 2900, 2912, 2932, 2949, 2950, 2951, 2952, 2953, 2955, 2957, 
+2958, 2959, 2961, 2963, 2976, 2997, 3017, 3019, 3022, 3031, 3036, 3047, 3049, 3057, 3059, 3068, 3069, 3076, 3077, 3094, 3095, 3109, 3110, 3111, 
+3115, 3119, 3124, 3132, 3143, 3144, 3160, 3161, 3174, 3178, 3179, 3180, 3183, 3184, 3188, 3189, 3199, 3213, 3221, 3226, 3232, 3241, 3242, 3245, 
+3252, 3268, 3269, 3282, 3283, 3288, 3325, 3330, 3331, 3336, 3349, 3392, 3400, 3403, 3404, 3408, 3409, 3410, 3428, 3433, 3434, 3436, 3451, 3476, 
+3477, 3478, 3479, 3492, 3493, 3502, 3503, 3509, 3510, 3548, 3551, 3569, 3573, 3576, 3577, 3590, 3616, 3619, 3620, 3626, 3638, 3644, 3645, 3646, 
+3647, 3648, 3650, 3653, 3682, 3684, 3698, 3703, 3757, 3761, 3801, 3803, 3809, 3810, 3819, 3820, 3834, 3835, 3837, 3842, 3846, 3847, 3876, 3877, 
+3972, 4007, 4008, 4009, 4010, 4014, 4153]
+
+
+
+
+"""
+dest = [0, 0, 0, 1, 2, 3, 4, 0, 1, 5, 6, 2, 6, 7, 1, 4, 5, 1, 8, 3, 4, 9, 2, 10, 3, 2, 11, 12, 11, 13, 3, 7, 9, 4, 13, 13, 8, 14, 5, 15, 12, 12, 16, 5, 7, 6, 14, 17, 10, 18, 10, 6, 14, 8, 7, 8, 13, 11, 9, 19, 19, 20, 21, 9, 18, 10, 22, 20, 17, 23, 24, 11, 16, 25, 12, 24, 15, 26, 27, 14, 27, 28, 15, 16, 26, 15, 29, 26, 25, 16, 25, 30, 24, 31, 17, 27, 23, 17, 32, 18, 22, 22, 18, 33, 21, 34, 19, 21, 20, 19, 35, 23, 35, 36, 20, 37, 34, 21, 36, 38, 39, 40, 37, 22, 32, 41, 23, 42, 31, 24, 41, 43, 44, 43, 45, 25, 29, 46, 26, 47, 28, 27, 46, 48, 46, 29, 28, 49, 50, 30, 51, 28, 52, 53, 47, 29, 30, 50, 54, 44, 54, 55, 30, 45, 41, 32, 31, 56, 57, 48, 58, 31, 59, 60, 33, 32, 33, 61, 59, 39, 61, 33, 62, 40, 36, 35, 34, 63, 64, 38, 65, 34, 55, 54, 42, 35, 66, 67, 68, 36, 37, 58, 39, 55, 58, 37, 57, 67, 38, 64, 69, 64, 69, 70, 38, 68, 40, 39, 48, 71, 48, 57, 40, 50, 72, 62, 60, 41, 42, 51, 55, 59, 51, 42, 50, 62, 43, 44, 73, 57, 73, 56, 43, 60, 45, 74, 44, 75, 74, 45, 56, 58, 76, 77, 71, 46, 47, 78, 52, 52, 78, 47, 79, 77, 49, 68, 80, 76, 80, 81, 49, 51, 68, 49, 66, 53, 53, 52, 82, 69, 82, 79, 53, 83, 75, 63, 75, 54, 56, 73, 74, 72, 60, 59, 72, 81, 62, 72, 61, 80, 71, 71, 76, 61, 63, 75, 83, 66, 83, 83, 63, 65, 65, 84, 64, 82, 84, 65, 70, 79, 67, 66, 81, 74, 81, 80, 67, 73, 70, 69, 84, 78, 77, 76, 77, 70, 79, 82, 78, 85, 85, 85, 85, 84]
+orb = dest_to_orb(dest)
+print(proto_canonize(orb))
+"""
+
+
+
+"""
 for key in OrbDictionary.keys():
 	dest = OrbDictionary[key]
 	orb = dest_to_orb(dest)
@@ -32,7 +104,7 @@ for key in OrbDictionary.keys():
 		print('proto_canonize succeeded')
 	else:
 		raise Exception('proto_canonize failed on dest',dest)
-	
+"""	
 
 
 # Covers of O(20,5).
@@ -63,8 +135,94 @@ D[(80, 168)] = [1, 0, 0, 2, 0, 1, 1, 3, 4, 5, 6, 0, 7, 8, 9, 1, 2, 10, 11, 7, 11
  
 D[(80, 169)] = [1, 0, 0, 2, 0, 1, 1, 3, 4, 5, 6, 0, 7, 8, 9, 1, 2, 10, 11, 7, 11, 6, 2, 6, 10, 2, 5, 5, 3, 12, 13, 4, 13, 14, 3, 9, 12, 3, 15, 8, 6, 11, 4, 16, 5, 4, 10, 17, 9, 18, 7, 19, 8, 7, 20, 21, 20, 22, 8, 23, 18, 9, 22, 24, 17, 21, 25, 10, 16, 26, 19, 11, 15, 27, 12, 28, 21, 17, 29, 12, 14, 13, 27, 30, 19, 31, 16, 13, 27, 15, 14, 32, 33, 24, 34, 14, 35, 36, 23, 15, 26, 16, 37, 26, 25, 38, 17, 25, 22, 20, 18, 39, 40, 41, 42, 18, 31, 19, 43, 41, 44, 42, 45, 20, 29, 46, 21, 45, 47, 48, 49, 22, 23, 50, 35, 44, 50, 23, 51, 48, 24, 33, 52, 40, 52, 53, 24, 49, 38, 25, 46, 51, 37, 43, 26, 53, 54, 55, 55, 27, 28, 56, 57, 35, 57, 58, 28, 29, 56, 28, 30, 55, 46, 29, 38, 59, 30, 60, 56, 33, 60, 30, 58, 31, 43, 37, 31, 61, 32, 62, 63, 54, 63, 61, 32, 34, 62, 32, 59, 36, 34, 64, 33, 65, 64, 34, 53, 37, 36, 35, 66, 67, 66, 51, 36, 38, 39, 68, 68, 47, 68, 39, 39, 42, 42, 44, 40, 69, 41, 40, 70, 60, 70, 45, 41, 71, 72, 49, 71, 43, 45, 70, 44, 57, 73, 71, 48, 46, 49, 72, 47, 74, 48, 47, 73, 75, 51, 66, 50, 66, 75, 69, 67, 50, 53, 52, 64, 64, 74, 65, 69, 52, 55, 54, 54, 76, 76, 67, 65, 56, 58, 57, 60, 77, 78, 59, 61, 58, 59, 78, 62, 73, 61, 63, 78, 72, 67, 76, 75, 62, 65, 74, 76, 63, 69, 75, 74, 68, 79, 77, 77, 70, 71, 73, 72, 79, 77, 79, 79, 78]
 
-"""
+# Just update these two lines for each case.
+base_orb_str = '(20, 5)'
+base_orb = dest_to_orb(D[(20,5)])
+
+print("This file contains information about covers of", base_orb_str)
+print(' ')
+print('------------------------------------------------------------------')
+print(' ')
 for key in D.keys():
+	print("Examining orbifold",key)
 	orb = dest_to_orb(D[key])
-	print(proto_canonize(orb))
-"""
+	print(' ')
+	print('Here is the starting triangulation')
+	print(' ')
+	orb.info()
+	print(' ')
+	print('The vertex classes of', key, 'are:')
+	original_verts = [vertex for vertex in orb.Vertices]
+	print(orb.Vertices)
+	print('where')
+	for vertex in orb.Vertices:
+		print(vertex, '=', vertex.Corners)
+	covering_maps = simplicial_maps_OP(orb,base_orb)
+	print('There is/are', len(covering_maps), 'OP covering map(s) from', key, 'to', base_orb_str)
+	map_0 = covering_maps[0]
+	map_on_cusps = {}
+	for tet in orb.Tetrahedra:
+		for zero_subsimplex in ZeroSubsimplices:
+			image_tet = map_0[tet][1]
+			image_vertex = map_0[tet][0].image(zero_subsimplex)
+			image_vertex_class = image_tet.Class[image_vertex]
+			source_vertex_class = tet.Class[zero_subsimplex]
+			map_on_cusps[source_vertex_class] = image_vertex_class
+	print('The first covering map restricted to the vertex classes is:')
+	print(map_on_cusps)
+	print(' ')
+	print("Attempting to make proto-canonical...")
+	if proto_canonize(orb):
+		print('Proto-canonize succeeded')
+	else:
+		print('Proto-canonize failed. Moving to next orb.')
+		print(' ')
+		print('---------------------------------------------------------------')
+		print(' ')
+		continue
+	print(' ')
+	print("Now doing canonize part 2...")
+	canonical_retriangulation(orb)
+	if orb.is_geometric is False:
+		print("The proto-canonical triangulation was not the canonical decomp, so canonize part 2 found the canonical re-triangulation.")
+	print(' ')
+	print('The canonical triangulation is:')
+	print(' ')
+	orb.info()
+	print(' ')
+	print('Its vertex classes are')
+	print(orb.Vertices)
+	print('where')
+	for vertex in orb.Vertices:
+		if vertex in original_verts:
+			print(vertex, 'is ideal and contains')
+		else:
+			print(vertex, 'is finite and contains')
+		print(vertex.Corners)
+	print(' ')
+	print('We now print each OP self-isometry and how it acts on the vertex classes. The vertex classes were preserved')
+	print('during the Pachner moves. e.g. if v0 was a cusp of the original triangulation, then v0 in this')
+	print('triangulation is that same cusp.')
+	for map_0 in simplicial_maps_OP(orb,orb):
+		print(' ')
+		print(map_0)
+		map_on_classes = {}
+		for tet in orb.Tetrahedra:
+			for zero_subsimplex in ZeroSubsimplices:
+				image_tet = map_0[tet][1]
+				image_vertex = map_0[tet][0].image(zero_subsimplex)
+				image_vertex_class = image_tet.Class[image_vertex]
+				source_vertex_class = tet.Class[zero_subsimplex]
+				map_on_classes[source_vertex_class] = image_vertex_class
+		print('It acts on vertex classes as')
+		print(map_on_classes)
+	print(' ')
+	print('-----------------------------------------------------------------------------------')
+	print(' ')
+
+
+
+
+
+
+

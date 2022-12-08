@@ -1116,3 +1116,15 @@ orb.info()
 #isometric.
 """
 
+"""
+dest = O14_0
+orb = dest_to_orb(dest)
+edge = orb.Edges[0]
+a = edge.get_arrow()
+L = [a.true_next().copy() for i in range(4)]
+print(L)
+for i in range(4):
+    print(i+1)
+    print((i+1)%3)
+    print('')
+"""

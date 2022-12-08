@@ -30,14 +30,14 @@ def canonical_retriangulation(orb):
 	initialize_tet_status(orb)
 	# Turn orb into a SimplicialOrbifold, i.e. remove the hyperbolic structure.
 	# This function is in IsomorphismSignature.py.
-	simplicial_orb = hyperbolic_to_simplicial(orb)
-	step_one(simplicial_orb)
-	step_two(simplicial_orb)
+	orb.remove_geometry()
+	step_one(orb)
+	step_two(orb)
 	# Assuming those two steps went okay, we now have the canonical retriangulation. Let's
 	# remove the canonize_info data from the tetrahedra.
-	for tet in simplicial_orb.Tetrahedra:
+	for tet in orb.Tetrahedra:
 		tet.canonize_info = None
-	return simplicial_orb
+	return orb
 
 # Initializes the canonize info of each tet in the CuspedOrbifold orb. In particular,
 # all the part_of_coned_cell flags are set to False.
@@ -259,8 +259,7 @@ def eliminate_opaque_face(orb):
 						return True
 	return False
 
-# Note: I'm migrating the SimplicialOrbifold class into CuspedOrbifold. The 4-4 move in SimplicialOrb is called
-# special 4-4 in CuspedOrb. So should change the four_to_four call here to special_four_to_four. In progress.
+
 def opaque_four_to_four(face,tet):
 	nbr = tet.Neighbor[face]
 	if len(nbr.Symmetries) != 2:
@@ -268,7 +267,7 @@ def opaque_four_to_four(face,tet):
 	for one_subsimplex in OneSubsimplices:
 		if is_subset(one_subsimplex,face):
 			edge = tet.Class[one_subsimplex]
-			if orb.four_to_four(edge):
+			if orb.special_four_to_four(edge):
 				return True
 	return False
 				
