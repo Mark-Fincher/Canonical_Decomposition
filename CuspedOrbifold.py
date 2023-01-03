@@ -566,7 +566,9 @@ class CuspedOrbifold:
 	This is my solution. If a flat tet is "admissible", then it belongs. Otherwise the triangulation
 	is not proto-canonical.
 
-	Should update this. Just have it compute tilts instead of doing special_four_to_four.
+	Should update this. Just have it compute tilts instead of doing special_four_to_four. Meaning, I
+	think you can just compute the tilts of the non-flat tets which are glued to the flat tet,
+	and use that to determine the convexity/concavity/transparency of the square face.
 	"""
 	def check_admissible(self,tet):
 		if tet.is_flat() is False:
@@ -1059,7 +1061,11 @@ class CuspedOrbifold:
 		b = a.glued()
 		z = tet.edge_params[a.Edge]
 		w = voisin.edge_params[b.Edge]
-		if ((z*w*w).imag).evaluate() < 0 or (z*w*w).imag == self.real_arithmetic_type.Zero():
+		if ((z*w*w).imag).evaluate() < 0:
+			# Then the union of the three tetrahedra is not convex.
+			return 0
+		if (z*w*w).imag == self.real_arithmetic_type.Zero() and (z*w*w).real.evaluate() > 0:
+			# Then a 3-2 move should be done instead.
 			return 0
 		flat_u0_u1_v1_w1 = False
 		flat_u0_u1_v0_w1 = False
@@ -1872,17 +1878,29 @@ class CuspedOrbifold:
 			w_3_4 = a.Tetrahedron.edge_params[a.north_tail()]
 			if case == 'horizontal':
 				total = z_1_4*w_1_4*z_1_4
-				if (total).imag.evaluate() < 0 or total.imag == Zero:
+				if (total).imag.evaluate() < 0:
+					return 0
+				if total.imag == Zero and total.real.evaluate() > 0:
+					# I don't think this can happen, anyway.
 					return 0
 				total = z_2_3*w_2_3*z_2_3
-				if (total).imag.evaluate() < 0 or total.imag == Zero:
+				if (total).imag.evaluate() < 0:
+					return 0
+				if total.imag == Zero and total.real.evaluate() > 0:
+					# I don't think this can happen, anyway.
 					return 0
 			if case == 'vertical':
 				total = z_1_2*w_1_2*z_1_2
-				if (total).imag.evaluate() < 0 or total.imag == Zero:
+				if (total).imag.evaluate() < 0:
+					return 0
+				if total.imag == Zero and total.real.evaluate() > 0:
+					# I don't think this can happen, anyway.
 					return 0
 				total = z_3_4*w_3_4*z_3_4
-				if (total).imag.evaluate() < 0 or total.imag == Zero:
+				if (total).imag.evaluate() < 0:
+					return 0
+				if total.imag == Zero and total.real.evaluate() > 0:
+					# I don't think this can happen, anyway.
 					return 0
 		# If we've gotten to here, then the special 4-4 move is possible.
 		# First we take care of geometry.
