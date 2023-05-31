@@ -1,0 +1,975 @@
+This file contains information about covers of (40, 15)
+ 
+------------------------------------------------------------------
+ 
+Examining orbifold (40, 15)
+ 
+Here is the starting triangulation
+ 
+this triangulation is geometric
+number of tetrahedra is 6
+gluing data for tet0 is
+face 0 of tet0 glued to tet0
+with gluing map (0, 2, 1, 3)
+face 1 of tet0 glued to tet0
+with gluing map (2, 1, 0, 3)
+face 2 of tet0 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 3 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+symmetries of tet0 are
+(0, 1, 2, 3)
+(1, 2, 0, 3)
+(2, 0, 1, 3)
+edge_params of tet0 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  1
+edge 02:  1
+edge 03:  6
+edge 12:  1
+edge 13:  6
+edge 23:  6
+gluing data for tet1 is
+face 0 of tet1 glued to tet2
+with gluing map (2, 0, 3, 1)
+face 1 of tet1 glued to None
+with gluing map None
+face 2 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 3 of tet1 glued to None
+with gluing map None
+symmetries of tet1 are
+(0, 1, 2, 3)
+(1, 3, 2, 0)
+(3, 0, 2, 1)
+edge_params of tet1 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet2 is
+face 0 of tet2 glued to tet3
+with gluing map (2, 1, 0, 3)
+face 1 of tet2 glued to tet5
+with gluing map (0, 3, 2, 1)
+face 2 of tet2 glued to tet1
+with gluing map (1, 3, 0, 2)
+face 3 of tet2 glued to tet2
+with gluing map (1, 0, 2, 3)
+symmetries of tet2 are
+(0, 1, 2, 3)
+edge_params of tet2 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet2 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet3 is
+face 0 of tet3 glued to tet4
+with gluing map (2, 1, 0, 3)
+face 1 of tet3 glued to tet3
+with gluing map (0, 3, 2, 1)
+face 2 of tet3 glued to tet2
+with gluing map (2, 1, 0, 3)
+face 3 of tet3 glued to tet3
+with gluing map (0, 3, 2, 1)
+symmetries of tet3 are
+(0, 1, 2, 3)
+edge_params of tet3 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet3 are
+edge 01:  1
+edge 02:  6
+edge 03:  1
+edge 12:  2
+edge 13:  1
+edge 23:  2
+gluing data for tet4 is
+face 0 of tet4 glued to tet5
+with gluing map (2, 1, 0, 3)
+face 1 of tet4 glued to None
+with gluing map None
+face 2 of tet4 glued to tet3
+with gluing map (2, 1, 0, 3)
+face 3 of tet4 glued to None
+with gluing map None
+symmetries of tet4 are
+(0, 1, 2, 3)
+(0, 2, 3, 1)
+(0, 3, 1, 2)
+edge_params of tet4 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet4 are
+edge 01:  2
+edge 02:  2
+edge 03:  2
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet5 is
+face 0 of tet5 glued to None
+with gluing map None
+face 1 of tet5 glued to None
+with gluing map None
+face 2 of tet5 glued to tet4
+with gluing map (2, 1, 0, 3)
+face 3 of tet5 glued to tet2
+with gluing map (0, 3, 2, 1)
+symmetries of tet5 are
+(0, 1, 2, 3)
+(1, 3, 2, 0)
+(3, 0, 2, 1)
+edge_params of tet5 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet5 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+ 
+The vertex classes of (40, 15) are:
+[v0 () , v1 () , v2 () , v3 () ]
+where
+v0 ()  = [<V0 of tet0>, <V2 of tet0>, <V1 of tet0>, <V1 of tet1>, <V0 of tet2>, <V0 of tet5>, <V2 of tet4>, <V3 of tet4>, <V3 of tet5>, <V1 of tet5>, <V1 of tet4>, <V1 of tet3>, <V1 of tet2>, <V3 of tet1>, <V0 of tet1>, <V3 of tet3>, <V3 of tet2>, <V2 of tet1>]
+v1 ()  = [<V3 of tet0>]
+v2 ()  = [<V2 of tet2>, <V0 of tet3>, <V2 of tet5>]
+v3 ()  = [<V2 of tet3>, <V0 of tet4>]
+There is/are 1 OP covering map(s) from (40, 15) to (40, 15)
+The first covering map restricted to the vertex classes is:
+{v0 () : v0 () , v1 () : v1 () , v2 () : v2 () , v3 () : v3 () }
+ 
+Attempting to make proto-canonical...
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+cancelled flat tet(s)
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+did 3-2 move
+ 
+ 
+Proto-canonize succeeded
+ 
+Now doing canonize part 2...
+inputted orb is already a canonical triangulation
+ 
+The canonical triangulation is:
+ 
+this triangulation is geometric
+number of tetrahedra is 4
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet0 glued to tet2
+with gluing map (0, 2, 1, 3)
+face 2 of tet0 glued to tet2
+with gluing map (0, 2, 1, 3)
+face 3 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+symmetries of tet0 are
+(0, 1, 2, 3)
+edge_params of tet0 are
+edge 01 0 + (2/3 * sqrt(3)) * i
+edge 02 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 03 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 23 0 + (2/3 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  1
+edge 02:  2
+edge 03:  3
+edge 12:  6
+edge 13:  2
+edge 23:  1
+gluing data for tet1 is
+face 0 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to tet3
+with gluing map (0, 3, 2, 1)
+face 2 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 3 of tet1 glued to tet3
+with gluing map (0, 3, 2, 1)
+symmetries of tet1 are
+(0, 1, 2, 3)
+edge_params of tet1 are
+edge 01 (-1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 02 (5/7 * sqrt(1)) + (1/7 * sqrt(3)) * i
+edge 03 (2 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 12 (2 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 13 (5/7 * sqrt(1)) + (1/7 * sqrt(3)) * i
+edge 23 (-1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  1
+edge 02:  6
+edge 03:  2
+edge 12:  2
+edge 13:  6
+edge 23:  1
+gluing data for tet2 is
+face 0 of tet2 glued to tet3
+with gluing map (0, 1, 3, 2)
+face 1 of tet2 glued to tet0
+with gluing map (0, 2, 1, 3)
+face 2 of tet2 glued to tet0
+with gluing map (0, 2, 1, 3)
+face 3 of tet2 glued to tet3
+with gluing map (0, 1, 3, 2)
+symmetries of tet2 are
+(0, 1, 2, 3)
+edge_params of tet2 are
+edge 01 (2/3 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge 02 (3/4 * sqrt(1)) + (3/4 * sqrt(3)) * i
+edge 03 (1/7 * sqrt(1)) + (3/7 * sqrt(3)) * i
+edge 12 (1/7 * sqrt(1)) + (3/7 * sqrt(3)) * i
+edge 13 (3/4 * sqrt(1)) + (3/4 * sqrt(3)) * i
+edge 23 (2/3 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge labels of tet2 are
+edge 01:  2
+edge 02:  1
+edge 03:  3
+edge 12:  3
+edge 13:  1
+edge 23:  2
+gluing data for tet3 is
+face 0 of tet3 glued to tet2
+with gluing map (0, 1, 3, 2)
+face 1 of tet3 glued to tet1
+with gluing map (0, 3, 2, 1)
+face 2 of tet3 glued to tet2
+with gluing map (0, 1, 3, 2)
+face 3 of tet3 glued to tet1
+with gluing map (0, 3, 2, 1)
+symmetries of tet3 are
+(0, 1, 2, 3)
+edge_params of tet3 are
+edge 01 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 02 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 0 + (2/3 * sqrt(3)) * i
+edge 12 0 + (2/3 * sqrt(3)) * i
+edge 13 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge labels of tet3 are
+edge 01:  2
+edge 02:  6
+edge 03:  1
+edge 12:  1
+edge 13:  3
+edge 23:  2
+ 
+Its vertex classes are
+[v0 () , v1 () , v2 () , v3 () ]
+where
+v0 ()  is ideal and contains
+[<V3 of tet0>, <V2 of tet1>, <V3 of tet2>, <V2 of tet3>]
+v1 ()  is ideal and contains
+[<V0 of tet0>, <V0 of tet1>, <V0 of tet2>, <V0 of tet3>]
+v2 ()  is ideal and contains
+[<V2 of tet0>, <V3 of tet1>, <V1 of tet2>, <V1 of tet3>]
+v3 ()  is ideal and contains
+[<V1 of tet0>, <V1 of tet1>, <V2 of tet2>, <V3 of tet3>]
+ 
+We now print each OP self-isometry and how it acts on the vertex classes. The vertex classes were preserved
+during the Pachner moves. e.g. if v0 was a cusp of the original triangulation, then v0 in this
+triangulation is that same cusp.
+ 
+{tet0: ((0, 1, 2, 3), tet0), tet1: ((0, 1, 2, 3), tet1), tet2: ((0, 1, 2, 3), tet2), tet3: ((0, 1, 2, 3), tet3)}
+It acts on vertex classes as
+{v1 () : v1 () , v3 () : v3 () , v2 () : v2 () , v0 () : v0 () }
+ 
+{tet0: ((3, 2, 1, 0), tet0), tet1: ((2, 3, 0, 1), tet1), tet2: ((3, 2, 1, 0), tet2), tet3: ((2, 3, 0, 1), tet3)}
+It acts on vertex classes as
+{v1 () : v0 () , v3 () : v2 () , v2 () : v3 () , v0 () : v1 () }
+ 
+{tet0: ((1, 2, 0, 3), tet3), tet1: ((3, 2, 1, 0), tet1), tet2: ((1, 0, 3, 2), tet2), tet3: ((2, 0, 1, 3), tet0)}
+It acts on vertex classes as
+{v1 () : v2 () , v3 () : v0 () , v2 () : v1 () , v0 () : v3 () }
+ 
+{tet0: ((3, 0, 2, 1), tet3), tet1: ((1, 0, 3, 2), tet1), tet2: ((2, 3, 0, 1), tet2), tet3: ((1, 3, 2, 0), tet0)}
+It acts on vertex classes as
+{v1 () : v3 () , v3 () : v1 () , v2 () : v0 () , v0 () : v2 () }
+ 
+-----------------------------------------------------------------------------------
+ 
+Examining orbifold (80, 193)
+ 
+Here is the starting triangulation
+ 
+this triangulation is geometric
+number of tetrahedra is 12
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (2, 1, 0, 3)
+face 1 of tet0 glued to tet5
+with gluing map (1, 3, 0, 2)
+face 2 of tet0 glued to None
+with gluing map None
+face 3 of tet0 glued to None
+with gluing map None
+symmetries of tet0 are
+(0, 1, 2, 3)
+(2, 1, 3, 0)
+(3, 1, 0, 2)
+edge_params of tet0 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  3
+edge 02:  1
+edge 03:  1
+edge 12:  3
+edge 13:  3
+edge 23:  1
+gluing data for tet1 is
+face 0 of tet1 glued to None
+with gluing map None
+face 1 of tet1 glued to tet2
+with gluing map (1, 2, 3, 0)
+face 2 of tet1 glued to tet0
+with gluing map (2, 1, 0, 3)
+face 3 of tet1 glued to None
+with gluing map None
+symmetries of tet1 are
+(0, 1, 2, 3)
+(2, 1, 3, 0)
+(3, 1, 0, 2)
+edge_params of tet1 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  3
+edge 02:  1
+edge 03:  1
+edge 12:  3
+edge 13:  3
+edge 23:  1
+gluing data for tet2 is
+face 0 of tet2 glued to tet3
+with gluing map (2, 0, 3, 1)
+face 1 of tet2 glued to None
+with gluing map None
+face 2 of tet2 glued to tet1
+with gluing map (3, 0, 1, 2)
+face 3 of tet2 glued to None
+with gluing map None
+symmetries of tet2 are
+(0, 1, 2, 3)
+(1, 3, 2, 0)
+(3, 0, 2, 1)
+edge_params of tet2 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet2 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet3 is
+face 0 of tet3 glued to tet9
+with gluing map (3, 2, 0, 1)
+face 1 of tet3 glued to tet11
+with gluing map (0, 3, 2, 1)
+face 2 of tet3 glued to tet2
+with gluing map (1, 3, 0, 2)
+face 3 of tet3 glued to tet4
+with gluing map (0, 1, 3, 2)
+symmetries of tet3 are
+(0, 1, 2, 3)
+edge_params of tet3 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet3 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet4 is
+face 0 of tet4 glued to tet6
+with gluing map (2, 1, 0, 3)
+face 1 of tet4 glued to tet8
+with gluing map (1, 3, 0, 2)
+face 2 of tet4 glued to tet3
+with gluing map (0, 1, 3, 2)
+face 3 of tet4 glued to tet5
+with gluing map (0, 1, 3, 2)
+symmetries of tet4 are
+(0, 1, 2, 3)
+edge_params of tet4 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet4 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet5 is
+face 0 of tet5 glued to None
+with gluing map None
+face 1 of tet5 glued to None
+with gluing map None
+face 2 of tet5 glued to tet4
+with gluing map (0, 1, 3, 2)
+face 3 of tet5 glued to tet0
+with gluing map (2, 0, 3, 1)
+symmetries of tet5 are
+(0, 1, 2, 3)
+(1, 2, 0, 3)
+(2, 0, 1, 3)
+edge_params of tet5 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet5 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet6 is
+face 0 of tet6 glued to None
+with gluing map None
+face 1 of tet6 glued to None
+with gluing map None
+face 2 of tet6 glued to tet4
+with gluing map (2, 1, 0, 3)
+face 3 of tet6 glued to tet7
+with gluing map (0, 1, 3, 2)
+symmetries of tet6 are
+(0, 1, 2, 3)
+(1, 2, 0, 3)
+(2, 0, 1, 3)
+edge_params of tet6 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet6 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet7 is
+face 0 of tet7 glued to tet8
+with gluing map (2, 0, 3, 1)
+face 1 of tet7 glued to None
+with gluing map None
+face 2 of tet7 glued to tet6
+with gluing map (0, 1, 3, 2)
+face 3 of tet7 glued to None
+with gluing map None
+symmetries of tet7 are
+(0, 1, 2, 3)
+(1, 3, 2, 0)
+(3, 0, 2, 1)
+edge_params of tet7 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet7 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet8 is
+face 0 of tet8 glued to tet9
+with gluing map (2, 1, 0, 3)
+face 1 of tet8 glued to tet9
+with gluing map (2, 1, 0, 3)
+face 2 of tet8 glued to tet7
+with gluing map (1, 3, 0, 2)
+face 3 of tet8 glued to tet4
+with gluing map (2, 0, 3, 1)
+symmetries of tet8 are
+(0, 1, 2, 3)
+edge_params of tet8 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet8 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  3
+gluing data for tet9 is
+face 0 of tet9 glued to tet10
+with gluing map (2, 1, 0, 3)
+face 1 of tet9 glued to tet8
+with gluing map (2, 1, 0, 3)
+face 2 of tet9 glued to tet8
+with gluing map (2, 1, 0, 3)
+face 3 of tet9 glued to tet3
+with gluing map (2, 3, 1, 0)
+symmetries of tet9 are
+(0, 1, 2, 3)
+edge_params of tet9 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet9 are
+edge 01:  1
+edge 02:  1
+edge 03:  3
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet10 is
+face 0 of tet10 glued to None
+with gluing map None
+face 1 of tet10 glued to None
+with gluing map None
+face 2 of tet10 glued to tet9
+with gluing map (2, 1, 0, 3)
+face 3 of tet10 glued to tet11
+with gluing map (0, 1, 3, 2)
+symmetries of tet10 are
+(0, 1, 2, 3)
+(1, 2, 0, 3)
+(2, 0, 1, 3)
+edge_params of tet10 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet10 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+gluing data for tet11 is
+face 0 of tet11 glued to None
+with gluing map None
+face 1 of tet11 glued to None
+with gluing map None
+face 2 of tet11 glued to tet10
+with gluing map (0, 1, 3, 2)
+face 3 of tet11 glued to tet3
+with gluing map (0, 3, 2, 1)
+symmetries of tet11 are
+(0, 1, 2, 3)
+(1, 3, 2, 0)
+(3, 0, 2, 1)
+edge_params of tet11 are
+edge 01 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet11 are
+edge 01:  1
+edge 02:  1
+edge 03:  1
+edge 12:  1
+edge 13:  1
+edge 23:  1
+ 
+The vertex classes of (80, 193) are:
+[v0 () , v1 () , v2 () , v3 () ]
+where
+v0 ()  = [<V0 of tet0>, <V1 of tet5>, <V1 of tet4>, <V1 of tet6>, <V1 of tet7>, <V0 of tet8>, <V2 of tet9>, <V0 of tet10>, <V0 of tet11>, <V0 of tet3>, <V1 of tet2>, <V0 of tet1>, <V2 of tet0>, <V0 of tet5>, <V0 of tet4>, <V1 of tet8>, <V1 of tet9>, <V1 of tet10>, <V1 of tet11>, <V3 of tet3>, <V2 of tet2>, <V3 of tet11>, <V2 of tet10>, <V3 of tet7>, <V2 of tet6>, <V0 of tet6>, <V2 of tet4>, <V3 of tet5>, <V0 of tet7>, <V2 of tet5>, <V3 of tet0>, <V3 of tet1>, <V0 of tet2>, <V3 of tet2>, <V1 of tet3>, <V2 of tet1>]
+v1 ()  = [<V1 of tet0>, <V1 of tet1>]
+v2 ()  = [<V2 of tet3>, <V0 of tet9>, <V2 of tet8>, <V3 of tet4>, <V3 of tet6>, <V2 of tet11>]
+v3 ()  = [<V2 of tet7>, <V3 of tet8>, <V3 of tet9>, <V3 of tet10>]
+There is/are 1 OP covering map(s) from (80, 193) to (40, 15)
+The first covering map restricted to the vertex classes is:
+{v0 () : v0 () , v1 () : v1 () , v2 () : v2 () , v3 () : v3 () }
+ 
+Attempting to make proto-canonical...
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+cancelled flat tet(s)
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+did 3-2 move
+ 
+ 
+did 3-2 move
+ 
+ 
+Proto-canonize succeeded
+ 
+Now doing canonize part 2...
+inputted orb is already a canonical triangulation
+ 
+The canonical triangulation is:
+ 
+this triangulation is geometric
+number of tetrahedra is 8
+gluing data for tet0 is
+face 0 of tet0 glued to tet3
+with gluing map (0, 1, 3, 2)
+face 1 of tet0 glued to tet6
+with gluing map (0, 2, 1, 3)
+face 2 of tet0 glued to tet6
+with gluing map (0, 2, 1, 3)
+face 3 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+symmetries of tet0 are
+(0, 1, 2, 3)
+edge_params of tet0 are
+edge 01 0 + (2/3 * sqrt(3)) * i
+edge 02 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 03 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 23 0 + (2/3 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  1
+edge 02:  1
+edge 03:  3
+edge 12:  3
+edge 13:  1
+edge 23:  1
+gluing data for tet1 is
+face 0 of tet1 glued to tet2
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to tet5
+with gluing map (0, 3, 2, 1)
+face 2 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 3 of tet1 glued to tet7
+with gluing map (0, 3, 2, 1)
+symmetries of tet1 are
+(0, 1, 2, 3)
+edge_params of tet1 are
+edge 01 (-1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 02 (5/7 * sqrt(1)) + (1/7 * sqrt(3)) * i
+edge 03 (2 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 12 (2 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 13 (5/7 * sqrt(1)) + (1/7 * sqrt(3)) * i
+edge 23 (-1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  1
+edge 02:  3
+edge 03:  1
+edge 12:  1
+edge 13:  3
+edge 23:  1
+gluing data for tet2 is
+face 0 of tet2 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet2 glued to tet4
+with gluing map (0, 2, 1, 3)
+face 2 of tet2 glued to tet4
+with gluing map (0, 2, 1, 3)
+face 3 of tet2 glued to tet3
+with gluing map (0, 1, 3, 2)
+symmetries of tet2 are
+(0, 1, 2, 3)
+edge_params of tet2 are
+edge 01 0 + (2/3 * sqrt(3)) * i
+edge 02 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 03 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 23 0 + (2/3 * sqrt(3)) * i
+edge labels of tet2 are
+edge 01:  1
+edge 02:  1
+edge 03:  3
+edge 12:  3
+edge 13:  1
+edge 23:  1
+gluing data for tet3 is
+face 0 of tet3 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 1 of tet3 glued to tet7
+with gluing map (0, 3, 2, 1)
+face 2 of tet3 glued to tet2
+with gluing map (0, 1, 3, 2)
+face 3 of tet3 glued to tet5
+with gluing map (0, 3, 2, 1)
+symmetries of tet3 are
+(0, 1, 2, 3)
+edge_params of tet3 are
+edge 01 (-1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 02 (5/7 * sqrt(1)) + (1/7 * sqrt(3)) * i
+edge 03 (2 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 12 (2 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 13 (5/7 * sqrt(1)) + (1/7 * sqrt(3)) * i
+edge 23 (-1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge labels of tet3 are
+edge 01:  1
+edge 02:  3
+edge 03:  1
+edge 12:  1
+edge 13:  3
+edge 23:  1
+gluing data for tet4 is
+face 0 of tet4 glued to tet5
+with gluing map (0, 1, 3, 2)
+face 1 of tet4 glued to tet2
+with gluing map (0, 2, 1, 3)
+face 2 of tet4 glued to tet2
+with gluing map (0, 2, 1, 3)
+face 3 of tet4 glued to tet5
+with gluing map (0, 1, 3, 2)
+symmetries of tet4 are
+(0, 1, 2, 3)
+edge_params of tet4 are
+edge 01 (2/3 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge 02 (3/4 * sqrt(1)) + (3/4 * sqrt(3)) * i
+edge 03 (1/7 * sqrt(1)) + (3/7 * sqrt(3)) * i
+edge 12 (1/7 * sqrt(1)) + (3/7 * sqrt(3)) * i
+edge 13 (3/4 * sqrt(1)) + (3/4 * sqrt(3)) * i
+edge 23 (2/3 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge labels of tet4 are
+edge 01:  1
+edge 02:  1
+edge 03:  3
+edge 12:  3
+edge 13:  1
+edge 23:  1
+gluing data for tet5 is
+face 0 of tet5 glued to tet4
+with gluing map (0, 1, 3, 2)
+face 1 of tet5 glued to tet3
+with gluing map (0, 3, 2, 1)
+face 2 of tet5 glued to tet4
+with gluing map (0, 1, 3, 2)
+face 3 of tet5 glued to tet1
+with gluing map (0, 3, 2, 1)
+symmetries of tet5 are
+(0, 1, 2, 3)
+edge_params of tet5 are
+edge 01 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 02 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 0 + (2/3 * sqrt(3)) * i
+edge 12 0 + (2/3 * sqrt(3)) * i
+edge 13 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge labels of tet5 are
+edge 01:  1
+edge 02:  3
+edge 03:  1
+edge 12:  1
+edge 13:  3
+edge 23:  1
+gluing data for tet6 is
+face 0 of tet6 glued to tet7
+with gluing map (0, 1, 3, 2)
+face 1 of tet6 glued to tet0
+with gluing map (0, 2, 1, 3)
+face 2 of tet6 glued to tet0
+with gluing map (0, 2, 1, 3)
+face 3 of tet6 glued to tet7
+with gluing map (0, 1, 3, 2)
+symmetries of tet6 are
+(0, 1, 2, 3)
+edge_params of tet6 are
+edge 01 (2/3 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge 02 (3/4 * sqrt(1)) + (3/4 * sqrt(3)) * i
+edge 03 (1/7 * sqrt(1)) + (3/7 * sqrt(3)) * i
+edge 12 (1/7 * sqrt(1)) + (3/7 * sqrt(3)) * i
+edge 13 (3/4 * sqrt(1)) + (3/4 * sqrt(3)) * i
+edge 23 (2/3 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge labels of tet6 are
+edge 01:  1
+edge 02:  1
+edge 03:  3
+edge 12:  3
+edge 13:  1
+edge 23:  1
+gluing data for tet7 is
+face 0 of tet7 glued to tet6
+with gluing map (0, 1, 3, 2)
+face 1 of tet7 glued to tet1
+with gluing map (0, 3, 2, 1)
+face 2 of tet7 glued to tet6
+with gluing map (0, 1, 3, 2)
+face 3 of tet7 glued to tet3
+with gluing map (0, 3, 2, 1)
+symmetries of tet7 are
+(0, 1, 2, 3)
+edge_params of tet7 are
+edge 01 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge 02 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 03 0 + (2/3 * sqrt(3)) * i
+edge 12 0 + (2/3 * sqrt(3)) * i
+edge 13 (1 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 23 (3/7 * sqrt(1)) + (2/7 * sqrt(3)) * i
+edge labels of tet7 are
+edge 01:  1
+edge 02:  3
+edge 03:  1
+edge 12:  1
+edge 13:  3
+edge 23:  1
+ 
+Its vertex classes are
+[v0 () , v1 () , v2 () , v3 () ]
+where
+v0 ()  is ideal and contains
+[<V3 of tet0>, <V2 of tet1>, <V3 of tet2>, <V2 of tet3>, <V3 of tet4>, <V2 of tet5>, <V3 of tet6>, <V2 of tet7>]
+v1 ()  is ideal and contains
+[<V0 of tet0>, <V0 of tet1>, <V0 of tet2>, <V0 of tet3>, <V0 of tet4>, <V0 of tet5>, <V0 of tet6>, <V0 of tet7>]
+v2 ()  is ideal and contains
+[<V2 of tet0>, <V3 of tet1>, <V2 of tet2>, <V3 of tet3>, <V1 of tet4>, <V1 of tet5>, <V1 of tet6>, <V1 of tet7>]
+v3 ()  is ideal and contains
+[<V1 of tet0>, <V1 of tet1>, <V1 of tet2>, <V1 of tet3>, <V2 of tet4>, <V3 of tet5>, <V2 of tet6>, <V3 of tet7>]
+ 
+We now print each OP self-isometry and how it acts on the vertex classes. The vertex classes were preserved
+during the Pachner moves. e.g. if v0 was a cusp of the original triangulation, then v0 in this
+triangulation is that same cusp.
+ 
+{tet0: ((0, 1, 2, 3), tet0), tet1: ((0, 1, 2, 3), tet1), tet2: ((0, 1, 2, 3), tet2), tet3: ((0, 1, 2, 3), tet3), tet4: ((0, 1, 2, 3), tet4), tet5: ((0, 1, 2, 3), tet5), tet6: ((0, 1, 2, 3), tet6), tet7: ((0, 1, 2, 3), tet7)}
+It acts on vertex classes as
+{v1 () : v1 () , v3 () : v3 () , v2 () : v2 () , v0 () : v0 () }
+ 
+{tet0: ((3, 2, 1, 0), tet0), tet1: ((2, 3, 0, 1), tet3), tet2: ((3, 2, 1, 0), tet2), tet3: ((2, 3, 0, 1), tet1), tet4: ((3, 2, 1, 0), tet4), tet5: ((2, 3, 0, 1), tet5), tet6: ((3, 2, 1, 0), tet6), tet7: ((2, 3, 0, 1), tet7)}
+It acts on vertex classes as
+{v1 () : v0 () , v3 () : v2 () , v2 () : v3 () , v0 () : v1 () }
+ 
+{tet0: ((0, 1, 2, 3), tet2), tet1: ((0, 1, 2, 3), tet3), tet2: ((0, 1, 2, 3), tet0), tet3: ((0, 1, 2, 3), tet1), tet4: ((0, 1, 2, 3), tet6), tet5: ((0, 1, 2, 3), tet7), tet6: ((0, 1, 2, 3), tet4), tet7: ((0, 1, 2, 3), tet5)}
+It acts on vertex classes as
+{v1 () : v1 () , v3 () : v3 () , v2 () : v2 () , v0 () : v0 () }
+ 
+{tet0: ((3, 2, 1, 0), tet2), tet1: ((2, 3, 0, 1), tet1), tet2: ((3, 2, 1, 0), tet0), tet3: ((2, 3, 0, 1), tet3), tet4: ((3, 2, 1, 0), tet6), tet5: ((2, 3, 0, 1), tet7), tet6: ((3, 2, 1, 0), tet4), tet7: ((2, 3, 0, 1), tet5)}
+It acts on vertex classes as
+{v1 () : v0 () , v3 () : v2 () , v2 () : v3 () , v0 () : v1 () }
+ 
+{tet0: ((1, 2, 0, 3), tet5), tet1: ((3, 2, 1, 0), tet1), tet2: ((1, 2, 0, 3), tet7), tet3: ((3, 2, 1, 0), tet3), tet4: ((1, 0, 3, 2), tet6), tet5: ((2, 0, 1, 3), tet0), tet6: ((1, 0, 3, 2), tet4), tet7: ((2, 0, 1, 3), tet2)}
+It acts on vertex classes as
+{v1 () : v2 () , v3 () : v0 () , v2 () : v1 () , v0 () : v3 () }
+ 
+{tet0: ((3, 0, 2, 1), tet5), tet1: ((1, 0, 3, 2), tet3), tet2: ((3, 0, 2, 1), tet7), tet3: ((1, 0, 3, 2), tet1), tet4: ((2, 3, 0, 1), tet6), tet5: ((1, 3, 2, 0), tet0), tet6: ((2, 3, 0, 1), tet4), tet7: ((1, 3, 2, 0), tet2)}
+It acts on vertex classes as
+{v1 () : v3 () , v3 () : v1 () , v2 () : v0 () , v0 () : v2 () }
+ 
+{tet0: ((1, 2, 0, 3), tet7), tet1: ((3, 2, 1, 0), tet3), tet2: ((1, 2, 0, 3), tet5), tet3: ((3, 2, 1, 0), tet1), tet4: ((1, 0, 3, 2), tet4), tet5: ((2, 0, 1, 3), tet2), tet6: ((1, 0, 3, 2), tet6), tet7: ((2, 0, 1, 3), tet0)}
+It acts on vertex classes as
+{v1 () : v2 () , v3 () : v0 () , v2 () : v1 () , v0 () : v3 () }
+ 
+{tet0: ((3, 0, 2, 1), tet7), tet1: ((1, 0, 3, 2), tet1), tet2: ((3, 0, 2, 1), tet5), tet3: ((1, 0, 3, 2), tet3), tet4: ((2, 3, 0, 1), tet4), tet5: ((1, 3, 2, 0), tet2), tet6: ((2, 3, 0, 1), tet6), tet7: ((1, 3, 2, 0), tet0)}
+It acts on vertex classes as
+{v1 () : v3 () , v3 () : v1 () , v2 () : v0 () , v0 () : v2 () }
+ 
+-----------------------------------------------------------------------------------
+ 
