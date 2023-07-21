@@ -1,11 +1,88 @@
 """
-Take the quotient of a SimplicialOrbifold/CuspedOrbifold under the action of a group of
+Take the quotient of a CuspedOrbifold under the action of a group of
 simplicial automorphisms/self-isometries.
+
+If the orbifold is geometric, the quotient will be too.
+
+The function does not change the input orbifold. It returns a quotiented copy
+of the input orbifold.
+
+Each automorphism should be expressed as a dictionary of the form
+
+{tet0: ((a, b, c, d), teti), ...}
+
+The argument "group" should be a list or tuple of the full group you'd like to
+quotient by, not just a set of generators of that group.
 """
 from SimplicialOrbifold import*
 from CuspedOrbifold import*
 
-def quotient(orb,group):
+def quotient(initial_orb,initial_group):
+	orb = initial_orb.copy()
+	# initial_group refers to the tetrahedra of initial_orb.
+	# We need to make a new list representing the group as it
+	# acts on orb.
+	group = []
+	for initial_isom in initial_group:
+		isom = {}
+		for i in range(len(orb.Tetrahedra)):
+			target_index = initial_isom[initial_orb.Tetrahedra[i]][1].Index
+			isom[orb.Tetrahedra[i]] = (initial_isom[initial_orb.Tetrahedra[i]][0],
+				orb.Tetrahedra[target_index])
+		group.append(isom)
+	orbits = make_orbits(orb,group)
+	keep_tets = [orbit[0] for orbit in orbits]
+	for tet in keep_tets:
+		for face in TwoSubsimplices:
+			update_face_gluing(tet,face,keep_tets,group)
+	update_syms(orb,keep_tets,group)
+	if not orb.is_geometric:
+		# There could be some faces in a tet which are identified by a symmetry
+		# but more than one of them is not glued to None. At this point, that can only
+		# happen if each is glued to itself. We don't allow that for simplicial orbs.
+		for tet in keep_tets:
+			for face in TwoSubsimplices:
+				if tet.face_glued_to_self(face):
+					for sym in tet.Symmetries:
+						other_face = sym.image(face)
+						if other_face != face:
+							tet.Neighbor[other_face] = None
+							tet.Gluing[other_face] = None
+		# Now we have to be careful about edge labels.
+		# In the geometric case, this is taken care of by the geometry.
+		# The point is that if an edge has a non-trivial stabilizer under the
+		# action of group, then its new edge label will be the old one times the
+		# order of that stabilizer. The order of the stabilizer is the valence of
+		# the edge in the original orbifold divided by the valence in the quotient
+		# orbifold. So we want to remember the old valences before we destroy them
+		# in making the new edge classes.
+		old_edge_class = {}
+		for tet in keep_tets:
+			for one_subsimplex in OneSubsimplices:
+				old_edge_class[(tet,one_subsimplex)] = tet.Class[one_subsimplex]
+			tet.clear_Class()
+		quotient_orb = SimplicialOrbifold(keep_tets)
+		seen_new_edges = []
+		for tet in quotient_orb.Tetrahedra:
+			for one_subsimplex in OneSubsimplices:
+				new_edge = tet.Class[one_subsimplex]
+				if new_edge in seen_new_edges:
+					continue
+				seen_new_edges.append(new_edge)
+				old_edge = old_edge_class[(tet,one_subsimplex)]
+				stabilizer_order = old_edge.valence()//new_edge.valence()
+				new_label = old_edge.LocusOrder*stabilizer_order
+				quotient_orb.change_edge_labels(new_edge,new_label)
+		return quotient_orb
+	# When there's geometry, the edge labels will be determined by that geometry,
+	# so we don't need to do the same work as above. Might still be good to do it,
+	# as a check.
+	for tet in keep_tets:
+		tet.remove_redundant_face_gluing()
+		tet.clear_Class()
+	return CuspedOrbifold(keep_tets)
+
+def quotient_old(orb,group):
 	orbits = make_orbits(orb,group)
 	keep_tets = []
 	for orbit in orbits:
@@ -99,7 +176,7 @@ def update_face_gluing(tet,face,keep_tets,group):
 		tet.attach(face,g[nbr][1],(g[nbr][0]*gluing).tuple())
 		# Now, if there is some g in the group such that g(face) != face, we want to
 		# remove the face gluing data for g(face). That's just our convention for
-		# simplicial and geometric orbifolds. But it's also useful here because
+		# orbifold triangulations. But it's also useful here because
 		# it means update_face_gluing will skip g(face) when it gets to it later.
 		for g in group:
 			if g[tet][1] is tet:
@@ -109,6 +186,8 @@ def update_face_gluing(tet,face,keep_tets,group):
 					tet.Gluing[other_face] = None
 	return
 
+# Note: to update sym group for each tet, we don't just add the elements of the isom group
+# which fix the tet, rather the group they generate with the original sym group of the tet. (?)
 def update_syms(orb,keep_tets,group):
 	for tet in keep_tets:
 		for g in group:

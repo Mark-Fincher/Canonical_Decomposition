@@ -3,6 +3,12 @@ Cusped orbifold class. Similar to the SnapPy t3m mcomplex class. Some things are
 with modification, from ancillary files of the paper "A census of tetrahedral hyperbolic 
 manifolds" by Evgeny Fominykh, Stavros Garoufalidis, Matthias Goerner, Vladimir Tarkaev, 
 and Andrei Vesnin. I comment FGGTV before those things.
+
+Important change: earlier on, I viewed geometric and non-geometric orbifold triangulations as
+separate python classes, CuspedOrbifold and SimplicialOrbifold respectively. Later, I decided
+to just view a non-geometric orbifold triangulation as a CuspedOrbifold object whose
+self.edge_params dictionary is identically None. There are still some references to SimplicialOrbifold
+objects hanging around in different places in the code. Will slowly remove them.
 """
 
 from HoroTriangle import*
@@ -10,7 +16,7 @@ from simplex import *
 from tetrahedron import Tetrahedron
 from corner import Corner
 from arrow import Arrow
-#from .face import Face
+from face import Face
 from edge import Edge
 from vertex import Vertex
 from Exact_Arithmetic import*
@@ -44,6 +50,7 @@ class CuspedOrbifold:
 			T.horotriangles = {V0:None, V1:None, V2:None, V3:None}
 		self.build_vertex_classes()
 		self.build_edge_classes()
+		self.build_face_classes()
 		if self.is_geometric:
 			self.add_cusp_cross_sections()
 			for cusp in self.Vertices:
@@ -404,6 +411,28 @@ class CuspedOrbifold:
                 
 		return result
     
+    # construct the face classes.
+	def build_face_classes(self):
+		for tet in self.Tetrahedra:
+			for two_subsimplex in TwoSubsimplices:
+				if tet.Class[two_subsimplex] == None:
+					nbr, perm = tet.true_glued(two_subsimplex)
+					nbr_two_subsimplex = perm.image(two_subsimplex)
+					newFace = Face()
+					self.Faces.append(newFace)
+					for sym in tet.Symmetries:
+						image = sym.image(two_subsimplex)
+						if tet.Class[image] == None:
+							tet.Class[image] = newFace
+							newFace.Corners.append(Corner(tet,image))
+					for sym in nbr.Symmetries:
+						image = sym.image(nbr_two_subsimplex)
+						if nbr.Class[image] == None:
+							nbr.Class[image] = newFace
+							newFace.Corners.append(Corner(nbr,image))
+		for i in range(len(self.Faces)):
+			self.Faces[i].Index = i
+
 
     # Construct the vertices.
 	#

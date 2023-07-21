@@ -205,6 +205,36 @@ class Tetrahedron:
                     self.Neighbor[image_face] = None
                     self.Gluing[image_face] = None
 
+    # In the orbit of a face under the symmetry group, all but one face should be glued to None.
+    # This might not be the case after, for example, quotienting an orb by some isometries, which
+    # is why we apply this function in quotient.py. We are implicitly assuming that the triangulation
+    # actually gives an orbifold, because we'll remove some gluing info which should be able to
+    # be inferred from symmetries if the quotient under the equivalence relation is an orbifold.
+    # This function does more than the one above, remove_extra_glued_to_self.
+    def remove_redundant_face_gluing(self):
+        seen_faces = []
+        for face in TwoSubsimplices:
+            if self.Neighbor[face] is None or face in seen_faces:
+                continue
+            # If face can be glued to itself, then do that.
+            if self.Neighbor[face] is self:
+                gluing = self.Gluing[face]
+                for sym in self.Symmetries:
+                    other_face = sym.image(face)
+                    if other_face != face and gluing.image(face) == other_face:
+                        self.Gluing[face] = inv(sym)*gluing
+            # Now detach everything in the orbit of face other than face.
+            for sym in self.Symmetries:
+                other_face = sym.image(face)
+                seen_faces.append(other_face)
+                if other_face != face:
+                    if self.Neighbor[other_face] is self and self.face_glued_to_self(face):
+                        self.Neighbor[other_face] = None
+                        self.Gluing[other_face] = None
+                    elif self.Neighbor[other_face] is None and self.Gluing[other_face] is None:
+                        continue
+                    else:
+                        self.detach(other_face)
 
 
     """

@@ -1,12 +1,19 @@
-"""
-A simplicial map is just a map of simplicial orbifolds. It sends tetrahedra
-to tetrahedra and respects the face gluings, symmetries, and edge labels. Hence
-it descends to a covering map of the quotient orbifold.
+# A simplicial map is just a map of orbifold triangulations. It sends tetrahedra
+# to tetrahedra and respects the face gluings, symmetries, and edge labels. Hence
+# it descends to a covering map of the quotient orbifold.
 
-Throughout this file, orb_1 and orb_2 can be CuspedOrbifold or SimplicialOrbifold
-objects. Of course even if they are geometric (i.e. CuspedOrbifold), we never
-refer to their geometry here. Simplicial maps are purely combinatorial.
-"""
+# Throughout this file, orb_1 and orb_2 can be geometric or not. Simplicial maps
+# are combinatorial.
+
+# Important convention: I represent a map from orb_1 to orb_2 as a dictionary
+
+# {tet0: ((a, b, c, d), teti), ...}
+
+# where tet0 of orb_1 is mapped to teti of orb_2 via the vertex mapping of vertices
+# represented by (a,b,c,d), i.e. v0 -> va, v1 -> vb, v2 -> vc, v3 -> vd. Except
+# it's not the tuple (a,b,c,d), but rather the perm4 object corresponding to it
+# (see perm4.py). Similarly, tet0 and teti are the actual Tetrahedron objects,
+# rather than just integers representing the index of the tet.
 
 from SimplicialOrbifold import*
 from HoroTriangle import* # for the function glued_to()

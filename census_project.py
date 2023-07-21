@@ -326,7 +326,7 @@ for key in D.keys():
 """
 
 # Covers of O5_0
-
+"""
 D = {}
 
 D[(5, 0)] = [0, 1, 2, 3, 2, 2, 0, 2, 1, 0, 1, 1, 4, 3, 3, 0, 3, 4, 4, 4]
@@ -424,8 +424,9 @@ D[(45, 5)] = [0, 1, 2, 3, 2, 2, 0, 4, 1, 0, 1, 5, 6, 7, 8, 0, 9, 10, 9, 1, 11, 1
 D[(45, 6)] = [0, 1, 2, 3, 2, 2, 0, 4, 1, 0, 1, 5, 6, 7, 8, 0, 9, 10, 9, 1, 11, 11, 12, 2, 3, 13, 14, 6, 14, 15, 3, 12, 13, 3, 16, 10, 4, 4, 17, 11, 17, 18, 4, 8, 5, 19, 5, 9, 19, 5, 20, 7, 8, 21, 6, 22, 7, 6, 23, 24, 23, 25, 7, 26, 21, 8, 25, 27, 10, 9, 28, 29, 28, 28, 10, 30, 12, 31, 11, 32, 31, 12, 31, 33, 16, 34, 13, 23, 29, 24, 24, 13, 15, 14, 34, 21, 32, 22, 22, 14, 34, 16, 15, 35, 27, 33, 36, 15, 26, 37, 30, 16, 18, 17, 18, 31, 22, 32, 32, 17, 33, 27, 33, 18, 20, 20, 19, 28, 24, 29, 29, 19, 30, 30, 26, 20, 25, 23, 21, 38, 39, 40, 41, 25, 37, 26, 37, 40, 36, 36, 27, 41, 42, 38, 38, 34, 35, 43, 44, 42, 44, 44, 35, 36, 43, 35, 43, 37, 38, 42, 42, 39, 41, 41, 39, 44, 40, 39, 40, 43]
  
 D[(45, 7)] = [0, 1, 2, 3, 2, 2, 0, 4, 1, 0, 1, 5, 6, 7, 8, 0, 9, 10, 11, 1, 12, 13, 14, 2, 3, 15, 16, 6, 16, 17, 3, 14, 15, 3, 18, 10, 4, 19, 20, 12, 20, 21, 4, 8, 19, 4, 22, 13, 5, 22, 21, 9, 21, 20, 5, 11, 22, 5, 19, 7, 8, 23, 6, 24, 7, 6, 25, 26, 25, 27, 7, 28, 23, 8, 27, 29, 11, 14, 9, 30, 10, 9, 13, 31, 13, 12, 10, 32, 14, 11, 12, 33, 18, 34, 15, 25, 31, 26, 26, 15, 17, 16, 34, 23, 33, 24, 24, 16, 34, 18, 17, 35, 29, 30, 36, 17, 28, 37, 32, 18, 32, 32, 28, 19, 24, 33, 33, 20, 30, 29, 30, 21, 26, 31, 31, 22, 27, 25, 23, 38, 39, 40, 41, 27, 37, 28, 37, 40, 36, 36, 29, 41, 42, 38, 38, 34, 35, 43, 44, 42, 44, 44, 35, 36, 43, 35, 43, 37, 38, 42, 42, 39, 41, 41, 39, 44, 40, 39, 40, 43]
- 
+ """
 
+"""
 # The following code takes a dest seq dictionary, D, and prints the OP isometry classes of the corresponding orbs.
 # For this example, D is the covers of O(5,0), because that's what's un-commented above.
 seen_orbs = []
@@ -454,3 +455,84 @@ for key1 in D.keys():
 for OP_iso_class in OP_iso_classes:
 	print(OP_iso_class)
 	print(" ")
+"""
+
+D = {}
+
+D[(8,2)] = [1, 2, 2, 1, 0, 3, 3, 0, 3, 0, 0, 4, 2, 1, 1, 5, 6, 5, 5, 2, 7, 4, 4, 3, 4, 7, 7, 7, 5, 6, 6, 6]
+D[(12,4)] = [0, 1, 2, 3, 2, 3, 0, 4, 1, 0, 5, 6, 5, 7, 1, 0, 8, 4, 4, 1, 3, 2, 7, 5, 9, 10, 10, 2, 7, 5, 3, 10, 4, 8, 8, 9, 6, 11, 11, 8, 11, 6, 6, 7, 10, 9, 9, 11]
+D[(12,6)] = [0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 3, 6, 4, 2, 7, 0, 3, 7, 1, 4, 8, 9, 9, 1, 10, 6, 6, 2, 7, 3, 4, 9, 5, 11, 11, 10, 11, 5, 5, 7, 6, 10, 10, 8, 9, 8, 8, 11]
+
+print("O(8,2) has dest seq",D[(8,2)])
+print("canonize")
+
+orb = dest_to_orb(D[(8,2)])
+
+if proto_canonize(orb):
+	print("canonize succeeded")
+else:
+	print("canonize failed")
+print("the canonical triang is")
+print(' ')
+orb.info()
+print(' ')
+print("Its OP isoms are")
+isoms = simplicial_maps_OP(orb,orb)
+print(isoms)
+print('')
+print('quotient by the 2nd isom, which is',isoms[2])
+print('to get')
+print('')
+orb2 = quotient(orb,[isoms[0],isoms[2]])
+orb2.info()
+print('')
+
+print(orb2.Tetrahedra[0].Class[F0])
+
+print('the singular locus of this quotient orbifold is')
+loc = singular_locus(orb2)
+loc.info()
+print('')
+print('-------------------------------------------------------------------')
+print('quotient O(8,2) by the 3rd isom, which is',isoms[3])
+print('to get')
+orb3 = quotient(orb,[isoms[0],isoms[3]])
+print('')
+orb3.info()
+print('')
+print('the singular locus of this quotient orbifold is')
+loc = singular_locus(orb3)
+loc.info()
+print('')
+print('-------------------------------------------------------------------')
+print('')
+print("O(12,4) has dest seq",D[(12,4)])
+print("canonize")
+
+orb = dest_to_orb(D[(12,4)])
+
+if proto_canonize(orb):
+	print("canonize succeeded")
+else:
+	print("canonize failed")
+print("the canonical triang is")
+print(' ')
+orb.info()
+print(' ')
+print("Its OP isoms are")
+isoms = simplicial_maps_OP(orb,orb)
+print(isoms)
+print('')
+print('quotient by the 1st isom, which is',isoms[1])
+print('to get')
+print('')
+orb2 = quotient(orb,[isoms[0],isoms[1]])
+orb2.info()
+print('')
+print('the singular locus of this quotient orbifold is')
+loc = singular_locus(orb2)
+loc.info()
+print('')
+print('-------------------------------------------------------------------')
+
+
