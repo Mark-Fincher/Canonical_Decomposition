@@ -164,3 +164,35 @@ class Perm4:
 
         for p in Perm4._rawKleinFour:
             yield Perm4(p)
+
+    @staticmethod
+    def GenerateSubgroup(generators):
+        # For a list of elements of S4, return the subgroup of S4 which they generate.
+        generators = [Perm4((0,1,2,3))] + generators + [inv(p) for p in generators]
+        # Remove duplicates.
+        gen_tuples = set([p.tuple() for p in generators])
+        generators = [Perm4(p) for p in gen_tuples]
+        # Generate all words up to length 2.
+        level = generators
+        next_level = []
+        for p1 in level:
+            for p2 in generators:
+                next_level.append(p1*p2)
+        # Remove duplicates from next_level.
+        next_level_tuples = set([p.tuple() for p in next_level])
+        next_level = [Perm4(p) for p in next_level_tuples]
+        # Using the set of words up to length n, generate the words up to length n+1. If the two
+        # sets of words equal each other, then we have generated the whole subgroup, so done.
+        while len(next_level) != len(level):
+            level = next_level
+            next_level = []
+            for p1 in level:
+                for p2 in generators:
+                    next_level.append(p1*p2)
+            # Remove duplicates from next_level.
+            next_level_tuples = set([p.tuple() for p in next_level])
+            next_level = [Perm4(p) for p in next_level_tuples]
+        # Sort, just for neatness, then return the result.
+        next_level_tuples = sorted([p.tuple() for p in next_level])
+        next_level = [Perm4(p) for p in next_level_tuples]
+        return next_level

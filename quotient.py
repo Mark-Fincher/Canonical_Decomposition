@@ -190,13 +190,16 @@ def update_face_gluing(tet,face,keep_tets,group):
 # which fix the tet, rather the group they generate with the original sym group of the tet. (?)
 def update_syms(orb,keep_tets,group):
 	for tet in keep_tets:
+		generators = tet.Symmetries
 		for g in group:
 			if g[tet][1] == tet and g[tet][0].tuple() != (0,1,2,3):
-				tet.Symmetries.append(g[tet][0])
+				generators.append(g[tet][0])
+		tet.Symmetries = Perm4.GenerateSubgroup(generators)
 	# If F and F' are faces in a tet which are identified by a face gluing
 	# and by a symmetry, then they should really be glued to themselves.
 	# This can't happen in the original orbifold, but it could happen now
-	# that we've possibly added more symmetries.
+	# that we've possibly added more symmetries. Update: this face gluing convention
+	# isn't something I believe in anymore, should change this at some point.
 	for tet in keep_tets:
 		for face1 in TwoSubsimplices:
 			if tet.Neighbor[face1] is tet:
