@@ -1,12 +1,12 @@
 """
-This file is used to create the barycentric graph and singular locus graph of a simplicial
-orbifold. The graph data type is defined in graph.py.
+This file is used to create the barycentric graph and singular locus graph of an orbifold
+triangulation. The graph data type is defined in graph.py.
 
 The barycentric graph has one vertex for every tet, vertex class, edge class, and face class
-of a simplicial orbifold "orb". You have an edge exactly when one of these is contained in the other.
+of an orbifold triangulation "orb". You have an edge exactly when one of these is contained in the other.
 There could be more than one edge between two vertices in the graph. The graph edges are given a
 positive integer label corresponding to the order of the rotation group fixing it. The idea 
-is that this graph is the 1-skeleton of the barycentric subdivision of the simplicial orbifold, 
+is that this graph is the 1-skeleton of the barycentric subdivision of the orbifold triangulation, 
 quotiented out by the symmetries of the tets. 
 
 For example, suppose 0-simplices V1 and V2 of tet0 belong to the same vertex class, V. If V1 
@@ -21,7 +21,8 @@ the same kind of statement to determine graph edges between the other graph vert
 The singular locus graph is obtained from the barycentric graph by:
 - Removing all edges labelled 1.
 - Removing any isolated vertices which result from step 1.
-- Removing any valence 2 vertices.
+- Removing any valence 2 vertex v, where the two connected edges are distint and having other vertex not equal to v.
+  In this case, we can be sure that v is not an ideal point because of the classification of cusp types.
 
 """
 
@@ -144,7 +145,7 @@ def barycentric_graph(orb):
 	return graph
 
 """
-Given a simplicial orbifold "orb", return its singular locus. First it gets the barycentric
+Given an orbifold triang "orb", return its singular locus. First it gets the barycentric
 graph, then it turns that into the singular locus.
 """
 def singular_locus(orb):

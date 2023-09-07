@@ -1,0 +1,599 @@
+O(8,2) has dest seq [1, 2, 2, 1, 0, 3, 3, 0, 3, 0, 0, 4, 2, 1, 1, 5, 6, 5, 5, 2, 7, 4, 4, 3, 4, 7, 7, 7, 5, 6, 6, 6]
+canonize
+ 
+ 
+did 2-3 move
+ 
+ 
+canonize succeeded
+the canonical triang is
+ 
+this triangulation is geometric
+number of tetrahedra is 1
+gluing data for tet0 is
+face 0 of tet0 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 1 of tet0 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 2 of tet0 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 3 of tet0 glued to tet0
+with gluing map (0, 1, 3, 2)
+symmetries of tet0 are
+(0, 1, 2, 3)
+edge_params of tet0 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  3
+edge 02:  3
+edge 03:  3
+edge 12:  3
+edge 13:  3
+edge 23:  3
+ 
+Its OP isoms are
+[{tet0: ((0, 1, 2, 3), tet0)}, {tet0: ((1, 0, 3, 2), tet0)}, {tet0: ((2, 3, 0, 1), tet0)}, {tet0: ((3, 2, 1, 0), tet0)}]
+
+quotient by the 2nd isom, which is {tet0: ((2, 3, 0, 1), tet0)}
+to get
+
+this triangulation is geometric
+number of tetrahedra is 1
+gluing data for tet0 is
+face 0 of tet0 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 1 of tet0 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 2 of tet0 glued to None
+with gluing map None
+face 3 of tet0 glued to None
+with gluing map None
+symmetries of tet0 are
+(0, 1, 2, 3)
+(2, 3, 0, 1)
+edge_params of tet0 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  3
+edge 02:  3
+edge 03:  3
+edge 12:  3
+edge 13:  3
+edge 23:  3
+
+f0
+the singular locus of this quotient orbifold is
+Vertices =  [v0 () , v1 () ]
+ 
+Edges =  [e0 (), e1 (), e2 ()]
+ 
+Label of edge e0 () is 3
+Vertices of edge e0 () are [v1 () , v0 () ]
+ 
+Label of edge e1 () is 2
+Vertices of edge e1 () are [v1 () , v1 () ]
+ 
+Label of edge e2 () is 3
+Vertices of edge e2 () are [v0 () , v0 () ]
+ 
+
+-------------------------------------------------------------------
+quotient O(8,2) by the 3rd isom, which is {tet0: ((3, 2, 1, 0), tet0)}
+to get
+
+this triangulation is geometric
+number of tetrahedra is 1
+gluing data for tet0 is
+face 0 of tet0 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 1 of tet0 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 2 of tet0 glued to None
+with gluing map None
+face 3 of tet0 glued to None
+with gluing map None
+symmetries of tet0 are
+(0, 1, 2, 3)
+(3, 2, 1, 0)
+edge_params of tet0 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  3
+edge 02:  3
+edge 03:  3
+edge 12:  3
+edge 13:  3
+edge 23:  3
+
+the singular locus of this quotient orbifold is
+Vertices =  [v0 () , v1 () ]
+ 
+Edges =  [e0 (), e1 (), e2 ()]
+ 
+Label of edge e0 () is 3
+Vertices of edge e0 () are [v1 () , v0 () ]
+ 
+Label of edge e1 () is 2
+Vertices of edge e1 () are [v1 () , v1 () ]
+ 
+Label of edge e2 () is 3
+Vertices of edge e2 () are [v0 () , v0 () ]
+ 
+
+-------------------------------------------------------------------
+
+O(12,4) has dest seq [0, 1, 2, 3, 2, 3, 0, 4, 1, 0, 5, 6, 5, 7, 1, 0, 8, 4, 4, 1, 3, 2, 7, 5, 9, 10, 10, 2, 7, 5, 3, 10, 4, 8, 8, 9, 6, 11, 11, 8, 11, 6, 6, 7, 10, 9, 9, 11]
+canonize
+ 
+ 
+did 2-3 move
+ 
+ 
+canonize succeeded
+the canonical triang is
+ 
+this triangulation is geometric
+number of tetrahedra is 2
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet0 glued to None
+with gluing map None
+face 2 of tet0 glued to None
+with gluing map None
+face 3 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+symmetries of tet0 are
+(0, 1, 2, 3)
+(1, 0, 3, 2)
+edge_params of tet0 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  1
+edge 02:  3
+edge 03:  6
+edge 12:  6
+edge 13:  3
+edge 23:  1
+gluing data for tet1 is
+face 0 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 2 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 3 of tet1 glued to tet1
+with gluing map (1, 0, 2, 3)
+symmetries of tet1 are
+(0, 1, 2, 3)
+edge_params of tet1 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  1
+edge 02:  3
+edge 03:  3
+edge 12:  3
+edge 13:  6
+edge 23:  1
+ 
+Its OP isoms are
+[{tet0: ((0, 1, 2, 3), tet0), tet1: ((0, 1, 2, 3), tet1)}, {tet0: ((2, 3, 0, 1), tet0), tet1: ((2, 3, 0, 1), tet1)}]
+
+quotient by the 1st isom, which is {tet0: ((2, 3, 0, 1), tet0), tet1: ((2, 3, 0, 1), tet1)}
+to get
+
+this triangulation is geometric
+number of tetrahedra is 2
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet0 glued to None
+with gluing map None
+face 2 of tet0 glued to None
+with gluing map None
+face 3 of tet0 glued to None
+with gluing map None
+symmetries of tet0 are
+(0, 1, 2, 3)
+(1, 0, 3, 2)
+(2, 3, 0, 1)
+(3, 2, 1, 0)
+edge_params of tet0 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  1
+edge 02:  3
+edge 03:  6
+edge 12:  6
+edge 13:  3
+edge 23:  1
+gluing data for tet1 is
+face 0 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 2 of tet1 glued to None
+with gluing map None
+face 3 of tet1 glued to None
+with gluing map None
+symmetries of tet1 are
+(0, 1, 2, 3)
+(2, 3, 0, 1)
+edge_params of tet1 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  1
+edge 02:  3
+edge 03:  3
+edge 12:  3
+edge 13:  6
+edge 23:  1
+
+the singular locus of this quotient orbifold is
+Vertices =  [v0 () , v1 () , v2 () , v3 () ]
+ 
+Edges =  [e0 (), e1 (), e2 (), e3 (), e4 (), e5 ()]
+ 
+Label of edge e0 () is 2
+Vertices of edge e0 () are [v0 () , v2 () ]
+ 
+Label of edge e1 () is 2
+Vertices of edge e1 () are [v0 () , v3 () ]
+ 
+Label of edge e2 () is 3
+Vertices of edge e2 () are [v2 () , v1 () ]
+ 
+Label of edge e3 () is 6
+Vertices of edge e3 () are [v3 () , v1 () ]
+ 
+Label of edge e4 () is 2
+Vertices of edge e4 () are [v2 () , v3 () ]
+ 
+Label of edge e5 () is 2
+Vertices of edge e5 () are [v1 () , v0 () ]
+ 
+
+-------------------------------------------------------------------
+
+O(12,6) has dest seq [0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 3, 6, 4, 2, 7, 0, 3, 7, 1, 4, 8, 9, 9, 1, 10, 6, 6, 2, 7, 3, 4, 9, 5, 11, 11, 10, 11, 5, 5, 7, 6, 10, 10, 8, 9, 8, 8, 11]
+canonize
+ 
+ 
+did 2-3 move
+ 
+ 
+canonize succeeded
+the canonical triang is
+ 
+this triangulation is geometric
+number of tetrahedra is 2
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (1, 0, 2, 3)
+face 1 of tet0 glued to None
+with gluing map None
+face 2 of tet0 glued to None
+with gluing map None
+face 3 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+symmetries of tet0 are
+(0, 1, 2, 3)
+(1, 0, 3, 2)
+edge_params of tet0 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  1
+edge 02:  6
+edge 03:  3
+edge 12:  3
+edge 13:  6
+edge 23:  1
+gluing data for tet1 is
+face 0 of tet1 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 2 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 3 of tet1 glued to tet1
+with gluing map (1, 0, 2, 3)
+symmetries of tet1 are
+(0, 1, 2, 3)
+edge_params of tet1 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  1
+edge 02:  3
+edge 03:  6
+edge 12:  3
+edge 13:  3
+edge 23:  1
+ 
+Its OP isoms are
+[{tet0: ((0, 1, 2, 3), tet0), tet1: ((0, 1, 2, 3), tet1)}, {tet0: ((2, 3, 0, 1), tet0), tet1: ((3, 2, 1, 0), tet1)}]
+
+quotient by the 1st isom, which is {tet0: ((2, 3, 0, 1), tet0), tet1: ((3, 2, 1, 0), tet1)}
+to get
+
+this triangulation is geometric
+number of tetrahedra is 2
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (1, 0, 2, 3)
+face 1 of tet0 glued to None
+with gluing map None
+face 2 of tet0 glued to None
+with gluing map None
+face 3 of tet0 glued to None
+with gluing map None
+symmetries of tet0 are
+(0, 1, 2, 3)
+(1, 0, 3, 2)
+(2, 3, 0, 1)
+(3, 2, 1, 0)
+edge_params of tet0 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  1
+edge 02:  6
+edge 03:  3
+edge 12:  3
+edge 13:  6
+edge 23:  1
+gluing data for tet1 is
+face 0 of tet1 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to tet0
+with gluing map (1, 0, 2, 3)
+face 2 of tet1 glued to None
+with gluing map None
+face 3 of tet1 glued to None
+with gluing map None
+symmetries of tet1 are
+(0, 1, 2, 3)
+(3, 2, 1, 0)
+edge_params of tet1 are
+edge 01 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 02 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 03 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 12 (3/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge 13 (1/2 * sqrt(1)) + (1/6 * sqrt(3)) * i
+edge 23 (-1/2 * sqrt(1)) + (1/2 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  1
+edge 02:  3
+edge 03:  6
+edge 12:  3
+edge 13:  3
+edge 23:  1
+
+the singular locus of this quotient orbifold is
+Vertices =  [v0 () , v1 () , v2 () , v3 () ]
+ 
+Edges =  [e0 (), e1 (), e2 (), e3 (), e4 (), e5 ()]
+ 
+Label of edge e0 () is 2
+Vertices of edge e0 () are [v0 () , v2 () ]
+ 
+Label of edge e1 () is 2
+Vertices of edge e1 () are [v0 () , v3 () ]
+ 
+Label of edge e2 () is 6
+Vertices of edge e2 () are [v2 () , v1 () ]
+ 
+Label of edge e3 () is 3
+Vertices of edge e3 () are [v3 () , v1 () ]
+ 
+Label of edge e4 () is 2
+Vertices of edge e4 () are [v3 () , v2 () ]
+ 
+Label of edge e5 () is 2
+Vertices of edge e5 () are [v1 () , v0 () ]
+ 
+
+-------------------------------------------------------------------
+
+O(20,5) has dest seq [0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 4, 2, 7, 9, 3, 6, 6, 6, 7, 5, 4, 10, 11, 9, 12, 4, 13, 12, 8, 5, 14, 15, 15, 7, 8, 16, 13, 13, 16, 8, 9, 15, 9, 11, 16, 11, 10, 17, 17, 14, 17, 10, 10, 12, 12, 13, 11, 18, 15, 14, 14, 19, 19, 18, 18, 16, 18, 19, 19, 17]
+canonize
+ 
+ 
+did 2-3 move
+ 
+ 
+did 2-3 move
+ 
+ 
+cancelled flat tet(s)
+ 
+ 
+canonize succeeded
+the canonical triang is
+ 
+this triangulation is geometric
+number of tetrahedra is 2
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 2 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 3 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+symmetries of tet0 are
+(0, 1, 2, 3)
+edge_params of tet0 are
+edge 01 0 + (1/3 * sqrt(3)) * i
+edge 02 (3/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 03 (1 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 12 (1 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 13 (3/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 23 0 + (1/3 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  2
+edge 02:  6
+edge 03:  3
+edge 12:  3
+edge 13:  6
+edge 23:  2
+gluing data for tet1 is
+face 0 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 2 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 3 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+symmetries of tet1 are
+(0, 1, 2, 3)
+edge_params of tet1 are
+edge 01 0 + (1 * sqrt(3)) * i
+edge 02 (1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 03 (1 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge 12 (1 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge 13 (1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 23 0 + (1 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  2
+edge 02:  3
+edge 03:  6
+edge 12:  6
+edge 13:  3
+edge 23:  2
+ 
+Its OP isoms are
+[{tet0: ((0, 1, 2, 3), tet0), tet1: ((0, 1, 2, 3), tet1)}, {tet0: ((1, 0, 3, 2), tet0), tet1: ((1, 0, 3, 2), tet1)}, {tet0: ((2, 3, 0, 1), tet0), tet1: ((3, 2, 1, 0), tet1)}, {tet0: ((3, 2, 1, 0), tet0), tet1: ((2, 3, 0, 1), tet1)}]
+
+quotient by the 1st isom, which is {tet0: ((1, 0, 3, 2), tet0), tet1: ((1, 0, 3, 2), tet1)}
+to get
+
+this triangulation is geometric
+number of tetrahedra is 2
+gluing data for tet0 is
+face 0 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 1 of tet0 glued to None
+with gluing map None
+face 2 of tet0 glued to tet1
+with gluing map (0, 1, 3, 2)
+face 3 of tet0 glued to None
+with gluing map None
+symmetries of tet0 are
+(0, 1, 2, 3)
+(1, 0, 3, 2)
+edge_params of tet0 are
+edge 01 0 + (1/3 * sqrt(3)) * i
+edge 02 (3/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 03 (1 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 12 (1 * sqrt(1)) + (1 * sqrt(3)) * i
+edge 13 (3/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 23 0 + (1/3 * sqrt(3)) * i
+edge labels of tet0 are
+edge 01:  2
+edge 02:  6
+edge 03:  3
+edge 12:  3
+edge 13:  6
+edge 23:  2
+gluing data for tet1 is
+face 0 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+face 1 of tet1 glued to None
+with gluing map None
+face 2 of tet1 glued to None
+with gluing map None
+face 3 of tet1 glued to tet0
+with gluing map (0, 1, 3, 2)
+symmetries of tet1 are
+(0, 1, 2, 3)
+(1, 0, 3, 2)
+edge_params of tet1 are
+edge 01 0 + (1 * sqrt(3)) * i
+edge 02 (1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 03 (1 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge 12 (1 * sqrt(1)) + (1/3 * sqrt(3)) * i
+edge 13 (1/4 * sqrt(1)) + (1/4 * sqrt(3)) * i
+edge 23 0 + (1 * sqrt(3)) * i
+edge labels of tet1 are
+edge 01:  2
+edge 02:  3
+edge 03:  6
+edge 12:  6
+edge 13:  3
+edge 23:  2
+
+the singular locus of this quotient orbifold is
+Vertices =  [v0 () , v1 () , v2 () , v3 () ]
+ 
+Edges =  [e0 (), e1 (), e2 (), e3 (), e4 (), e5 ()]
+ 
+Label of edge e0 () is 2
+Vertices of edge e0 () are [v2 () , v0 () ]
+ 
+Label of edge e1 () is 2
+Vertices of edge e1 () are [v3 () , v1 () ]
+ 
+Label of edge e2 () is 2
+Vertices of edge e2 () are [v2 () , v3 () ]
+ 
+Label of edge e3 () is 2
+Vertices of edge e3 () are [v2 () , v3 () ]
+ 
+Label of edge e4 () is 6
+Vertices of edge e4 () are [v0 () , v1 () ]
+ 
+Label of edge e5 () is 3
+Vertices of edge e5 () are [v0 () , v1 () ]
+ 
+

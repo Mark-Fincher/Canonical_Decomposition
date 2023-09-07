@@ -464,6 +464,8 @@ D = {}
 D[(8,2)] = [1, 2, 2, 1, 0, 3, 3, 0, 3, 0, 0, 4, 2, 1, 1, 5, 6, 5, 5, 2, 7, 4, 4, 3, 4, 7, 7, 7, 5, 6, 6, 6]
 D[(12,4)] = [0, 1, 2, 3, 2, 3, 0, 4, 1, 0, 5, 6, 5, 7, 1, 0, 8, 4, 4, 1, 3, 2, 7, 5, 9, 10, 10, 2, 7, 5, 3, 10, 4, 8, 8, 9, 6, 11, 11, 8, 11, 6, 6, 7, 10, 9, 9, 11]
 D[(12,6)] = [0, 1, 2, 3, 2, 4, 0, 5, 1, 0, 3, 6, 4, 2, 7, 0, 3, 7, 1, 4, 8, 9, 9, 1, 10, 6, 6, 2, 7, 3, 4, 9, 5, 11, 11, 10, 11, 5, 5, 7, 6, 10, 10, 8, 9, 8, 8, 11]
+D[(20,5)] = [0, 1, 2, 3, 2, 4, 0, 2, 1, 0, 5, 1, 6, 3, 3, 0, 5, 7, 1, 8, 4, 2, 7, 9, 3, 6, 6, 6, 7, 5, 4, 10, 11, 9, 12, 4, 13, 12, 8, 5, 14, 15, 15, 7, 8, 16, 13, 13, 16, 8, 9, 15, 9, 11, 16, 11, 10, 17, 17, 14, 17, 10, 10, 12, 12, 13, 11, 18, 15, 14, 14, 19, 19, 18, 18, 16, 18, 19, 19, 17]
+
 
 print("O(8,2) has dest seq",D[(8,2)])
 print("canonize")
@@ -536,5 +538,62 @@ loc = singular_locus(orb2)
 loc.info()
 print('')
 print('-------------------------------------------------------------------')
+print('')
+print("O(12,6) has dest seq",D[(12,6)])
+print("canonize")
+
+orb = dest_to_orb(D[(12,6)])
+
+if proto_canonize(orb):
+	print("canonize succeeded")
+else:
+	print("canonize failed")
+print("the canonical triang is")
+print(' ')
+orb.info()
+print(' ')
+print("Its OP isoms are")
+isoms = simplicial_maps_OP(orb,orb)
+print(isoms)
+print('')
+print('quotient by the 1st isom, which is',isoms[1])
+print('to get')
+print('')
+orb2 = quotient(orb,[isoms[0],isoms[1]])
+orb2.info()
+print('')
+print('the singular locus of this quotient orbifold is')
+loc = singular_locus(orb2)
+loc.info()
+print('')
+print('-------------------------------------------------------------------')
+print('')
+print("O(20,5) has dest seq",D[(20,5)])
+print("canonize")
+
+orb = dest_to_orb(D[(20,5)])
+
+if proto_canonize(orb):
+	print("canonize succeeded")
+else:
+	print("canonize failed")
+print("the canonical triang is")
+print(' ')
+orb.info()
+print(' ')
+print("Its OP isoms are")
+isoms = simplicial_maps_OP(orb,orb)
+print(isoms)
+print('')
+print('quotient by the 1st isom, which is',isoms[1])
+print('to get')
+print('')
+orb2 = quotient(orb,[isoms[0],isoms[1]])
+orb2.info()
+print('')
+print('the singular locus of this quotient orbifold is')
+loc = singular_locus(orb2)
+loc.info()
+print('')
 
 
