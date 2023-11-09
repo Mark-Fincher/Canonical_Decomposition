@@ -31,7 +31,7 @@ with open("48seqs.json", "r") as read_file:
 
 ints_as_strings = ['0','1','2','3','4','5','6','7','8','9']
 
-"""
+
 L = dest_seqs_string
 dests = []
 for i in range(len(L)):
@@ -53,7 +53,36 @@ for i in range(len(L)):
 		j += 1
 	num = int(L[i+1:i+j])
 	dest.append(num)
-"""
+
+OrbDictionary = {(1,0):dests[0]}
+j = 0
+for i in range(len(dests)):
+	if i == 0:
+		continue
+	index = len(dests[i])//4
+	if len(dests[i]) == len(dests[i-1]):
+		j = j+1
+	else:
+		j = 0
+	order = j
+	OrbDictionary[(index,order)] = dests[i]
+
+# For each orb, print its label, its dest seq, and its singular locus, in a format
+# which is both human and machine readable. Output contained in file Cmain_singular_locus.txt.
+i = 0
+for key in OrbDictionary.keys():
+	print(key)
+	print(OrbDictionary[key])
+	orb = dest_to_orb(OrbDictionary[key])
+	loc = singular_locus(orb)
+	print(" ".join(["v"+str(vertex.Index) for vertex in loc.Vertices]))
+	print(" ".join(["e"+str(edge.Index) for edge in loc.Edges]))
+	for edge in loc.Edges:
+		print(" ".join(["v"+str(vertex.Index) for vertex in edge.Vertices]) + " " + str(edge.LocusOrder))
+	print("")
+
+
+
 
 """
 failed = []
@@ -457,7 +486,7 @@ for OP_iso_class in OP_iso_classes:
 	print(" ")
 """
 
-
+"""
 
 D = {}
 
@@ -490,8 +519,6 @@ print('')
 orb2 = quotient(orb,[isoms[0],isoms[2]])
 orb2.info()
 print('')
-
-print(orb2.Tetrahedra[0].Class[F0])
 
 print('the singular locus of this quotient orbifold is')
 loc = singular_locus(orb2)
@@ -596,4 +623,4 @@ loc = singular_locus(orb2)
 loc.info()
 print('')
 
-
+"""
