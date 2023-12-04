@@ -67,6 +67,7 @@ for i in range(len(dests)):
 	order = j
 	OrbDictionary[(index,order)] = dests[i]
 
+"""
 # For each orb, print its label, its dest seq, and its singular locus, in a format
 # which is both human and machine readable. Output contained in file Cmain_singular_locus.txt.
 i = 0
@@ -80,7 +81,7 @@ for key in OrbDictionary.keys():
 	for edge in loc.Edges:
 		print(" ".join(["v"+str(vertex.Index) for vertex in edge.Vertices]) + " " + str(edge.LocusOrder))
 	print("")
-
+"""
 
 
 
@@ -624,3 +625,48 @@ loc.info()
 print('')
 
 """
+
+# Below are the orbs and involutions of Prop 4.4.
+
+"""
+Prop_4_4 = [((4,0),1), ((8,2),2), ((8,2),3), ((12,4),1), ((12,6),1), ((20,5),1), ((24,4),1), ((24,15),2), ((24,15),3),
+((24,16),2), ((24,16),3), ((32,3),1), ((32,3),2), ((36,16),1), ((36,19),1), ((36,25),1), ((40,6),1), ((40,22),1),
+((40,22),5), ((48,15),1), ((48,16),1), ((48,16),3), ((48,42),1), ((48,43),1), ((48,55),1), ((48,55),3), ((48,57),1),
+((48,57),3)]
+
+# Let's now get the singular loci for the quotient orbs from Prop 4.4.
+
+for a in Prop_4_4:
+	print(a)
+	dest = OrbDictionary[a[0]]
+	print(dest)
+	orb = dest_to_orb(dest)
+	if proto_canonize(orb):
+		print("proto canonize succeeded")
+	else:
+		print("proto canonize failed")
+	print("check if canonical decomp is a triangulation")
+	canonical_retriangulation(orb)
+	if orb.is_geometric is False:
+		print("The proto-canonical triangulation was not the canonical decomp, so canonize part 2 found the canonical re-triangulation.")
+	print(simplicial_maps_OP(orb,orb))
+	isoms = simplicial_maps_OP(orb,orb)
+	print('Now we quotient by the given involution and print the singular locus of the resulting orbifold below')
+	orb2 = quotient(orb,[isoms[0],isoms[a[1]]])
+	loc = singular_locus(orb2)
+	loc.info()
+	print('')
+	print('------------------------------------------------------------------------------------------------------')
+	print('')
+"""
+
+dest = OrbDictionary[(36,16)]
+orb = dest_to_orb(dest)
+proto_canonize(orb)
+canonical_retriangulation(orb)
+orb.info()
+isoms = simplicial_maps_OP(orb,orb)
+print('')
+print(isoms[1])
+print('')
+orb2 = quotient(orb,[isoms[0],isoms[1]])

@@ -80,6 +80,16 @@ def quotient(initial_orb,initial_group):
 	for tet in keep_tets:
 		tet.remove_redundant_face_gluing()
 		tet.clear_Class()
+	
+	for i in range(len(keep_tets)):
+			print('gluing data for', keep_tets[i], 'is')
+			for j in range(4):
+				print('face', j, 'of', keep_tets[i], 'glued to', keep_tets[i].Neighbor[TwoSubsimplices[j]])
+				print('with gluing map',keep_tets[i].Gluing[TwoSubsimplices[j]])
+			print('symmetries of',keep_tets[i],'are')
+			for sym in keep_tets[i].Symmetries:
+				print(sym)
+
 	return CuspedOrbifold(keep_tets)
 
 def quotient_old(orb,group):

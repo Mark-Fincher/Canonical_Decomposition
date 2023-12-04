@@ -303,7 +303,7 @@ class Tetrahedron:
                 Neighbor = self.Neighbor[sym.image(two_subsimplex)]
                 perm = self.Gluing[sym.image(two_subsimplex)]
                 if self.face_glued_to_self(sym.image(two_subsimplex)):
-                    return(Neighbor,sym.inverse()*perm*sym)
+                    return(Neighbor,inv(sym)*perm*sym)
                 else:
                     return(Neighbor,perm*sym)
         return (None,None)
