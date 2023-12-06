@@ -228,11 +228,13 @@ class Tetrahedron:
                 other_face = sym.image(face)
                 seen_faces.append(other_face)
                 if other_face != face:
-                    if self.Neighbor[other_face] is self and self.face_glued_to_self(face):
+                    if self.Neighbor[other_face] is None:
+                        continue
+                    elif self.Neighbor[other_face] is not self.Neighbor[face]:
+                        raise Exception("unexpected occurence")
+                    elif self.Gluing[other_face].image(other_face) == self.Gluing[face].image(face):
                         self.Neighbor[other_face] = None
                         self.Gluing[other_face] = None
-                    elif self.Neighbor[other_face] is None and self.Gluing[other_face] is None:
-                        continue
                     else:
                         self.detach(other_face)
 
